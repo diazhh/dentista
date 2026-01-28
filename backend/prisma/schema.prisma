@@ -1,0 +1,964 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  DENTIST
+  STAFF_RECEPTIONIST
+  STAFF_BILLING
+  STAFF_ASSISTANT
+  PATIENT
+}
+
+enum SubscriptionTier {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+enum CancellationFeeType {
+  PERCENTAGE
+  FIXED
+  NONE
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+  PENDING_INVITATION
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum WaitlistStatus {
+  WAITING
+  CONTACTED
+  SCHEDULED
+  CANCELLED
+  EXPIRED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String?  @map("password_hash")
+  phone        String?
+  role         UserRole @default(PATIENT)
+  avatarUrl    String?  @map("avatar_url")
+  
+  licenseNumber   String? @map("license_number")
+  npiNumber       String? @map("npi_number")
+  specialization  String?
+  
+  oauthProvider String? @map("oauth_provider")
+  oauthId       String? @map("oauth_id")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  ownedTenants      Tenant[]           @relation("TenantOwner")
+  tenantMemberships TenantMembership[]
+  patientProfile    Patient?
+  sessions          Session[]
+  auditLogs         AuditLog[]
+  
+  @@unique([oauthProvider, oauthId])
+  @@map("users")
+}
+
+model Tenant {
+  id       String @id @default(uuid())
+  ownerId  String @map("owner_id")
+  name     String
+  subdomain String @unique
+  
+  subscriptionTier   SubscriptionTier   @default(STARTER) @map("subscription_tier")
+  subscriptionStatus SubscriptionStatus @default(TRIAL) @map("subscription_status")
+  stripeCustomerId   String?            @map("stripe_customer_id")
+  trialEndsAt        DateTime?          @map("trial_ends_at")
+  
+  maxPatients Int @default(100) @map("max_patients")
+  storageGB   Int @default(5) @map("storage_gb")
+  
+  whatsappConnected Boolean @default(false) @map("whatsapp_connected")
+  
+  // Políticas de cancelación configurables por tenant
+  cancellationMinHours     Int     @default(24) @map("cancellation_min_hours")
+  cancellationFeeType      String? @map("cancellation_fee_type") // 'PERCENTAGE' | 'FIXED' | 'NONE'
+  cancellationFeeAmount    Float?  @map("cancellation_fee_amount")
+  maxCancellationsPerMonth Int     @default(3) @map("max_cancellations_per_month")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  owner                    User                      @relation("TenantOwner", fields: [ownerId], references: [id])
+  memberships              TenantMembership[]
+  patientDentistRelations  PatientDentistRelation[]
+  appointments             Appointment[]
+  operatoryAssignments     OperatoryAssignment[]
+  auditLogs                AuditLog[]
+  odontograms              Odontogram[]
+  
+  @@index([ownerId])
+  @@map("tenants")
+}
+
+model TenantMembership {
+  id       String           @id @default(uuid())
+  userId   String           @map("user_id")
+  tenantId String           @map("tenant_id")
+  role     UserRole
+  
+  permissions Json?
+  status      MembershipStatus @default(PENDING_INVITATION)
+  isActive    Boolean          @default(true) @map("is_active")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  user   User   @relation(fields: [userId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  
+  @@unique([userId, tenantId])
+  @@index([userId])
+  @@index([tenantId])
+  @@map("tenant_memberships")
+}
+
+model Patient {
+  id          String   @id @default(uuid())
+  userId      String?  @unique @map("user_id") // Nullable: paciente puede existir sin usuario
+  documentId  String   @unique @map("document_id") // Cédula o pasaporte
+  firstName   String   @map("first_name")
+  lastName    String   @map("last_name")
+  dateOfBirth DateTime @map("date_of_birth")
+  gender      Gender
+  phone       String
+  
+  medicalHistory Json?   @map("medical_history")
+  allergies      String[]
+  medications    String[]
+  
+  emergencyContactName  String? @map("emergency_contact_name")
+  emergencyContactPhone String? @map("emergency_contact_phone")
+  
+  portalEnabled  Boolean @default(false) @map("portal_enabled")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  user                    User?                    @relation(fields: [userId], references: [id])
+  patientDentistRelations PatientDentistRelation[]
+  appointments            Appointment[]
+  waitlistEntries         Waitlist[]
+  treatmentPlans          TreatmentPlan[]
+  invoices                Invoice[]
+  payments                Payment[]
+  documents               Document[]
+  odontograms             Odontogram[]
+  
+  @@map("patients")
+}
+
+model PatientDentistRelation {
+  id         String    @id @default(uuid())
+  patientId  String    @map("patient_id")
+  dentistId  String    @map("dentist_id")
+  tenantId   String    @map("tenant_id")
+  
+  isActive  Boolean   @default(true) @map("is_active")
+  startedAt DateTime  @default(now()) @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+  notes     String?
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  patient Patient @relation(fields: [patientId], references: [id])
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  
+  @@unique([patientId, dentistId])
+  @@index([patientId])
+  @@index([dentistId])
+  @@index([tenantId])
+  @@map("patient_dentist_relations")
+}
+
+model Clinic {
+  id        String  @id @default(uuid())
+  name      String
+  address   Json    // { street, city, state, zipCode, country }
+  phone     String
+  email     String
+  
+  // Ubicación GPS para maps
+  latitude  Float?
+  longitude Float?
+  
+  // Administrador de clínica (opcional)
+  adminUserId String? @map("admin_user_id")
+  
+  // Detalles adicionales
+  floors      Int     @default(1) // Número de pisos
+  description String?
+  website     String?
+  logoUrl     String? @map("logo_url")
+  
+  // Control de acceso
+  createdBy String  @map("created_by") // Super Admin que la creó
+  isActive  Boolean @default(true) @map("is_active")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  operatories Operatory[]
+  
+  @@map("clinics")
+}
+
+model Operatory {
+  id          String  @id @default(uuid())
+  clinicId    String  @map("clinic_id")
+  name        String
+  floor       Int     @default(1) // Piso donde se encuentra
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
+  equipment   Json?   // Lista de equipamiento disponible
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  clinic               Clinic                @relation(fields: [clinicId], references: [id])
+  operatoryAssignments OperatoryAssignment[]
+  appointments         Appointment[]
+  
+  @@index([clinicId])
+  @@map("operatories")
+}
+
+model OperatoryAssignment {
+  id          String    @id @default(uuid())
+  operatoryId String    @map("operatory_id")
+  dentistId   String    @map("dentist_id")
+  tenantId    String    @map("tenant_id")
+  
+  schedule  Json
+  startDate DateTime  @map("start_date")
+  endDate   DateTime? @map("end_date")
+  isActive  Boolean   @default(true) @map("is_active")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  operatory Operatory @relation(fields: [operatoryId], references: [id])
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  
+  @@index([operatoryId])
+  @@index([dentistId])
+  @@index([tenantId])
+  @@map("operatory_assignments")
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  patientId       String            @map("patient_id")
+  dentistId       String            @map("dentist_id")
+  tenantId        String            @map("tenant_id")
+  operatoryId     String?           @map("operatory_id")
+  recurringId     String?           @map("recurring_id")
+  
+  appointmentDate DateTime          @map("appointment_date")
+  duration        Int
+  status          AppointmentStatus @default(SCHEDULED)
+  procedureType   String            @map("procedure_type")
+  notes           String?
+  
+  reminderSent Boolean @default(false) @map("reminder_sent")
+  confirmedVia String? @map("confirmed_via")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  patient   Patient              @relation(fields: [patientId], references: [id])
+  tenant    Tenant               @relation(fields: [tenantId], references: [id])
+  operatory Operatory?           @relation(fields: [operatoryId], references: [id])
+  recurring RecurringAppointment? @relation(fields: [recurringId], references: [id])
+  
+  @@index([patientId])
+  @@index([dentistId])
+  @@index([tenantId])
+  @@index([appointmentDate])
+  @@index([recurringId])
+  @@map("appointments")
+}
+
+model RecurringAppointment {
+  id          String               @id @default(uuid())
+  patientId   String               @map("patient_id")
+  dentistId   String               @map("dentist_id")
+  tenantId    String               @map("tenant_id")
+  operatoryId String?              @map("operatory_id")
+  
+  frequency   RecurrenceFrequency
+  interval    Int                  @default(1)
+  startDate   DateTime             @map("start_date")
+  endDate     DateTime?            @map("end_date")
+  
+  duration        Int
+  procedureType   String           @map("procedure_type")
+  notes           String?
+  
+  timeOfDay   String               @map("time_of_day")
+  daysOfWeek  Int[]                @map("days_of_week")
+  
+  isActive    Boolean              @default(true) @map("is_active")
+  
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
+  
+  appointments Appointment[]
+  
+  @@index([patientId])
+  @@index([dentistId])
+  @@index([tenantId])
+  @@index([isActive])
+  @@map("recurring_appointments")
+}
+
+model Waitlist {
+  id          String         @id @default(uuid())
+  patientId   String         @map("patient_id")
+  dentistId   String         @map("dentist_id")
+  tenantId    String         @map("tenant_id")
+  
+  preferredDates    DateTime[]   @map("preferred_dates")
+  preferredTimes    String[]     @map("preferred_times")
+  procedureType     String       @map("procedure_type")
+  duration          Int
+  priority          Int          @default(1)
+  
+  status            WaitlistStatus @default(WAITING)
+  notes             String?
+  
+  contactedAt       DateTime?    @map("contacted_at")
+  scheduledAppointmentId String? @map("scheduled_appointment_id")
+  
+  expiresAt         DateTime?    @map("expires_at")
+  
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  
+  patient Patient @relation(fields: [patientId], references: [id])
+  
+  @@index([patientId])
+  @@index([dentistId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("waitlist")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  refreshToken String   @unique @map("refresh_token")
+  userAgent    String?  @map("user_agent")
+  ipAddress    String?  @map("ip_address")
+  expiresAt    DateTime @map("expires_at")
+  isRevoked    Boolean  @default(false) @map("is_revoked")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([refreshToken])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+enum NotificationType {
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH
+}
+
+enum NotificationChannel {
+  APPOINTMENT_REMINDER
+  APPOINTMENT_CONFIRMATION
+  APPOINTMENT_CANCELLATION
+  WAITLIST_UPDATE
+  PAYMENT_REMINDER
+  MARKETING
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  SUSPEND
+  REACTIVATE
+  IMPERSONATE
+  EXPORT
+  VIEW
+}
+
+model AuditLog {
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  tenantId    String?     @map("tenant_id")
+  action      AuditAction
+  entity      String      // e.g., "Tenant", "User", "Subscription"
+  entityId    String?     @map("entity_id")
+  changes     Json?       // Stores before/after values
+  metadata    Json?       // Additional context (IP, user agent, etc.)
+  ipAddress   String?     @map("ip_address")
+  userAgent   String?     @map("user_agent")
+  
+  createdAt   DateTime    @default(now()) @map("created_at")
+  
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  @@index([userId])
+  @@index([tenantId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model NotificationPreference {
+  id       String   @id @default(uuid())
+  userId   String   @map("user_id")
+  tenantId String   @map("tenant_id")
+  
+  // Preferencias por canal
+  emailEnabled     Boolean @default(true) @map("email_enabled")
+  smsEnabled       Boolean @default(false) @map("sms_enabled")
+  whatsappEnabled  Boolean @default(false) @map("whatsapp_enabled")
+  pushEnabled      Boolean @default(true) @map("push_enabled")
+  
+  // Preferencias por tipo de notificación
+  appointmentReminders    Boolean @default(true) @map("appointment_reminders")
+  appointmentConfirmation Boolean @default(true) @map("appointment_confirmation")
+  waitlistUpdates         Boolean @default(true) @map("waitlist_updates")
+  paymentReminders        Boolean @default(true) @map("payment_reminders")
+  marketingEmails         Boolean @default(false) @map("marketing_emails")
+  
+  // Configuración de recordatorios
+  reminderHoursBefore Int[] @default([24, 2]) @map("reminder_hours_before") // Horas antes de la cita
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@unique([userId, tenantId])
+  @@index([userId])
+  @@index([tenantId])
+  @@map("notification_preferences")
+}
+
+model Notification {
+  id          String             @id @default(uuid())
+  userId      String             @map("user_id")
+  tenantId    String             @map("tenant_id")
+  
+  type        NotificationType
+  channel     NotificationChannel
+  
+  subject     String?
+  message     String
+  metadata    Json?              // Datos adicionales (appointmentId, etc.)
+  
+  // Estado de envío
+  sent        Boolean            @default(false)
+  sentAt      DateTime?          @map("sent_at")
+  failed      Boolean            @default(false)
+  failureReason String?          @map("failure_reason")
+  
+  // Programación
+  scheduledFor DateTime?         @map("scheduled_for")
+  
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+  
+  @@index([userId])
+  @@index([tenantId])
+  @@index([sent])
+  @@index([scheduledFor])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum TreatmentPlanStatus {
+  DRAFT
+  PROPOSED
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TreatmentItemStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  CHECK
+  INSURANCE
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum DocumentType {
+  XRAY
+  PHOTO
+  CONSENT_FORM
+  MEDICAL_RECORD
+  PRESCRIPTION
+  INVOICE
+  INSURANCE_CLAIM
+  OTHER
+}
+
+model TreatmentPlan {
+  id          String              @id @default(uuid())
+  patientId   String              @map("patient_id")
+  dentistId   String              @map("dentist_id")
+  tenantId    String              @map("tenant_id")
+  
+  title       String
+  description String?
+  diagnosis   String?
+  
+  status      TreatmentPlanStatus @default(DRAFT)
+  
+  totalCost   Float               @default(0) @map("total_cost")
+  
+  startDate   DateTime?           @map("start_date")
+  endDate     DateTime?           @map("end_date")
+  
+  notes       String?
+  
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+  
+  patient     Patient             @relation(fields: [patientId], references: [id])
+  items       TreatmentPlanItem[]
+  invoices    Invoice[]
+  
+  @@index([patientId])
+  @@index([dentistId])
+  @@index([tenantId])
+  @@index([status])
+  @@map("treatment_plans")
+}
+
+model TreatmentPlanItem {
+  id              String              @id @default(uuid())
+  treatmentPlanId String              @map("treatment_plan_id")
+  
+  tooth           String?             // Número de diente (ej: "18", "2.1")
+  surface         String?             // Superficie del diente (ej: "oclusal", "mesial")
+  
+  procedureCode   String              @map("procedure_code")
+  procedureName   String              @map("procedure_name")
+  description     String?
+  
+  status          TreatmentItemStatus @default(PENDING)
+  
+  estimatedCost   Float               @map("estimated_cost")
+  actualCost      Float?              @map("actual_cost")
+  
+  priority        Int                 @default(1) // 1-5
+  
+  estimatedDuration Int?              @map("estimated_duration") // minutos
+  
+  appointmentId   String?             @map("appointment_id")
+  
+  notes           String?
+  
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  
+  treatmentPlan   TreatmentPlan       @relation(fields: [treatmentPlanId], references: [id], onDelete: Cascade)
+  
+  @@index([treatmentPlanId])
+  @@index([status])
+  @@map("treatment_plan_items")
+}
+
+model Invoice {
+  id              String        @id @default(uuid())
+  invoiceNumber   String        @unique @map("invoice_number")
+  patientId       String        @map("patient_id")
+  dentistId       String        @map("dentist_id")
+  tenantId        String        @map("tenant_id")
+  treatmentPlanId String?       @map("treatment_plan_id")
+  
+  issueDate       DateTime      @map("issue_date")
+  dueDate         DateTime      @map("due_date")
+  
+  status          InvoiceStatus @default(DRAFT)
+  
+  subtotal        Float
+  tax             Float         @default(0)
+  discount        Float         @default(0)
+  total           Float
+  
+  amountPaid      Float         @default(0) @map("amount_paid")
+  balance         Float         @default(0)
+  
+  notes           String?
+  terms           String?
+  
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  
+  patient         Patient       @relation(fields: [patientId], references: [id])
+  treatmentPlan   TreatmentPlan? @relation(fields: [treatmentPlanId], references: [id])
+  items           InvoiceItem[]
+  payments        Payment[]
+  
+  @@index([patientId])
+  @@index([dentistId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([issueDate])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String   @map("invoice_id")
+  
+  description String
+  quantity    Int      @default(1)
+  unitPrice   Float    @map("unit_price")
+  total       Float
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  invoiceId       String        @map("invoice_id")
+  patientId       String        @map("patient_id")
+  tenantId        String        @map("tenant_id")
+  
+  amount          Float
+  paymentMethod   PaymentMethod @map("payment_method")
+  paymentDate     DateTime      @map("payment_date")
+  
+  status          PaymentStatus @default(PENDING)
+  
+  transactionId   String?       @map("transaction_id") // Stripe, etc.
+  reference       String?       // Número de cheque, etc.
+  
+  notes           String?
+  
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  
+  invoice         Invoice       @relation(fields: [invoiceId], references: [id])
+  patient         Patient       @relation(fields: [patientId], references: [id])
+  
+  @@index([invoiceId])
+  @@index([patientId])
+  @@index([tenantId])
+  @@index([paymentDate])
+  @@map("payments")
+}
+
+model Document {
+  id          String       @id @default(uuid())
+  patientId   String       @map("patient_id")
+  dentistId   String       @map("dentist_id")
+  tenantId    String       @map("tenant_id")
+  
+  type        DocumentType
+  title       String
+  description String?
+  
+  filePath    String       @map("file_path") // Local file path
+  fileName    String       @map("file_name")
+  fileSize    Int          @map("file_size") // bytes
+  mimeType    String       @map("mime_type")
+  
+  uploadedBy  String       @map("uploaded_by") // userId
+  
+  tags        String[]     @default([])
+  
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  
+  patient     Patient      @relation(fields: [patientId], references: [id])
+  
+  @@index([patientId])
+  @@index([dentistId])
+  @@index([tenantId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("documents")
+}
+
+enum ToothCondition {
+  HEALTHY
+  CAVITY
+  FILLED
+  CROWN
+  BRIDGE
+  IMPLANT
+  MISSING
+  EXTRACTION_NEEDED
+  ROOT_CANAL
+  FRACTURED
+  WORN
+  ABSCESS
+}
+
+enum ToothSurface {
+  OCCLUSAL      // O - Superficie oclusal (masticatoria)
+  MESIAL        // M - Superficie mesial (hacia el centro)
+  DISTAL        // D - Superficie distal (alejada del centro)
+  BUCCAL        // B - Superficie bucal/vestibular (hacia mejilla)
+  LINGUAL       // L - Superficie lingual/palatina (hacia lengua)
+  INCISAL       // I - Borde incisal (dientes anteriores)
+}
+
+model Odontogram {
+  id          String   @id @default(uuid())
+  patientId   String   @map("patient_id")
+  dentistId   String   @map("dentist_id")
+  tenantId    String   @map("tenant_id")
+  
+  date        DateTime @default(now())
+  notes       String?
+  
+  teeth       OdontogramTooth[]
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([patientId])
+  @@index([dentistId])
+  @@index([tenantId])
+  @@index([date])
+  @@map("odontograms")
+}
+
+model OdontogramTooth {
+  id            String          @id @default(uuid())
+  odontogramId  String          @map("odontogram_id")
+  
+  toothNumber   Int             @map("tooth_number") // 1-32 (adultos) o 51-85 (niños)
+  condition     ToothCondition
+  surfaces      ToothSurface[]  // Superficies afectadas
+  notes         String?
+  color         String?         // Color hex para visualización
+  
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  
+  odontogram    Odontogram      @relation(fields: [odontogramId], references: [id], onDelete: Cascade)
+  
+  @@unique([odontogramId, toothNumber])
+  @@index([odontogramId])
+  @@map("odontogram_teeth")
+}
+
+model SubscriptionPlan {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  description String?
+  
+  // Pricing
+  monthlyPrice  Float   @map("monthly_price")
+  yearlyPrice   Float?  @map("yearly_price")
+  currency      String  @default("USD")
+  
+  // Limits
+  maxPatients   Int     @map("max_patients")
+  maxUsers      Int     @map("max_users")
+  storageGB     Int     @map("storage_gb")
+  
+  // Features (JSON array of feature codes)
+  features      Json    @default("[]")
+  
+  // Status
+  isActive      Boolean @default(true) @map("is_active")
+  isPublic      Boolean @default(true) @map("is_public")
+  sortOrder     Int     @default(0) @map("sort_order")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@map("subscription_plans")
+}
+
+enum EmailTemplateType {
+  WELCOME
+  TRIAL_EXPIRING
+  TRIAL_EXPIRED
+  SUBSCRIPTION_ACTIVATED
+  SUBSCRIPTION_CANCELLED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  PASSWORD_RESET
+  INVITATION
+  SUPPORT_TICKET_CREATED
+  SUPPORT_TICKET_UPDATED
+  TENANT_CREATED
+  USER_CREATED
+}
+
+model EmailConfiguration {
+  id          String   @id @default(uuid())
+  
+  // SMTP Settings
+  smtpHost    String   @map("smtp_host")
+  smtpPort    Int      @map("smtp_port")
+  smtpUser    String   @map("smtp_user")
+  smtpPassword String  @map("smtp_password")
+  smtpSecure  Boolean  @default(true) @map("smtp_secure")
+  
+  // From Settings
+  fromEmail   String   @map("from_email")
+  fromName    String   @map("from_name")
+  replyToEmail String? @map("reply_to_email")
+  
+  // Status
+  isActive    Boolean  @default(true) @map("is_active")
+  isVerified  Boolean  @default(false) @map("is_verified")
+  
+  // Testing
+  lastTestedAt DateTime? @map("last_tested_at")
+  testResult   String?   @map("test_result")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@map("email_configurations")
+}
+
+model EmailTemplate {
+  id          String            @id @default(uuid())
+  type        EmailTemplateType @unique
+  name        String
+  description String?
+  
+  subject     String
+  htmlBody    String            @map("html_body") @db.Text
+  textBody    String?           @map("text_body") @db.Text
+  
+  // Variables disponibles (JSON array)
+  variables   Json              @default("[]")
+  
+  isActive    Boolean           @default(true) @map("is_active")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  emailLogs EmailLog[]
+  
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id          String   @id @default(uuid())
+  
+  templateId  String?  @map("template_id")
+  
+  to          String
+  from        String
+  subject     String
+  
+  status      String   // sent, failed, pending
+  error       String?  @db.Text
+  
+  // Tracking
+  sentAt      DateTime? @map("sent_at")
+  openedAt    DateTime? @map("opened_at")
+  clickedAt   DateTime? @map("clicked_at")
+  
+  metadata    Json?
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  template  EmailTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  
+  @@index([templateId])
+  @@index([to])
+  @@index([status])
+  @@index([createdAt])
+  @@map("email_logs")
+}
