@@ -75,20 +75,20 @@ api.interceptors.response.use(
         });
 
         const { accessToken, refreshToken: newRefreshToken } = response.data;
-        
+
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', newRefreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         processQueue(null, accessToken);
-        
+
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        
+
         // Only redirect if not already on login page
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';
@@ -104,6 +104,13 @@ api.interceptors.response.use(
 );
 
 // Auth API
+export const publicAPI = {
+  getClinics: (params?: { city?: string; specialty?: string; q?: string }) =>
+    api.get('/public/clinics', { params }),
+  getClinicBySlug: (slug: string) => api.get(`/public/clinics/${slug}`),
+  getDentists: () => api.get('/public/dentists'),
+};
+
 export const authAPI = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
     const response = await api.post('/auth/login', { email, password });
@@ -179,6 +186,33 @@ export const adminAPI = {
     const response = await api.get(`/admin/metrics/activity?days=${days}`);
     return response.data;
   },
+};
+
+export const whatsappAPI = {
+  getStatus: async () => {
+    const response = await api.get('/whatsapp/status');
+    return response.data;
+  },
+
+  sendMessage: async (to: string, message: string) => {
+    const response = await api.post('/whatsapp/send', { to, message });
+    return response.data;
+  }
+};
+
+export const patientPortalAPI = {
+  getDashboard: async () => {
+    const response = await api.get('/portal/dashboard');
+    return response.data;
+  },
+  getAppointments: async () => {
+    const response = await api.get('/portal/appointments');
+    return response.data;
+  },
+  getDocuments: async () => {
+    const response = await api.get('/portal/documents');
+    return response.data;
+  }
 };
 
 export default api;

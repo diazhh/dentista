@@ -18,6 +18,9 @@ import { PaymentsModule } from './payments/payments.module';
 import { DocumentsModule } from './documents/documents.module';
 import { OdontogramsModule } from './odontograms/odontograms.module';
 import { EmailModule } from './email/email.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
+import { CaslModule } from './casl/casl.module';
+import { PublicModule } from './public/public.module';
 
 @Module({
   imports: [
@@ -47,6 +50,9 @@ import { EmailModule } from './email/email.module';
     DocumentsModule,
     OdontogramsModule,
     EmailModule,
+    WhatsappModule,
+    CaslModule,
+    PublicModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

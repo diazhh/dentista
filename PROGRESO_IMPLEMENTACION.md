@@ -6,9 +6,9 @@
 
 ## 🎯 Resumen General
 
-**Total de Módulos Implementados:** 9/30+  
-**Porcentaje Completado:** ~30%  
-**Fase Actual:** FASE 1 - MVP (Sprint 6 completado)
+**Total de Módulos Implementados:** 15/30+  
+**Porcentaje Completado:** ~60%  
+**Fase Actual:** FASE 2 - Integraciones (En Progreso)
 
 ---
 
@@ -186,30 +186,72 @@
 
 ## 📋 Módulos Pendientes (Próximos)
 
-### Sprint 6 (Semana 11-12) - ✅ COMPLETADO
-- [x] Recurring appointments ✅
-- [x] TenantMembership (Staff multi-dentista) ✅
-- [x] Waitlist ✅
-- [x] Appointment reminders (BullMQ + Nodemailer) ✅
-- [ ] Frontend: Calendar view (FullCalendar) - PENDIENTE (Frontend)
+### 10. **Calendar Frontend (FullCalendar)** ✅
+- **Fecha:** 05/01/2026
+- **Detalle:** Implementación completa con Vistas Mensual/Semanal/Diaria, Drag&Drop, y gestión de citas.
+- **Referencia:** [IMPLEMENTACION_CALENDAR.md](./IMPLEMENTACION_CALENDAR.md)
 
-### Sprint 7-8 (Semana 13-16) - PENDIENTE
-- [ ] WhatsApp Integration (Baileys)
-- [ ] QR code connection
-- [ ] Basic messaging
-- [ ] Chat sessions
+### 11. **Odontogramas Digitales** ✅
+- **Fecha:** 05/01/2026
+- **Detalle:** Sistema FDI completo, interactivo, 12 condiciones, historial.
+- **Referencia:** [IMPLEMENTACION_ODONTOGRAMS.md](./IMPLEMENTACION_ODONTOGRAMS.md)
 
-### Sprints Futuros
-- [ ] WhatsApp AI Chatbot (GPT-4)
-- [ ] Calendar Integrations (Google, Outlook, Apple)
-- [ ] Patient Portal
-- [ ] Odontograma Digital
-- [ ] Treatment Plans
-- [ ] Billing & Payments
-- [ ] Documents & Prescriptions
-- [ ] Notifications System
-- [ ] Analytics & Reports
-- [ ] Insurance Management
+### 12. **Treatment Plans** ✅
+- **Fecha:** 05/01/2026
+- **Detalle:** Presupuestos, fases, prioridades, seguimiento de progreso.
+- **Referencia:** [IMPLEMENTACION_TREATMENT_PLANS.md](./IMPLEMENTACION_TREATMENT_PLANS.md)
+
+### 13. **Invoices & Payments** ✅
+- **Fecha:** 05/01/2026
+- **Detalle:** Facturación, abonos, reportes financieros básicos.
+- **Referencia:** [IMPLEMENTACION_INVOICES.md](./IMPLEMENTACION_INVOICES.md)
+
+### 14. **Documents Management** ✅
+- **Fecha:** 05/01/2026
+- **Detalle:** Almacenamiento local organizado por tenant, carga de RX, fotos, etc.
+- **Referencia:** [IMPLEMENTACION_DOCUMENTS.md](./IMPLEMENTACION_DOCUMENTS.md)
+
+### 15. **WhatsApp Integration (Baileys)** ✅
+- **Fecha:** 05/01/2026
+- **Detalle:** Conexión vía QR code, envío de mensajes y API de estado.
+- **Sub-módulos:**
+  - Cliente QR & Gestión de Sesión
+  - Envío Manual de Mensajes
+  - **Recordatorios Automáticos:** Integración con BullMQ para citas y confirmaciones.
+- **Referencia:** Backend Module + Frontend Settings Page
+
+---
+
+## 📋 Módulos Pendientes (Próximos)
+
+### 16. **Patient Portal** ✅
+- **Fecha:** 05/01/2026
+- **Detalle:** Portal dedicado para pacientes con dashboard propio.
+- **Funcionalidades:**
+  - Login diferenciado (Guard 'PatientRoute').
+  - Dashboard con próximas citas y facturas.
+  - Historial de citas y solicitud de nuevas.
+  - Visualización de documentos compartidos.
+- **Referencia:** [IMPLEMENTACION_PLAN.md](.gemini/antigravity/brain/e83bc5dc-f3d2-4755-bf62-f6302f437e5e/implementation_plan.md)
+
+---
+
+## 📋 Módulos Pendientes (Próximos)
+
+### Fase 2 - Integraciones y Pulido
+- [x] **WhatsApp Integration (Baileys)**
+  - [x] Cliente QR
+  - [x] Envío de mensajes
+  - [x] Recepción de eventos
+- [x] **Portal del Paciente**
+  - [x] Auth Guard
+  - [x] Dashboard
+  - [x] Citas & Docs
+- [ ] **Configuración UI/UX Final**
+  - [x] Tema Tailwind
+  - Animaciones
+  - Polishing de componentes
+- [ ] **Reportes Avanzados**
 
 ---
 

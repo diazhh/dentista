@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   Stethoscope,
+  MessageSquare,
 } from 'lucide-react';
 
 interface TenantLayoutProps {
@@ -69,6 +70,12 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
       description: 'Archivos y documentos',
     },
     {
+      name: 'WhatsApp',
+      icon: MessageSquare,
+      path: '/settings/whatsapp',
+      description: 'Conexión y mensajes',
+    },
+    {
       name: 'Configuración',
       icon: Settings,
       path: '/settings',
@@ -89,9 +96,8 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
       <aside
-        className={`${
-          sidebarOpen ? 'w-64' : 'w-20'
-        } bg-gradient-to-b from-blue-900 to-blue-800 text-white transition-all duration-300 flex flex-col`}
+        className={`${sidebarOpen ? 'w-64' : 'w-20'
+          } bg-gradient-to-b from-blue-900 to-blue-800 text-white transition-all duration-300 flex flex-col`}
       >
         {/* Header */}
         <div className="p-4 flex items-center justify-between border-b border-blue-700">
@@ -119,11 +125,10 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
-                  active
-                    ? 'bg-blue-700 text-white shadow-lg'
-                    : 'text-blue-200 hover:bg-blue-700/50 hover:text-white'
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${active
+                  ? 'bg-blue-700 text-white shadow-lg'
+                  : 'text-blue-200 hover:bg-blue-700/50 hover:text-white'
+                  }`}
                 title={!sidebarOpen ? item.name : ''}
               >
                 <Icon className={`h-5 w-5 flex-shrink-0 ${active ? 'text-white' : ''}`} />

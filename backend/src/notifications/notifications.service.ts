@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from './email.service';
+import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { CreateNotificationPreferenceDto } from './dto/create-notification-preference.dto';
 import { UpdateNotificationPreferenceDto } from './dto/update-notification-preference.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
@@ -15,8 +16,9 @@ export class NotificationsService {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
+    private whatsappService: WhatsappService,
     @InjectQueue('notifications') private notificationQueue: Queue,
-  ) {}
+  ) { }
 
   // ==================== Notification Preferences ====================
 
@@ -109,7 +111,7 @@ export class NotificationsService {
     }
 
     const preferences = await this.getPreferences(notification.userId, notification.tenantId);
-    
+
     const user = await this.prisma.user.findUnique({
       where: { id: notification.userId },
     });
@@ -128,6 +130,16 @@ export class NotificationsService {
           notification.subject || 'Notificación',
           notification.message,
         );
+      } else if (notification.type === NotificationType.WHATSAPP && preferences.whatsappEnabled) {
+        if (user.phone) {
+          success = await this.whatsappService.sendMessage(
+            user.phone,
+            notification.message
+          );
+        } else {
+          await this.markNotificationFailed(notificationId, 'User has no phone number');
+          return;
+        }
       }
 
       if (success) {
@@ -210,23 +222,49 @@ export class NotificationsService {
       reminderTime.setHours(reminderTime.getHours() - hoursBefore);
 
       if (reminderTime > new Date()) {
-        await this.sendNotification(
-          {
-            userId: appointment.patient.userId,
-            type: NotificationType.EMAIL,
-            channel: NotificationChannel.APPOINTMENT_REMINDER,
-            subject: 'Recordatorio de Cita',
-            message: `Tienes una cita programada en ${hoursBefore} horas`,
-            metadata: {
-              appointmentId: appointment.id,
-              appointmentDate: appointment.appointmentDate,
-              dentistName: dentist?.name,
-              procedureType: appointment.procedureType,
-            },
-            scheduledFor: reminderTime.toISOString(),
-          },
-          appointment.tenantId,
-        );
+        if (reminderTime > new Date()) {
+          // Email Notification
+          if (preferences.emailEnabled) {
+            await this.sendNotification(
+              {
+                userId: appointment.patient.userId,
+                type: NotificationType.EMAIL,
+                channel: NotificationChannel.APPOINTMENT_REMINDER,
+                subject: 'Recordatorio de Cita',
+                message: `Tienes una cita programada en ${hoursBefore} horas`,
+                metadata: {
+                  appointmentId: appointment.id,
+                  appointmentDate: appointment.appointmentDate,
+                  dentistName: dentist?.name,
+                  procedureType: appointment.procedureType,
+                },
+                scheduledFor: reminderTime.toISOString(),
+              },
+              appointment.tenantId,
+            );
+          }
+
+          // WhatsApp Notification
+          if (preferences.whatsappEnabled && preferences.appointmentReminders) {
+            await this.sendNotification(
+              {
+                userId: appointment.patient.userId,
+                type: NotificationType.WHATSAPP,
+                channel: NotificationChannel.APPOINTMENT_REMINDER,
+                subject: 'Recordatorio de Cita',
+                message: `Hola ${appointment.patient.firstName}, te recordamos que tienes una cita programada para el ${appointment.appointmentDate.toLocaleDateString()} a las ${appointment.appointmentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Tratamiento: ${appointment.procedureType}.`,
+                metadata: {
+                  appointmentId: appointment.id,
+                  appointmentDate: appointment.appointmentDate,
+                  dentistName: dentist?.name,
+                  procedureType: appointment.procedureType,
+                },
+                scheduledFor: reminderTime.toISOString(),
+              },
+              appointment.tenantId,
+            );
+          }
+        }
       }
     }
   }
@@ -260,21 +298,44 @@ export class NotificationsService {
       where: { id: appointment.dentistId },
     });
 
-    await this.sendNotification(
-      {
-        userId: appointment.patient.userId,
-        type: NotificationType.EMAIL,
-        channel: NotificationChannel.APPOINTMENT_CONFIRMATION,
-        subject: 'Confirmación de Cita',
-        message: 'Tu cita ha sido confirmada exitosamente',
-        metadata: {
-          appointmentId: appointment.id,
-          appointmentDate: appointment.appointmentDate,
-          dentistName: dentist?.name,
-          procedureType: appointment.procedureType,
+    // Email Confirmation
+    if (preferences.emailEnabled) {
+      await this.sendNotification(
+        {
+          userId: appointment.patient.userId,
+          type: NotificationType.EMAIL,
+          channel: NotificationChannel.APPOINTMENT_CONFIRMATION,
+          subject: 'Confirmación de Cita',
+          message: 'Tu cita ha sido confirmada exitosamente',
+          metadata: {
+            appointmentId: appointment.id,
+            appointmentDate: appointment.appointmentDate,
+            dentistName: dentist?.name,
+            procedureType: appointment.procedureType,
+          },
         },
-      },
-      appointment.tenantId,
-    );
+        appointment.tenantId,
+      );
+    }
+
+    // WhatsApp Confirmation
+    if (preferences.whatsappEnabled && preferences.appointmentConfirmation) {
+      await this.sendNotification(
+        {
+          userId: appointment.patient.userId,
+          type: NotificationType.WHATSAPP,
+          channel: NotificationChannel.APPOINTMENT_CONFIRMATION,
+          subject: 'Confirmación de Cita',
+          message: `Hola ${appointment.patient.firstName}, tu cita para el ${appointment.appointmentDate.toLocaleDateString()} a las ${appointment.appointmentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ha sido confirmada.`,
+          metadata: {
+            appointmentId: appointment.id,
+            appointmentDate: appointment.appointmentDate,
+            dentistName: dentist?.name,
+            procedureType: appointment.procedureType,
+          },
+        },
+        appointment.tenantId,
+      );
+    }
   }
 }
