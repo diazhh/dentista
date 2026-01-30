@@ -25,14 +25,14 @@ export class PatientsController {
   @ApiOperation({ summary: 'Create a new patient' })
   @ApiResponse({ status: 201, description: 'Patient successfully created' })
   create(@Request() req, @Body() createPatientDto: CreatePatientDto) {
-    return this.patientsService.create(req.user.id, createPatientDto);
+    return this.patientsService.create(req.user.userId, req.user.tenantId, createPatientDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all patients for current dentist' })
   @ApiResponse({ status: 200, description: 'List of patients' })
   findAll(@Request() req) {
-    return this.patientsService.findAllForDentist(req.user.id);
+    return this.patientsService.findAllForDentist(req.user.userId, req.user.tenantId);
   }
 
   @Get(':id')
@@ -40,7 +40,7 @@ export class PatientsController {
   @ApiResponse({ status: 200, description: 'Patient details' })
   @ApiResponse({ status: 404, description: 'Patient not found' })
   findOne(@Request() req, @Param('id') id: string) {
-    return this.patientsService.findOne(id, req.user.id);
+    return this.patientsService.findOne(id, req.user.userId, req.user.tenantId);
   }
 
   @Patch(':id')
@@ -48,7 +48,7 @@ export class PatientsController {
   @ApiResponse({ status: 200, description: 'Patient successfully updated' })
   @ApiResponse({ status: 404, description: 'Patient not found' })
   update(@Request() req, @Param('id') id: string, @Body() updatePatientDto: UpdatePatientDto) {
-    return this.patientsService.update(id, req.user.id, updatePatientDto);
+    return this.patientsService.update(id, req.user.userId, req.user.tenantId, updatePatientDto);
   }
 
   @Delete(':id')
@@ -56,7 +56,7 @@ export class PatientsController {
   @ApiResponse({ status: 200, description: 'Patient relationship deactivated' })
   @ApiResponse({ status: 404, description: 'Patient not found' })
   remove(@Request() req, @Param('id') id: string) {
-    return this.patientsService.remove(id, req.user.id);
+    return this.patientsService.remove(id, req.user.userId, req.user.tenantId);
   }
 
   @Get('search/query')
@@ -67,7 +67,7 @@ export class PatientsController {
   @ApiQuery({ name: 'lastName', required: false, type: String })
   @ApiQuery({ name: 'phone', required: false, type: String })
   search(@Request() req, @Query() searchDto: SearchPatientDto) {
-    return this.patientsService.search(req.user.id, searchDto);
+    return this.patientsService.search(req.user.userId, req.user.tenantId, searchDto);
   }
 
   @Post(':id/transfer')
@@ -76,14 +76,14 @@ export class PatientsController {
   @ApiResponse({ status: 404, description: 'Patient or new dentist not found' })
   @ApiResponse({ status: 400, description: 'Patient already assigned to this dentist' })
   transfer(@Request() req, @Param('id') id: string, @Body() transferDto: TransferPatientDto) {
-    return this.patientsService.transfer(id, req.user.id, transferDto);
+    return this.patientsService.transfer(id, req.user.userId, req.user.tenantId, transferDto);
   }
 
   @Get('export/csv')
   @ApiOperation({ summary: 'Export all patients to CSV' })
   @ApiResponse({ status: 200, description: 'CSV file with patients data' })
   async exportCSV(@Request() req, @Res() res: Response) {
-    const csv = await this.patientsService.exportToCSV(req.user.id);
+    const csv = await this.patientsService.exportToCSV(req.user.userId, req.user.tenantId);
     res.header('Content-Type', 'text/csv');
     res.header('Content-Disposition', 'attachment; filename=patients.csv');
     res.send(csv);
@@ -105,7 +105,7 @@ export class PatientsController {
         skip_empty_lines: true,
       });
 
-      return this.patientsService.importFromCSV(req.user.id, csvData);
+      return this.patientsService.importFromCSV(req.user.userId, req.user.tenantId, csvData);
     } catch (error) {
       throw new BadRequestException('Invalid CSV format');
     }
@@ -116,7 +116,7 @@ export class PatientsController {
   @ApiResponse({ status: 200, description: 'Dashboard summary with metrics, timeline, and alerts' })
   @ApiResponse({ status: 403, description: 'No access to this patient' })
   getDashboardSummary(@Request() req, @Param('id') patientId: string) {
-    return this.dashboardService.getDashboardSummary(patientId, req.user.id);
+    return this.dashboardService.getDashboardSummary(patientId, req.user.userId, req.user.tenantId);
   }
 
   @Get(':id/appointments/:appointmentId/details')
@@ -129,6 +129,6 @@ export class PatientsController {
     @Param('id') patientId: string,
     @Param('appointmentId') appointmentId: string,
   ) {
-    return this.dashboardService.getAppointmentDetail(patientId, appointmentId, req.user.id);
+    return this.dashboardService.getAppointmentDetail(patientId, appointmentId, req.user.userId, req.user.tenantId);
   }
 }

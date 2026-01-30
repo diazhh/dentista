@@ -14,6 +14,8 @@ import {
   X,
   Stethoscope,
   MessageSquare,
+  Building2,
+  UserPlus,
 } from 'lucide-react';
 
 interface TenantLayoutProps {
@@ -68,6 +70,18 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
       icon: FolderOpen,
       path: '/documents',
       description: 'Archivos y documentos',
+    },
+    {
+      name: 'Clínicas',
+      icon: Building2,
+      path: '/clinics',
+      description: 'Gestión de sedes y consultorios',
+    },
+    {
+      name: 'Equipo',
+      icon: UserPlus,
+      path: '/staff',
+      description: 'Personal y colaboradores',
     },
     {
       name: 'WhatsApp',

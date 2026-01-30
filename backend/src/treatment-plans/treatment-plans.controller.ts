@@ -18,7 +18,7 @@ export class TreatmentPlansController {
   create(@Body() createTreatmentPlanDto: CreateTreatmentPlanDto, @Request() req) {
     return this.treatmentPlansService.create(
       createTreatmentPlanDto,
-      req.user.sub,
+      req.user.userId,
       req.user.tenantId,
     );
   }
@@ -26,13 +26,13 @@ export class TreatmentPlansController {
   @Get()
   @ApiOperation({ summary: 'Get all treatment plans' })
   findAll(@Request() req, @Query('patientId') patientId?: string) {
-    return this.treatmentPlansService.findAll(req.user.sub, req.user.tenantId, patientId);
+    return this.treatmentPlansService.findAll(req.user.userId, req.user.tenantId, patientId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get treatment plan by ID' })
   findOne(@Param('id') id: string, @Request() req) {
-    return this.treatmentPlansService.findOne(id, req.user.sub, req.user.tenantId);
+    return this.treatmentPlansService.findOne(id, req.user.userId, req.user.tenantId);
   }
 
   @Patch(':id')
@@ -45,7 +45,7 @@ export class TreatmentPlansController {
     return this.treatmentPlansService.update(
       id,
       updateTreatmentPlanDto,
-      req.user.sub,
+      req.user.userId,
       req.user.tenantId,
     );
   }
@@ -60,7 +60,7 @@ export class TreatmentPlansController {
     return this.treatmentPlansService.updateItem(
       itemId,
       updateItemDto,
-      req.user.sub,
+      req.user.userId,
       req.user.tenantId,
     );
   }
@@ -68,6 +68,6 @@ export class TreatmentPlansController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete treatment plan' })
   remove(@Param('id') id: string, @Request() req) {
-    return this.treatmentPlansService.remove(id, req.user.sub, req.user.tenantId);
+    return this.treatmentPlansService.remove(id, req.user.userId, req.user.tenantId);
   }
 }

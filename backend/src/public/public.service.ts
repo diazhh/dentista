@@ -21,12 +21,19 @@ export class PublicService {
                 // city: true,    // Not in schema
                 // phone: true,   // Not in schema
                 // logo: true,    // Not in schema
-                users: {
-                    where: { role: 'DENTIST' },
+                memberships: {
+                    where: {
+                        role: 'DENTIST',
+                        isActive: true,
+                    },
                     select: {
-                        id: true,
-                        name: true,
-                        specialization: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                specialization: true,
+                            },
+                        },
                     },
                     take: 3,
                 }
@@ -45,13 +52,20 @@ export class PublicService {
                 // address: true,
                 // city: true,
                 // phone: true,
-                users: {
-                    where: { role: 'DENTIST' },
+                memberships: {
+                    where: {
+                        role: 'DENTIST',
+                        isActive: true,
+                    },
                     select: {
-                        id: true,
-                        name: true,
-                        specialization: true,
-                        // bio: true, // Not in schema
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                specialization: true,
+                                // bio: true, // Not in schema
+                            },
+                        },
                     },
                 },
             },

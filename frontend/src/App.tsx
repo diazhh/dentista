@@ -55,6 +55,8 @@ import NewOdontogramPage from './pages/NewOdontogramPage';
 import OdontogramDetailPage from './pages/OdontogramDetailPage';
 import PatientDashboardPage from './pages/PatientDashboardPage';
 import WhatsappSettingsPage from './pages/WhatsappSettingsPage';
+import ClinicsListPage from './pages/ClinicsListPage';
+import StaffListPage from './pages/StaffListPage';
 
 // Patient Portal Pages
 import PatientDashboard from './pages/patient/PatientDashboard';
@@ -480,6 +482,28 @@ function AppContent() {
           }
         />
 
+        {/* Clinics & Staff Routes */}
+        <Route
+          path="/clinics"
+          element={
+            <TenantRoute>
+              <TenantLayout>
+                <ClinicsListPage />
+              </TenantLayout>
+            </TenantRoute>
+          }
+        />
+        <Route
+          path="/staff"
+          element={
+            <TenantRoute>
+              <TenantLayout>
+                <StaffListPage />
+              </TenantLayout>
+            </TenantRoute>
+          }
+        />
+
         {/* Settings & Integration */}
         <Route
           path="/settings"
@@ -493,6 +517,16 @@ function AppContent() {
         />
         <Route
           path="/whatsapp"
+          element={
+            <TenantRoute>
+              <TenantLayout>
+                <WhatsappSettingsPage />
+              </TenantLayout>
+            </TenantRoute>
+          }
+        />
+        <Route
+          path="/settings/whatsapp"
           element={
             <TenantRoute>
               <TenantLayout>

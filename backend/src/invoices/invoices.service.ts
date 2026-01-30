@@ -7,10 +7,27 @@ import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 export class InvoicesService {
   constructor(private prisma: PrismaService) {}
 
-  private async generateInvoiceNumber(): Promise<string> {
-    const count = await this.prisma.invoice.count();
-    const number = (count + 1).toString().padStart(6, '0');
-    return `INV-${number}`;
+  private async generateInvoiceNumber(tenantId: string): Promise<string> {
+    // Usar transacción para evitar race conditions
+    const result = await this.prisma.$transaction(async (tx) => {
+      const lastInvoice = await tx.invoice.findFirst({
+        where: { tenantId },
+        orderBy: { createdAt: 'desc' },
+        select: { invoiceNumber: true },
+      });
+
+      let nextNumber = 1;
+      if (lastInvoice && lastInvoice.invoiceNumber) {
+        const match = lastInvoice.invoiceNumber.match(/INV-(\d+)/);
+        if (match) {
+          nextNumber = parseInt(match[1], 10) + 1;
+        }
+      }
+
+      return `INV-${nextNumber.toString().padStart(6, '0')}`;
+    });
+
+    return result;
   }
 
   async create(dto: CreateInvoiceDto, dentistId: string, tenantId: string) {
@@ -31,7 +48,7 @@ export class InvoicesService {
     const discount = dto.discount || 0;
     const total = subtotal + tax - discount;
 
-    const invoiceNumber = await this.generateInvoiceNumber();
+    const invoiceNumber = await this.generateInvoiceNumber(tenantId);
 
     return this.prisma.invoice.create({
       data: {

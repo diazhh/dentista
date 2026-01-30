@@ -1,10 +1,12 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Req, Res } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Controller, Post, Body, UseGuards, Request, Get, Req, Res, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
@@ -92,5 +94,28 @@ export class AuthController {
   async logout(@Body('refreshToken') refreshToken: string) {
     await this.authService.logout(refreshToken);
     return { message: 'Successfully logged out' };
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request password reset email' })
+  @ApiResponse({ status: 200, description: 'Password reset email sent if account exists' })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto.email);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password using token' })
+  @ApiResponse({ status: 200, description: 'Password reset successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.password);
+  }
+
+  @Get('validate-reset-token')
+  @ApiOperation({ summary: 'Validate password reset token' })
+  @ApiQuery({ name: 'token', required: true, description: 'Password reset token' })
+  @ApiResponse({ status: 200, description: 'Token validation result' })
+  async validateResetToken(@Query('token') token: string) {
+    return this.authService.validateResetToken(token);
   }
 }

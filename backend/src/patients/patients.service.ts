@@ -12,7 +12,7 @@ import { Readable } from 'stream';
 export class PatientsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dentistId: string, createPatientDto: CreatePatientDto): Promise<Patient> {
+  async create(dentistId: string, tenantId: string, createPatientDto: CreatePatientDto): Promise<Patient> {
     const { userId, email, emergencyContactName, emergencyContactPhone, ...patientData } = createPatientDto;
 
     let finalUserId = userId;
@@ -58,7 +58,7 @@ export class PatientsService {
       data: {
         patientId: patient.id,
         dentistId: dentistId,
-        tenantId: dentistId,
+        tenantId: tenantId,
         isActive: true,
       },
     });
@@ -66,12 +66,13 @@ export class PatientsService {
     return patient;
   }
 
-  async findAllForDentist(dentistId: string): Promise<Patient[]> {
+  async findAllForDentist(dentistId: string, tenantId: string): Promise<Patient[]> {
     return this.prisma.patient.findMany({
       where: {
         patientDentistRelations: {
           some: {
             dentistId: dentistId,
+            tenantId: tenantId,
             isActive: true,
           },
         },
@@ -87,13 +88,14 @@ export class PatientsService {
     });
   }
 
-  async findOne(id: string, dentistId: string): Promise<Patient> {
+  async findOne(id: string, dentistId: string, tenantId: string): Promise<Patient> {
     const patient = await this.prisma.patient.findFirst({
       where: {
         id,
         patientDentistRelations: {
           some: {
             dentistId: dentistId,
+            tenantId: tenantId,
             isActive: true,
           },
         },
@@ -125,8 +127,8 @@ export class PatientsService {
     return patient;
   }
 
-  async update(id: string, dentistId: string, updatePatientDto: UpdatePatientDto): Promise<Patient> {
-    await this.findOne(id, dentistId);
+  async update(id: string, dentistId: string, tenantId: string, updatePatientDto: UpdatePatientDto): Promise<Patient> {
+    await this.findOne(id, dentistId, tenantId);
 
     return this.prisma.patient.update({
       where: { id },
@@ -134,8 +136,8 @@ export class PatientsService {
     });
   }
 
-  async remove(id: string, dentistId: string): Promise<void> {
-    await this.findOne(id, dentistId);
+  async remove(id: string, dentistId: string, tenantId: string): Promise<void> {
+    await this.findOne(id, dentistId, tenantId);
 
     await this.prisma.patientDentistRelation.updateMany({
       where: {
@@ -149,11 +151,12 @@ export class PatientsService {
     });
   }
 
-  async search(dentistId: string, searchDto: SearchPatientDto): Promise<Patient[]> {
+  async search(dentistId: string, tenantId: string, searchDto: SearchPatientDto): Promise<Patient[]> {
     const whereConditions: any = {
       patientDentistRelations: {
         some: {
           dentistId: dentistId,
+          tenantId: tenantId,
           isActive: true,
         },
       },
@@ -200,8 +203,8 @@ export class PatientsService {
     });
   }
 
-  async transfer(patientId: string, currentDentistId: string, transferDto: TransferPatientDto): Promise<void> {
-    const patient = await this.findOne(patientId, currentDentistId);
+  async transfer(patientId: string, currentDentistId: string, tenantId: string, transferDto: TransferPatientDto): Promise<void> {
+    const patient = await this.findOne(patientId, currentDentistId, tenantId);
 
     const newDentist = await this.prisma.user.findUnique({
       where: { id: transferDto.newDentistId },
@@ -238,14 +241,14 @@ export class PatientsService {
       data: {
         patientId: patientId,
         dentistId: transferDto.newDentistId,
-        tenantId: transferDto.newDentistId,
+        tenantId: tenantId,
         isActive: true,
       },
     });
   }
 
-  async exportToCSV(dentistId: string): Promise<string> {
-    const patients = await this.findAllForDentist(dentistId);
+  async exportToCSV(dentistId: string, tenantId: string): Promise<string> {
+    const patients = await this.findAllForDentist(dentistId, tenantId);
 
     const data = patients.map(patient => ({
       documentId: patient.documentId,
@@ -266,7 +269,7 @@ export class PatientsService {
     return parser.parse(data);
   }
 
-  async importFromCSV(dentistId: string, csvData: any[]): Promise<{ success: number; errors: string[] }> {
+  async importFromCSV(dentistId: string, tenantId: string, csvData: any[]): Promise<{ success: number; errors: string[] }> {
     let success = 0;
     const errors: string[] = [];
 
@@ -312,7 +315,7 @@ export class PatientsService {
               data: {
                 patientId: existingPatient.id,
                 dentistId: dentistId,
-                tenantId: dentistId,
+                tenantId: tenantId,
                 isActive: true,
               },
             });
@@ -339,7 +342,7 @@ export class PatientsService {
           data: {
             patientId: patient.id,
             dentistId: dentistId,
-            tenantId: dentistId,
+            tenantId: tenantId,
             isActive: true,
           },
         });

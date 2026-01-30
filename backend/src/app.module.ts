@@ -21,6 +21,7 @@ import { EmailModule } from './email/email.module';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { CaslModule } from './casl/casl.module';
 import { PublicModule } from './public/public.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { PublicModule } from './public/public.module';
     WhatsappModule,
     CaslModule,
     PublicModule,
+    StripeModule,
   ],
 })
 export class AppModule { }

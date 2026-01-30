@@ -48,6 +48,7 @@ export class AppointmentsService {
     const conflicts = await this.prisma.appointment.findMany({
       where: {
         dentistId: dentistId,
+        tenantId: tenantId, // Agregado: validación de tenant
         operatoryId: createAppointmentDto.operatoryId || undefined,
         status: {
           in: [AppointmentStatus.SCHEDULED],

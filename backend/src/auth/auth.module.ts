@@ -11,12 +11,14 @@ import { AppleStrategy } from './strategies/apple.strategy';
 import { MicrosoftStrategy } from './strategies/microsoft.strategy';
 import { UsersModule } from '../users/users.module';
 import { PrismaModule } from '../prisma/prisma.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
     UsersModule,
     PrismaModule,
     PassportModule,
+    EmailModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

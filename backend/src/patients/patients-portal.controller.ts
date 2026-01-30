@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards, Request } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PatientsPortalService } from './patients-portal.service';
 
 @Controller('portal')

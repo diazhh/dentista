@@ -16,11 +16,12 @@ import {
 export class PatientsDashboardService {
   constructor(private prisma: PrismaService) {}
 
-  async validatePatientAccess(dentistId: string, patientId: string): Promise<void> {
+  async validatePatientAccess(dentistId: string, tenantId: string, patientId: string): Promise<void> {
     const relation = await this.prisma.patientDentistRelation.findFirst({
       where: {
         patientId,
         dentistId,
+        tenantId,
         isActive: true,
       },
     });
@@ -33,8 +34,9 @@ export class PatientsDashboardService {
   async getDashboardSummary(
     patientId: string,
     dentistId: string,
+    tenantId: string,
   ): Promise<DashboardSummaryDto> {
-    await this.validatePatientAccess(dentistId, patientId);
+    await this.validatePatientAccess(dentistId, tenantId, patientId);
 
     const [metrics, timeline, alerts, quickStats] = await Promise.all([
       this.getMetrics(patientId, dentistId),
@@ -327,8 +329,9 @@ export class PatientsDashboardService {
     patientId: string,
     appointmentId: string,
     dentistId: string,
+    tenantId: string,
   ): Promise<AppointmentDetailDto> {
-    await this.validatePatientAccess(dentistId, patientId);
+    await this.validatePatientAccess(dentistId, tenantId, patientId);
 
     const appointment = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },

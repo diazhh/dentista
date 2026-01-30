@@ -13,7 +13,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
   async getProfile(@Request() req) {
-    const user = await this.usersService.findById(req.user.id);
+    const user = await this.usersService.findById(req.user.userId);
     const { passwordHash, ...result } = user;
     return result;
   }

@@ -215,4 +215,101 @@ export const patientPortalAPI = {
   }
 };
 
+// Clinics API
+export const clinicsAPI = {
+  getAll: async () => {
+    const response = await api.get('/clinics');
+    return response.data;
+  },
+  getById: async (id: string) => {
+    const response = await api.get(`/clinics/${id}`);
+    return response.data;
+  },
+  create: async (data: {
+    name: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+    phone?: string;
+    email?: string;
+  }) => {
+    const response = await api.post('/clinics', data);
+    return response.data;
+  },
+  update: async (id: string, data: Partial<{
+    name: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+    phone?: string;
+    email?: string;
+    isActive?: boolean;
+  }>) => {
+    const response = await api.patch(`/clinics/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    const response = await api.delete(`/clinics/${id}`);
+    return response.data;
+  },
+  // Operatories
+  getOperatories: async (clinicId?: string) => {
+    const url = clinicId ? `/clinics/operatories/all?clinicId=${clinicId}` : '/clinics/operatories/all';
+    const response = await api.get(url);
+    return response.data;
+  },
+  createOperatory: async (data: { clinicId: string; name: string; description?: string }) => {
+    const response = await api.post('/clinics/operatories', data);
+    return response.data;
+  },
+  updateOperatory: async (id: string, data: Partial<{ name: string; description?: string; isActive?: boolean }>) => {
+    const response = await api.patch(`/clinics/operatories/${id}`, data);
+    return response.data;
+  },
+  deleteOperatory: async (id: string) => {
+    const response = await api.delete(`/clinics/operatories/${id}`);
+    return response.data;
+  },
+};
+
+// Staff/Tenant Membership API
+export const staffAPI = {
+  getAll: async () => {
+    const response = await api.get('/tenant-membership/staff');
+    return response.data;
+  },
+  invite: async (data: { email: string; name: string; role: string; permissions?: string[] }) => {
+    const response = await api.post('/tenant-membership/invite', data);
+    return response.data;
+  },
+  getById: async (id: string) => {
+    const response = await api.get(`/tenant-membership/${id}`);
+    return response.data;
+  },
+  update: async (id: string, data: Partial<{ role: string; permissions?: string[]; status?: string }>) => {
+    const response = await api.patch(`/tenant-membership/${id}`, data);
+    return response.data;
+  },
+  remove: async (id: string) => {
+    const response = await api.delete(`/tenant-membership/${id}`);
+    return response.data;
+  },
+  getMyWorkspaces: async () => {
+    const response = await api.get('/tenant-membership/my-workspaces');
+    return response.data;
+  },
+  acceptInvitation: async (id: string) => {
+    const response = await api.patch(`/tenant-membership/${id}/accept`);
+    return response.data;
+  },
+  rejectInvitation: async (id: string) => {
+    const response = await api.patch(`/tenant-membership/${id}/reject`);
+    return response.data;
+  },
+};
+
 export default api;
