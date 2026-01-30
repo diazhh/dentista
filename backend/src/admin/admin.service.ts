@@ -1,12 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from './audit-log.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AdminService {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(
     private prisma: PrismaService,
     private auditLogService: AuditLogService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async getAllTenants(page: number = 1, limit: number = 20) {
@@ -674,6 +681,133 @@ export class AdminService {
     return {
       message: 'User role updated successfully',
       membership: updatedMembership,
+    };
+  }
+
+  /**
+   * Impersonate a user as Super Admin
+   * Generates tokens that allow acting as the target user
+   */
+  async impersonateUser(
+    adminId: string,
+    targetUserId: string,
+    userAgent?: string,
+    ipAddress?: string,
+  ) {
+    // Verify admin is SUPER_ADMIN
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+    });
+
+    if (!admin || admin.role !== 'SUPER_ADMIN') {
+      throw new NotFoundException('Unauthorized: Super Admin access required');
+    }
+
+    // Get target user
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+      include: {
+        ownedTenants: true,
+        tenantMemberships: {
+          where: { isActive: true, status: 'ACTIVE' },
+          include: { tenant: true },
+        },
+      },
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Determine tenant context
+    let tenantId = null;
+    if (targetUser.ownedTenants?.length > 0) {
+      tenantId = targetUser.ownedTenants[0].id;
+    } else if (targetUser.tenantMemberships?.length > 0) {
+      tenantId = targetUser.tenantMemberships[0].tenantId;
+    }
+
+    // Generate impersonation token with special flag
+    const payload = {
+      email: targetUser.email,
+      sub: targetUser.id,
+      role: targetUser.role,
+      tenantId,
+      impersonatedBy: adminId, // Mark this as an impersonation session
+      impersonatedByEmail: admin.email,
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '1h', // Shorter expiry for impersonation
+    });
+
+    // Generate refresh token
+    const refreshToken = randomBytes(64).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+
+    await this.prisma.session.create({
+      data: {
+        userId: targetUser.id,
+        refreshToken,
+        userAgent,
+        ipAddress,
+        expiresAt,
+      },
+    });
+
+    // Log the impersonation action
+    await this.auditLogService.create({
+      userId: adminId,
+      action: 'IMPERSONATE',
+      entity: 'User',
+      entityId: targetUserId,
+      metadata: {
+        adminId,
+        adminEmail: admin.email,
+        targetUserId,
+        targetUserEmail: targetUser.email,
+        ipAddress,
+        userAgent,
+      },
+    });
+
+    this.logger.warn(
+      `Super Admin ${admin.email} (${adminId}) started impersonating user ${targetUser.email} (${targetUserId})`,
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: targetUser.id,
+        email: targetUser.email,
+        name: targetUser.name,
+        role: targetUser.role,
+      },
+      impersonation: {
+        isImpersonating: true,
+        originalAdminId: adminId,
+        originalAdminEmail: admin.email,
+      },
+    };
+  }
+
+  /**
+   * Stop impersonation session and return admin's original tokens
+   */
+  async stopImpersonation(currentUserId: string) {
+    // This would typically need the original admin's ID from the token
+    // For now, we just invalidate the current session
+    await this.prisma.session.updateMany({
+      where: { userId: currentUserId },
+      data: { isRevoked: true },
+    });
+
+    this.logger.log(`Impersonation session ended for user ${currentUserId}`);
+
+    return {
+      message: 'Impersonation session ended. Please log in again.',
     };
   }
 }

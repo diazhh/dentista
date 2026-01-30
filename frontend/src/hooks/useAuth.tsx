@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  switchTenant: (tenantId: string) => Promise<void>;
   isAuthenticated: boolean;
   isSuperAdmin: boolean;
 }
@@ -47,11 +48,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.error('Logout error:', error);
       }
     }
-    
+
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setUser(null);
+  };
+
+  const switchTenant = async (tenantId: string) => {
+    const response: AuthResponse = await authAPI.switchTenant(tenantId);
+
+    localStorage.setItem('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    localStorage.setItem('user', JSON.stringify(response.user));
+
+    setUser(response.user);
   };
 
   const value = {
@@ -59,6 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading,
     login,
     logout,
+    switchTenant,
     isAuthenticated: !!user,
     isSuperAdmin: user?.role === 'SUPER_ADMIN',
   };

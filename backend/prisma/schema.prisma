@@ -980,3 +980,125 @@ model PasswordResetToken {
   @@index([expiresAt])
   @@map("password_reset_tokens")
 }
+
+// ==========================================
+// WhatsApp Chatbot Models
+// ==========================================
+
+enum ChatSessionStatus {
+  ACTIVE
+  HUMAN_TAKEOVER
+  CLOSED
+}
+
+model ChatSession {
+  id           String            @id @default(uuid())
+  tenantId     String            @map("tenant_id")
+  patientId    String?           @map("patient_id")
+  patientPhone String            @map("patient_phone")
+  patientName  String?           @map("patient_name")
+  status       ChatSessionStatus @default(ACTIVE)
+  context      Json?             // Stores conversation context (current flow, awaiting input, etc.)
+  lastIntent   String?           @map("last_intent")
+
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+  closedAt     DateTime?         @map("closed_at")
+
+  messages     ChatMessage[]
+
+  @@index([tenantId])
+  @@index([patientPhone])
+  @@index([patientId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("chat_sessions")
+}
+
+enum ChatMessageSender {
+  BOT
+  PATIENT
+  STAFF
+}
+
+model ChatMessage {
+  id          String            @id @default(uuid())
+  sessionId   String            @map("session_id")
+  sender      ChatMessageSender
+  message     String            @db.Text
+  intent      String?           // Detected intent (SCHEDULE_APPOINTMENT, FAQ, etc.)
+  confidence  Float?            // AI confidence score for intent detection
+  metadata    Json?             // Additional data (appointment details, selected options, etc.)
+
+  // For staff messages
+  staffUserId String?           @map("staff_user_id")
+
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  session     ChatSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([sender])
+  @@index([intent])
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+// ==========================================
+// Calendar Sync Models
+// ==========================================
+
+enum CalendarProvider {
+  GOOGLE
+  OUTLOOK
+  APPLE
+}
+
+model CalendarConnection {
+  id            String           @id @default(uuid())
+  userId        String           @map("user_id")
+  tenantId      String           @map("tenant_id")
+  provider      CalendarProvider
+
+  accessToken   String           @map("access_token") @db.Text
+  refreshToken  String?          @map("refresh_token") @db.Text
+  tokenExpiry   DateTime?        @map("token_expiry")
+
+  calendarId    String?          @map("calendar_id") // External calendar ID
+  calendarName  String?          @map("calendar_name")
+
+  syncEnabled   Boolean          @default(true) @map("sync_enabled")
+  syncDirection String           @default("both") @map("sync_direction") // 'to_external', 'from_external', 'both'
+  lastSyncAt    DateTime?        @map("last_sync_at")
+  lastSyncError String?          @map("last_sync_error")
+
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([tenantId])
+  @@index([provider])
+  @@map("calendar_connections")
+}
+
+model CalendarSyncLog {
+  id            String   @id @default(uuid())
+  connectionId  String   @map("connection_id")
+
+  action        String   // 'create', 'update', 'delete'
+  direction     String   // 'to_external', 'from_external'
+
+  appointmentId String?  @map("appointment_id")
+  externalEventId String? @map("external_event_id")
+
+  status        String   // 'success', 'failed', 'skipped'
+  error         String?  @db.Text
+
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([connectionId])
+  @@index([appointmentId])
+  @@index([createdAt])
+  @@map("calendar_sync_logs")
+}

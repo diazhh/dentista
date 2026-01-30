@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -86,6 +86,15 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="flex items-center justify-end">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-indigo-600 hover:text-indigo-500"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
           </div>
 
           <div>

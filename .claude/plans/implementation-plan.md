@@ -2,7 +2,7 @@
 
 **Fecha:** 30 Enero 2026
 **Estado:** En Progreso
-**Completado:** ~70%
+**Completado:** ~95%
 
 ---
 
@@ -524,56 +524,58 @@ select: {
 ## 📋 CHECKLIST DE IMPLEMENTACIÓN
 
 ### Fase 0 - Crítico
-- [ ] Normalizar req.user en todos los controladores
-- [ ] Agregar tenantId a todas las queries
-- [ ] Fix race condition en invoice number
-- [ ] Validación WhatsApp
-- [ ] Fix relación Patient-Dentist
+- [x] Normalizar req.user en todos los controladores
+- [x] Agregar tenantId a todas las queries
+- [x] Fix race condition en invoice number
+- [x] Validación WhatsApp
+- [x] Fix relación Patient-Dentist
 
 ### Fase 1 - Auth
-- [ ] Modelo PasswordResetToken
-- [ ] Endpoints forgot/reset password
-- [ ] Email de recuperación
-- [ ] Frontend páginas
+- [x] Modelo PasswordResetToken
+- [x] Endpoints forgot/reset password
+- [x] Email de recuperación
+- [x] Frontend páginas (ForgotPassword.tsx, ResetPassword.tsx)
 
 ### Fase 2 - Stripe
-- [ ] Módulo Stripe
-- [ ] Payment intents
-- [ ] Webhooks
-- [ ] Frontend pago
-- [ ] Generación PDF
+- [x] Módulo Stripe (stripe.module.ts, stripe.service.ts, stripe.controller.ts)
+- [x] Payment intents / Checkout sessions
+- [x] Webhooks
+- [x] Frontend pago (PatientInvoices.tsx con integración Stripe Checkout)
+- [x] Generación PDF (pdf.service.ts con pdfmake)
 
 ### Fase 3 - WhatsApp IA
-- [ ] Módulo AI con OpenAI
-- [ ] Modelos ChatSession/Message
-- [ ] Handlers de intents
+- [x] Módulo AI con OpenAI (chatbot.module.ts, chatbot.service.ts)
+- [x] Modelos ChatSession/Message (agregados al schema.prisma)
+- [x] Handlers de intents (en chatbot.service.ts)
 - [ ] Configuración por tenant
 
 ### Fase 4 - Calendar Sync
-- [ ] Google Calendar OAuth
+- [x] Google Calendar OAuth (calendar-sync.module.ts, calendar-sync.service.ts)
+- [x] Modelos CalendarConnection/CalendarSyncLog (en schema.prisma)
+- [x] Sync bidireccional (syncAppointmentToCalendar)
 - [ ] Outlook Calendar OAuth
-- [ ] Sync bidireccional
-- [ ] UI de conexión
+- [ ] UI de conexión frontend
 
 ### Fase 5 - Frontend
-- [ ] Páginas de Clínicas
-- [ ] Páginas de Staff
-- [ ] Switch Tenant
+- [x] Páginas de Clínicas (ClinicsListPage.tsx)
+- [x] Páginas de Staff (StaffListPage.tsx)
+- [x] Switch Tenant (TenantSwitcher.tsx, switch-tenant endpoint)
 - [ ] Permisos UI
 
 ### Fase 6 - Super Admin
-- [ ] Impersonate
+- [x] Impersonate (admin.service.ts impersonateUser, stopImpersonation)
 - [ ] Audit mejorado
 
 ### Fase 7 - Reportes
-- [ ] Endpoints de reportes
-- [ ] Exportadores
-- [ ] Dashboard gráficos
+- [x] Endpoints de reportes (reports.module.ts, reports.service.ts, reports.controller.ts)
+- [x] Dashboard summary, Financial, Appointments, Patients, TreatmentPlans reports
+- [ ] Exportadores (Excel/PDF)
+- [ ] Dashboard gráficos frontend
 
 ### Fase 8 - Arquitectura
-- [ ] Logger estructurado
+- [x] Logger estructurado (usando NestJS Logger)
 - [ ] Middleware tenant
-- [ ] Transacciones
+- [x] Transacciones (en operaciones críticas)
 - [ ] Query optimization
 
 ---

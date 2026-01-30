@@ -1,7 +1,8 @@
 import { Controller, Post, Body, UseGuards, Request, Get, Req, Res, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -117,5 +118,18 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Token validation result' })
   async validateResetToken(@Query('token') token: string) {
     return this.authService.validateResetToken(token);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('switch-tenant')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Switch to a different tenant' })
+  @ApiBody({ schema: { properties: { tenantId: { type: 'string' } } } })
+  @ApiResponse({ status: 200, description: 'Successfully switched tenant', type: LoginResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized or no access to tenant' })
+  async switchTenant(@Request() req, @Body('tenantId') tenantId: string): Promise<LoginResponseDto> {
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip;
+    return this.authService.switchTenant(req.user.id, tenantId, userAgent, ipAddress);
   }
 }

@@ -336,4 +336,95 @@ export class AuthService {
       email: resetToken.user.email.replace(/(.{2}).*(@.*)/, '$1***$2') // Mask email for security
     };
   }
+
+  /**
+   * Switches the current tenant context for a user
+   * Used when a user belongs to multiple tenants
+   */
+  async switchTenant(userId: string, tenantId: string, userAgent?: string, ipAddress?: string): Promise<LoginResponseDto> {
+    // Verify user has access to this tenant
+    const membership = await this.prisma.tenantMembership.findFirst({
+      where: {
+        userId,
+        tenantId,
+        status: 'ACTIVE',
+        isActive: true,
+      },
+      include: {
+        tenant: true,
+        user: true,
+      },
+    });
+
+    if (!membership) {
+      // Check if user owns the tenant
+      const ownedTenant = await this.prisma.tenant.findFirst({
+        where: {
+          id: tenantId,
+          ownerId: userId,
+        },
+        include: {
+          owner: true,
+        },
+      });
+
+      if (!ownedTenant) {
+        throw new UnauthorizedException('You do not have access to this tenant');
+      }
+
+      // Generate new tokens with the new tenant context
+      const payload = {
+        email: ownedTenant.owner.email,
+        sub: userId,
+        role: ownedTenant.owner.role,
+        tenantId: ownedTenant.id,
+      };
+
+      const accessToken = this.jwtService.sign(payload, {
+        expiresIn: this.configService.get('JWT_EXPIRES_IN', '8h'),
+      });
+
+      const refreshToken = await this.generateRefreshToken(userId, userAgent, ipAddress);
+
+      this.logger.log(`User ${userId} switched to owned tenant ${tenantId}`);
+
+      return {
+        accessToken,
+        refreshToken,
+        user: {
+          id: userId,
+          email: ownedTenant.owner.email,
+          name: ownedTenant.owner.name,
+          role: ownedTenant.owner.role,
+        },
+      };
+    }
+
+    // Generate new tokens with the new tenant context
+    const payload = {
+      email: membership.user.email,
+      sub: userId,
+      role: membership.role,
+      tenantId: membership.tenantId,
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: this.configService.get('JWT_EXPIRES_IN', '8h'),
+    });
+
+    const refreshToken = await this.generateRefreshToken(userId, userAgent, ipAddress);
+
+    this.logger.log(`User ${userId} switched to tenant ${tenantId} via membership`);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: userId,
+        email: membership.user.email,
+        name: membership.user.name,
+        role: membership.role,
+      },
+    };
+  }
 }

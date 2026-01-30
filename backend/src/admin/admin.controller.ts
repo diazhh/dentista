@@ -239,4 +239,19 @@ export class AdminController {
   ) {
     return this.adminService.updateTenantUserRole(tenantId, userId, data.role, req.user.userId);
   }
+
+  @Post('impersonate/:userId')
+  @ApiOperation({ summary: 'Impersonate a user (Super Admin only)' })
+  @ApiResponse({ status: 200, description: 'Impersonation tokens generated' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async impersonateUser(@Request() req, @Param('userId') userId: string) {
+    return this.adminService.impersonateUser(req.user.id, userId, req.headers['user-agent'], req.ip);
+  }
+
+  @Post('stop-impersonation')
+  @ApiOperation({ summary: 'Stop impersonating and return to admin session' })
+  @ApiResponse({ status: 200, description: 'Returned to admin session' })
+  async stopImpersonation(@Request() req) {
+    return this.adminService.stopImpersonation(req.user.id);
+  }
 }

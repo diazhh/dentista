@@ -5,6 +5,7 @@ import {
     LayoutDashboard,
     Calendar,
     FileText,
+    CreditCard,
     LogOut,
     Menu,
     X,
@@ -31,6 +32,11 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
             name: 'Mis Citas',
             icon: Calendar,
             path: '/patient/appointments',
+        },
+        {
+            name: 'Facturas',
+            icon: CreditCard,
+            path: '/patient/invoices',
         },
         {
             name: 'Documentos',

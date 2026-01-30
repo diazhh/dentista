@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import TenantSwitcher from '../TenantSwitcher';
 import {
   LayoutDashboard,
   Calendar,
@@ -202,6 +203,7 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
                 </p>
               </div>
               <div className="flex items-center gap-4">
+                <TenantSwitcher />
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900">{user?.email}</p>
                   <p className="text-xs text-gray-500">Dentista</p>

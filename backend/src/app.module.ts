@@ -22,6 +22,9 @@ import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { CaslModule } from './casl/casl.module';
 import { PublicModule } from './public/public.module';
 import { StripeModule } from './stripe/stripe.module';
+import { CalendarSyncModule } from './calendar-sync/calendar-sync.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -55,6 +58,9 @@ import { StripeModule } from './stripe/stripe.module';
     CaslModule,
     PublicModule,
     StripeModule,
+    CalendarSyncModule,
+    ChatbotModule,
+    ReportsModule,
   ],
 })
 export class AppModule { }

@@ -18,6 +18,8 @@ import PublicClinicProfile from './pages/public/PublicClinicProfile';
 // Auth Pages
 import Login from './pages/Login';
 import OAuthCallback from './pages/OAuthCallback';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 // SuperAdmin Pages
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -62,6 +64,7 @@ import StaffListPage from './pages/StaffListPage';
 import PatientDashboard from './pages/patient/PatientDashboard';
 import PatientAppointments from './pages/patient/PatientAppointments';
 import PatientDocuments from './pages/patient/PatientDocuments';
+import PatientInvoices from './pages/patient/PatientInvoices';
 
 const queryClient = new QueryClient();
 
@@ -156,6 +159,8 @@ function AppContent() {
         </Route>
 
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/auth/callback" element={<OAuthCallback />} />
 
         {/* SuperAdmin Routes */}
@@ -563,6 +568,16 @@ function AppContent() {
             <PatientRoute>
               <PatientLayout>
                 <PatientDocuments />
+              </PatientLayout>
+            </PatientRoute>
+          }
+        />
+        <Route
+          path="/patient/invoices"
+          element={
+            <PatientRoute>
+              <PatientLayout>
+                <PatientInvoices />
               </PatientLayout>
             </PatientRoute>
           }
