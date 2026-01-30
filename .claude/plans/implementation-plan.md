@@ -1,8 +1,8 @@
 # 🦷 DentiCloud - Plan de Implementación Completo
 
 **Fecha:** 30 Enero 2026
-**Estado:** En Progreso
-**Completado:** ~95%
+**Estado:** Completado
+**Completado:** ~99%
 
 ---
 
@@ -547,36 +547,36 @@ select: {
 - [x] Módulo AI con OpenAI (chatbot.module.ts, chatbot.service.ts)
 - [x] Modelos ChatSession/Message (agregados al schema.prisma)
 - [x] Handlers de intents (en chatbot.service.ts)
-- [ ] Configuración por tenant
+- [x] Configuración por tenant (ChatbotConfig model, chatbot-config.service.ts, chatbot-config.controller.ts)
 
 ### Fase 4 - Calendar Sync
 - [x] Google Calendar OAuth (calendar-sync.module.ts, calendar-sync.service.ts)
 - [x] Modelos CalendarConnection/CalendarSyncLog (en schema.prisma)
 - [x] Sync bidireccional (syncAppointmentToCalendar)
-- [ ] Outlook Calendar OAuth
-- [ ] UI de conexión frontend
+- [ ] Outlook Calendar OAuth (pendiente - estructura lista)
+- [x] UI de conexión frontend (CalendarSyncPage.tsx)
 
 ### Fase 5 - Frontend
 - [x] Páginas de Clínicas (ClinicsListPage.tsx)
 - [x] Páginas de Staff (StaffListPage.tsx)
 - [x] Switch Tenant (TenantSwitcher.tsx, switch-tenant endpoint)
-- [ ] Permisos UI
+- [x] Permisos UI (PermissionsPage.tsx)
 
 ### Fase 6 - Super Admin
 - [x] Impersonate (admin.service.ts impersonateUser, stopImpersonation)
-- [ ] Audit mejorado
+- [x] Audit mejorado (exportación CSV, alertas de actividad sospechosa, timeline de usuario, historial de entidad)
 
 ### Fase 7 - Reportes
 - [x] Endpoints de reportes (reports.module.ts, reports.service.ts, reports.controller.ts)
 - [x] Dashboard summary, Financial, Appointments, Patients, TreatmentPlans reports
-- [ ] Exportadores (Excel/PDF)
-- [ ] Dashboard gráficos frontend
+- [x] Exportadores (Excel/PDF) (excel.exporter.ts, pdf.exporter.ts)
+- [x] Dashboard gráficos frontend (ReportsPage.tsx con Recharts)
 
 ### Fase 8 - Arquitectura
 - [x] Logger estructurado (usando NestJS Logger)
-- [ ] Middleware tenant
+- [x] Middleware tenant (tenant-context.middleware.ts, tenant.decorator.ts, tenant.guard.ts)
 - [x] Transacciones (en operaciones críticas)
-- [ ] Query optimization
+- [x] Query optimization (query-helpers.ts con selects específicos)
 
 ---
 

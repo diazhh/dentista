@@ -1102,3 +1102,53 @@ model CalendarSyncLog {
   @@index([createdAt])
   @@map("calendar_sync_logs")
 }
+
+// ==========================================
+// Chatbot Configuration per Tenant
+// ==========================================
+
+model ChatbotConfig {
+  id          String   @id @default(uuid())
+  tenantId    String   @unique @map("tenant_id")
+
+  // Basic settings
+  isEnabled   Boolean  @default(true) @map("is_enabled")
+  welcomeMessage String? @map("welcome_message") @db.Text
+  fallbackMessage String? @map("fallback_message") @db.Text
+
+  // Business info
+  clinicName    String?  @map("clinic_name")
+  clinicAddress String?  @map("clinic_address") @db.Text
+  clinicPhone   String?  @map("clinic_phone")
+  clinicWebsite String?  @map("clinic_website")
+
+  // Operating hours (JSON: { monday: { open: "08:00", close: "18:00" }, ... })
+  operatingHours Json?   @map("operating_hours")
+
+  // Pricing info (JSON array: [{ service: "Cleaning", price: 50 }, ...])
+  pricingInfo   Json?    @map("pricing_info")
+
+  // AI Settings
+  aiModel       String   @default("gpt-3.5-turbo") @map("ai_model")
+  aiTemperature Float    @default(0.7) @map("ai_temperature")
+  maxTokens     Int      @default(300) @map("max_tokens")
+  systemPrompt  String?  @map("system_prompt") @db.Text
+
+  // Features toggles
+  allowScheduling     Boolean @default(true) @map("allow_scheduling")
+  allowCancellation   Boolean @default(true) @map("allow_cancellation")
+  allowRescheduling   Boolean @default(true) @map("allow_rescheduling")
+  requireIdentification Boolean @default(true) @map("require_identification")
+
+  // Auto-response settings
+  autoResponseDelay   Int     @default(1000) @map("auto_response_delay") // ms
+  humanHandoffKeywords String[] @map("human_handoff_keywords") @default(["humano", "persona", "agente", "recepcionista"])
+
+  // Rate limiting
+  maxMessagesPerHour  Int     @default(100) @map("max_messages_per_hour")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("chatbot_configs")
+}

@@ -1,6 +1,9 @@
-import { Controller, Get, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Req, Res, Header } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Response } from 'express';
 import { ReportsService } from './reports.service';
+import { ExcelExporter } from './exporters/excel.exporter';
+import { PdfExporter } from './exporters/pdf.exporter';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('reports')
@@ -8,7 +11,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @Controller('reports')
 @UseGuards(JwtAuthGuard)
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService) {}
+  constructor(
+    private readonly reportsService: ReportsService,
+    private readonly excelExporter: ExcelExporter,
+    private readonly pdfExporter: PdfExporter,
+  ) {}
 
   private getDateRange(startDate?: string, endDate?: string) {
     const end = endDate ? new Date(endDate) : new Date();
@@ -104,5 +111,219 @@ export class ReportsController {
       ...dateRange,
       dentistId,
     });
+  }
+
+  // ==========================================
+  // Export Endpoints
+  // ==========================================
+
+  @Get('financial/export/excel')
+  @ApiOperation({ summary: 'Export financial report to Excel' })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
+  @ApiQuery({ name: 'dentistId', required: false })
+  async exportFinancialExcel(
+    @Req() req,
+    @Res() res: Response,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('dentistId') dentistId?: string,
+  ) {
+    const dateRange = this.getDateRange(startDate, endDate);
+    const data = await this.reportsService.getFinancialSummary({
+      tenantId: req.user.tenantId,
+      ...dateRange,
+      dentistId,
+    });
+
+    const buffer = await this.excelExporter.exportFinancialReport(data);
+    const filename = `financial-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  @Get('financial/export/pdf')
+  @ApiOperation({ summary: 'Export financial report to PDF' })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
+  @ApiQuery({ name: 'dentistId', required: false })
+  async exportFinancialPdf(
+    @Req() req,
+    @Res() res: Response,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('dentistId') dentistId?: string,
+  ) {
+    const dateRange = this.getDateRange(startDate, endDate);
+    const data = await this.reportsService.getFinancialSummary({
+      tenantId: req.user.tenantId,
+      ...dateRange,
+      dentistId,
+    });
+
+    const buffer = await this.pdfExporter.exportFinancialReport(data);
+    const filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  @Get('appointments/export/excel')
+  @ApiOperation({ summary: 'Export appointment statistics to Excel' })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
+  @ApiQuery({ name: 'dentistId', required: false })
+  async exportAppointmentsExcel(
+    @Req() req,
+    @Res() res: Response,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('dentistId') dentistId?: string,
+  ) {
+    const dateRange = this.getDateRange(startDate, endDate);
+    const data = await this.reportsService.getAppointmentStats({
+      tenantId: req.user.tenantId,
+      ...dateRange,
+      dentistId,
+    });
+
+    const buffer = await this.excelExporter.exportAppointmentStats(data);
+    const filename = `appointments-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  @Get('appointments/export/pdf')
+  @ApiOperation({ summary: 'Export appointment statistics to PDF' })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
+  @ApiQuery({ name: 'dentistId', required: false })
+  async exportAppointmentsPdf(
+    @Req() req,
+    @Res() res: Response,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('dentistId') dentistId?: string,
+  ) {
+    const dateRange = this.getDateRange(startDate, endDate);
+    const data = await this.reportsService.getAppointmentStats({
+      tenantId: req.user.tenantId,
+      ...dateRange,
+      dentistId,
+    });
+
+    const buffer = await this.pdfExporter.exportAppointmentStats(data);
+    const filename = `appointments-report-${new Date().toISOString().split('T')[0]}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  @Get('patients/export/excel')
+  @ApiOperation({ summary: 'Export patient statistics to Excel' })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
+  async exportPatientsExcel(
+    @Req() req,
+    @Res() res: Response,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const dateRange = this.getDateRange(startDate, endDate);
+    const data = await this.reportsService.getPatientStats({
+      tenantId: req.user.tenantId,
+      ...dateRange,
+    });
+
+    const buffer = await this.excelExporter.exportPatientStats(data);
+    const filename = `patients-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  @Get('patients/export/pdf')
+  @ApiOperation({ summary: 'Export patient statistics to PDF' })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
+  async exportPatientsPdf(
+    @Req() req,
+    @Res() res: Response,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const dateRange = this.getDateRange(startDate, endDate);
+    const data = await this.reportsService.getPatientStats({
+      tenantId: req.user.tenantId,
+      ...dateRange,
+    });
+
+    const buffer = await this.pdfExporter.exportPatientStats(data);
+    const filename = `patients-report-${new Date().toISOString().split('T')[0]}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  @Get('treatment-plans/export/excel')
+  @ApiOperation({ summary: 'Export treatment plan statistics to Excel' })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
+  @ApiQuery({ name: 'dentistId', required: false })
+  async exportTreatmentPlansExcel(
+    @Req() req,
+    @Res() res: Response,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('dentistId') dentistId?: string,
+  ) {
+    const dateRange = this.getDateRange(startDate, endDate);
+    const data = await this.reportsService.getTreatmentPlanStats({
+      tenantId: req.user.tenantId,
+      ...dateRange,
+      dentistId,
+    });
+
+    const buffer = await this.excelExporter.exportTreatmentPlanStats(data);
+    const filename = `treatment-plans-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  @Get('treatment-plans/export/pdf')
+  @ApiOperation({ summary: 'Export treatment plan statistics to PDF' })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
+  @ApiQuery({ name: 'dentistId', required: false })
+  async exportTreatmentPlansPdf(
+    @Req() req,
+    @Res() res: Response,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('dentistId') dentistId?: string,
+  ) {
+    const dateRange = this.getDateRange(startDate, endDate);
+    const data = await this.reportsService.getTreatmentPlanStats({
+      tenantId: req.user.tenantId,
+      ...dateRange,
+      dentistId,
+    });
+
+    const buffer = await this.pdfExporter.exportTreatmentPlansPdf(data);
+    const filename = `treatment-plans-report-${new Date().toISOString().split('T')[0]}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
   }
 }

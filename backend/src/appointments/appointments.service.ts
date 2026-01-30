@@ -129,23 +129,44 @@ export class AppointmentsService {
       }
     }
 
+    // Optimized query with specific selects instead of full includes
     return this.prisma.appointment.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        appointmentDate: true,
+        duration: true,
+        status: true,
+        procedureType: true,
+        notes: true,
+        reminderSent: true,
+        confirmedVia: true,
+        createdAt: true,
         patient: {
-          include: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
             user: {
               select: {
                 email: true,
                 phone: true,
-                name: true,
               },
             },
           },
         },
         operatory: {
-          include: {
-            clinic: true,
+          select: {
+            id: true,
+            name: true,
+            floor: true,
+            clinic: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
       },

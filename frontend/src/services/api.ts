@@ -332,4 +332,168 @@ export const staffAPI = {
   },
 };
 
+// Calendar Sync API
+export const calendarSyncAPI = {
+  getConnections: async () => {
+    const response = await api.get('/calendar-sync');
+    return response.data;
+  },
+  getGoogleAuthUrl: async () => {
+    const response = await api.get('/calendar-sync/google/auth-url');
+    return response.data;
+  },
+  connectGoogle: async (code: string) => {
+    const response = await api.post('/calendar-sync/google/callback', { code });
+    return response.data;
+  },
+  disconnect: async (connectionId: string) => {
+    const response = await api.delete(`/calendar-sync/${connectionId}`);
+    return response.data;
+  },
+  syncNow: async (connectionId: string) => {
+    const response = await api.post(`/calendar-sync/${connectionId}/sync`);
+    return response.data;
+  },
+  updateSettings: async (connectionId: string, data: { syncEnabled?: boolean; syncDirection?: string }) => {
+    const response = await api.patch(`/calendar-sync/${connectionId}`, data);
+    return response.data;
+  },
+  getSyncLogs: async (connectionId: string) => {
+    const response = await api.get(`/calendar-sync/${connectionId}/logs`);
+    return response.data;
+  },
+};
+
+// Chatbot Config API
+export const chatbotConfigAPI = {
+  getConfig: async () => {
+    const response = await api.get('/chatbot-config');
+    return response.data;
+  },
+  updateConfig: async (data: {
+    isEnabled?: boolean;
+    welcomeMessage?: string;
+    fallbackMessage?: string;
+    clinicName?: string;
+    clinicAddress?: string;
+    clinicPhone?: string;
+    clinicWebsite?: string;
+    operatingHours?: Record<string, { open: string; close: string } | null>;
+    pricingInfo?: Array<{ service: string; price: number; description?: string }>;
+    aiModel?: string;
+    aiTemperature?: number;
+    maxTokens?: number;
+    systemPrompt?: string;
+    allowScheduling?: boolean;
+    allowCancellation?: boolean;
+    allowRescheduling?: boolean;
+    requireIdentification?: boolean;
+    humanHandoffKeywords?: string[];
+    maxMessagesPerHour?: number;
+  }) => {
+    const response = await api.put('/chatbot-config', data);
+    return response.data;
+  },
+  testChatbot: async (message: string) => {
+    const response = await api.post('/chatbot-config/test', { message });
+    return response.data;
+  },
+};
+
+// Reports API
+export const reportsAPI = {
+  getDashboard: async () => {
+    const response = await api.get('/reports/dashboard');
+    return response.data;
+  },
+  getFinancial: async (params?: { startDate?: string; endDate?: string; dentistId?: string }) => {
+    const response = await api.get('/reports/financial', { params });
+    return response.data;
+  },
+  getAppointments: async (params?: { startDate?: string; endDate?: string; dentistId?: string }) => {
+    const response = await api.get('/reports/appointments', { params });
+    return response.data;
+  },
+  getPatients: async (params?: { startDate?: string; endDate?: string }) => {
+    const response = await api.get('/reports/patients', { params });
+    return response.data;
+  },
+  getTreatmentPlans: async (params?: { startDate?: string; endDate?: string; dentistId?: string }) => {
+    const response = await api.get('/reports/treatment-plans', { params });
+    return response.data;
+  },
+  // Export functions
+  exportFinancialExcel: async (params?: { startDate?: string; endDate?: string }) => {
+    const response = await api.get('/reports/financial/export/excel', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+  exportFinancialPdf: async (params?: { startDate?: string; endDate?: string }) => {
+    const response = await api.get('/reports/financial/export/pdf', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+  exportAppointmentsExcel: async (params?: { startDate?: string; endDate?: string }) => {
+    const response = await api.get('/reports/appointments/export/excel', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+  exportAppointmentsPdf: async (params?: { startDate?: string; endDate?: string }) => {
+    const response = await api.get('/reports/appointments/export/pdf', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+  exportPatientsExcel: async (params?: { startDate?: string; endDate?: string }) => {
+    const response = await api.get('/reports/patients/export/excel', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+  exportPatientsPdf: async (params?: { startDate?: string; endDate?: string }) => {
+    const response = await api.get('/reports/patients/export/pdf', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+};
+
+// Audit Logs API
+export const auditLogsAPI = {
+  getAll: async (params?: {
+    page?: number;
+    limit?: number;
+    userId?: string;
+    action?: string;
+    entity?: string;
+    startDate?: string;
+    endDate?: string;
+  }) => {
+    const response = await api.get('/admin/audit-logs', { params });
+    return response.data;
+  },
+  exportCsv: async (params?: {
+    userId?: string;
+    action?: string;
+    entity?: string;
+    startDate?: string;
+    endDate?: string;
+  }) => {
+    const response = await api.get('/admin/audit-logs/export', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+};
+
 export default api;

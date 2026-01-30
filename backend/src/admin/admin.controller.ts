@@ -9,7 +9,10 @@ import {
   Query,
   UseGuards,
   Request,
+  Res,
+  Header,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AuditLogService } from './audit-log.service';
@@ -149,6 +152,8 @@ export class AdminController {
   @ApiQuery({ name: 'tenantId', required: false, type: String })
   @ApiQuery({ name: 'action', required: false, type: String })
   @ApiQuery({ name: 'entity', required: false, type: String })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Audit logs' })
   async getAuditLogs(
     @Query('page') page?: string,
@@ -157,6 +162,8 @@ export class AdminController {
     @Query('tenantId') tenantId?: string,
     @Query('action') action?: string,
     @Query('entity') entity?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
     return this.auditLogService.findAll({
       page: page ? parseInt(page) : 1,
@@ -165,14 +172,88 @@ export class AdminController {
       tenantId,
       action: action as any,
       entity,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
     });
+  }
+
+  @Get('audit-logs/export')
+  @ApiOperation({ summary: 'Export audit logs to CSV (Super Admin only)' })
+  @ApiQuery({ name: 'userId', required: false, type: String })
+  @ApiQuery({ name: 'tenantId', required: false, type: String })
+  @ApiQuery({ name: 'action', required: false, type: String })
+  @ApiQuery({ name: 'entity', required: false, type: String })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'CSV file' })
+  async exportAuditLogs(
+    @Res() res: Response,
+    @Query('userId') userId?: string,
+    @Query('tenantId') tenantId?: string,
+    @Query('action') action?: string,
+    @Query('entity') entity?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const csv = await this.auditLogService.exportToCsv({
+      userId,
+      tenantId,
+      action: action as any,
+      entity,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+    });
+
+    const filename = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csv);
   }
 
   @Get('audit-logs/statistics')
   @ApiOperation({ summary: 'Get audit log statistics (Super Admin only)' })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Audit log statistics' })
-  async getAuditLogStatistics() {
-    return this.auditLogService.getStatistics({});
+  async getAuditLogStatistics(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.auditLogService.getStatistics({
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+    });
+  }
+
+  @Get('audit-logs/suspicious-activity')
+  @ApiOperation({ summary: 'Get suspicious activity alerts (Super Admin only)' })
+  @ApiQuery({ name: 'hours', required: false, type: Number, description: 'Hours to look back (default: 24)' })
+  @ApiResponse({ status: 200, description: 'Suspicious activity alerts' })
+  async getSuspiciousActivity(@Query('hours') hours?: string) {
+    return this.auditLogService.getSuspiciousActivity({
+      hours: hours ? parseInt(hours) : 24,
+    });
+  }
+
+  @Get('audit-logs/user/:userId/timeline')
+  @ApiOperation({ summary: 'Get user activity timeline (Super Admin only)' })
+  @ApiQuery({ name: 'days', required: false, type: Number, description: 'Days to look back (default: 7)' })
+  @ApiResponse({ status: 200, description: 'User activity timeline' })
+  async getUserTimeline(
+    @Param('userId') userId: string,
+    @Query('days') days?: string,
+  ) {
+    return this.auditLogService.getUserTimeline(userId, days ? parseInt(days) : 7);
+  }
+
+  @Get('audit-logs/entity/:entity/:entityId')
+  @ApiOperation({ summary: 'Get entity change history (Super Admin only)' })
+  @ApiResponse({ status: 200, description: 'Entity change history' })
+  async getEntityHistory(
+    @Param('entity') entity: string,
+    @Param('entityId') entityId: string,
+  ) {
+    return this.auditLogService.getEntityHistory(entity, entityId);
   }
 
   @Get('audit-logs/:id')
