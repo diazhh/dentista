@@ -31,13 +31,13 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
 
   const menuItems = [
     {
-      name: 'Dashboard',
+      name: 'Tablero',
       icon: LayoutDashboard,
       path: '/superadmin',
       description: 'Vista general de la plataforma',
     },
     {
-      name: 'Tenants',
+      name: 'Clínicas',
       icon: Building2,
       path: '/superadmin/tenants',
       description: 'Gestión de clínicas suscritas',
@@ -84,7 +84,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
       ],
     },
     {
-      name: 'Analytics',
+      name: 'Análisis',
       icon: BarChart3,
       path: '/superadmin/analytics',
       description: 'Métricas de la plataforma',
@@ -125,7 +125,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
           {sidebarOpen && (
             <div>
               <h1 className="text-xl font-bold">DentiCloud</h1>
-              <p className="text-xs text-indigo-300">Super Admin Panel</p>
+              <p className="text-xs text-indigo-300">Panel de Super Administrador</p>
             </div>
           )}
           <button
@@ -258,7 +258,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {menuItems.find((item) => isActive(item.path))?.name || 'Dashboard'}
+                  {menuItems.find((item) => isActive(item.path))?.name || 'Tablero'}
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
                   {menuItems.find((item) => isActive(item.path))?.description ||
@@ -268,7 +268,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900">{user?.email}</p>
-                  <p className="text-xs text-gray-500">Super Admin</p>
+                  <p className="text-xs text-gray-500">Super Administrador</p>
                 </div>
               </div>
             </div>

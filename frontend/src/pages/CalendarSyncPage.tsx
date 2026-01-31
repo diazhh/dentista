@@ -100,16 +100,16 @@ export default function CalendarSyncPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Calendar Sync</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Sincronización de Calendarios</h1>
         <p className="text-gray-600 mt-1">
-          Connect your external calendars to sync appointments automatically
+          Conecta tus calendarios externos para sincronizar citas automáticamente
         </p>
       </div>
 
       {/* Connected Calendars */}
       <div className="bg-white rounded-lg shadow mb-8">
         <div className="p-6 border-b">
-          <h2 className="text-lg font-semibold">Connected Calendars</h2>
+          <h2 className="text-lg font-semibold">Calendarios Conectados</h2>
         </div>
         <div className="divide-y">
           {connections && connections.length > 0 ? (
@@ -123,8 +123,8 @@ export default function CalendarSyncPage() {
                       {getSyncStatusIcon(connection)}
                       <span>
                         {connection.lastSyncAt
-                          ? `Last synced: ${new Date(connection.lastSyncAt).toLocaleString()}`
-                          : 'Never synced'}
+                          ? `Última sincronización: ${new Date(connection.lastSyncAt).toLocaleString()}`
+                          : 'Nunca sincronizado'}
                       </span>
                     </div>
                     {connection.lastSyncError && (
@@ -137,7 +137,7 @@ export default function CalendarSyncPage() {
                     onClick={() => syncNowMutation.mutate(connection.id)}
                     disabled={syncNowMutation.isPending}
                     className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                    title="Sync now"
+                    title="Sincronizar ahora"
                   >
                     <RefreshCw className={`w-5 h-5 ${syncNowMutation.isPending ? 'animate-spin' : ''}`} />
                   </button>
@@ -147,18 +147,18 @@ export default function CalendarSyncPage() {
                       setShowSettings(true);
                     }}
                     className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                    title="Settings"
+                    title="Configuración"
                   >
                     <Settings className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Are you sure you want to disconnect this calendar?')) {
+                      if (confirm('¿Estás seguro de que quieres desconectar este calendario?')) {
                         disconnectMutation.mutate(connection.id);
                       }
                     }}
                     className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                    title="Disconnect"
+                    title="Desconectar"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -168,8 +168,8 @@ export default function CalendarSyncPage() {
           ) : (
             <div className="p-12 text-center text-gray-500">
               <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p>No calendars connected yet</p>
-              <p className="text-sm">Connect a calendar to start syncing appointments</p>
+              <p>No hay calendarios conectados aún</p>
+              <p className="text-sm">Conecta un calendario para comenzar a sincronizar citas</p>
             </div>
           )}
         </div>
@@ -178,7 +178,7 @@ export default function CalendarSyncPage() {
       {/* Add Calendar */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b">
-          <h2 className="text-lg font-semibold">Connect New Calendar</h2>
+          <h2 className="text-lg font-semibold">Conectar Nuevo Calendario</h2>
         </div>
         <div className="p-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Google Calendar */}
@@ -195,7 +195,7 @@ export default function CalendarSyncPage() {
             </svg>
             <div className="text-left">
               <p className="font-medium text-gray-900 group-hover:text-blue-700">Google Calendar</p>
-              <p className="text-sm text-gray-500">Connect your Google account</p>
+              <p className="text-sm text-gray-500">Conecta tu cuenta de Google</p>
             </div>
             <ExternalLink className="w-4 h-4 ml-auto text-gray-400 group-hover:text-blue-500" />
           </button>
@@ -210,7 +210,7 @@ export default function CalendarSyncPage() {
               <p className="text-sm text-gray-500">Microsoft 365</p>
             </div>
             <span className="absolute top-2 right-2 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
-              Coming Soon
+              Próximamente
             </span>
           </div>
 
@@ -224,7 +224,7 @@ export default function CalendarSyncPage() {
               <p className="text-sm text-gray-500">iCloud Calendar</p>
             </div>
             <span className="absolute top-2 right-2 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
-              Coming Soon
+              Próximamente
             </span>
           </div>
         </div>
@@ -235,7 +235,7 @@ export default function CalendarSyncPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
             <div className="p-6 border-b">
-              <h3 className="text-lg font-semibold">Calendar Settings</h3>
+              <h3 className="text-lg font-semibold">Configuración del Calendario</h3>
             </div>
             <div className="p-6 space-y-4">
               <div>
@@ -251,12 +251,12 @@ export default function CalendarSyncPage() {
                     }
                     className="w-4 h-4 text-blue-600 rounded"
                   />
-                  <span>Enable sync</span>
+                  <span>Habilitar sincronización</span>
                 </label>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sync Direction
+                  Dirección de Sincronización
                 </label>
                 <select
                   value={selectedConnection.syncDirection}
@@ -268,9 +268,9 @@ export default function CalendarSyncPage() {
                   }
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
                 >
-                  <option value="both">Two-way sync</option>
-                  <option value="to_external">DentiCloud to External only</option>
-                  <option value="from_external">External to DentiCloud only</option>
+                  <option value="both">Sincronización bidireccional</option>
+                  <option value="to_external">Solo de DentiCloud a externo</option>
+                  <option value="from_external">Solo de externo a DentiCloud</option>
                 </select>
               </div>
             </div>
@@ -279,7 +279,7 @@ export default function CalendarSyncPage() {
                 onClick={() => setShowSettings(false)}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={() =>
@@ -294,7 +294,7 @@ export default function CalendarSyncPage() {
                 disabled={updateSettingsMutation.isPending}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
               >
-                {updateSettingsMutation.isPending ? 'Saving...' : 'Save Changes'}
+                {updateSettingsMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
               </button>
             </div>
           </div>

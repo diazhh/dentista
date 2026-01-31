@@ -19,13 +19,13 @@ const PublicLayout = () => {
                                     to="/directory"
                                     className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                                 >
-                                    Find a Dentist
+                                    Buscar Dentista
                                 </Link>
                                 <Link
                                     to="/login"
                                     className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                                 >
-                                    For Dentists
+                                    Para Dentistas
                                 </Link>
                             </nav>
                         </div>
@@ -34,13 +34,13 @@ const PublicLayout = () => {
                                 to="/login"
                                 className="text-gray-700 hover:text-gray-900 font-medium text-sm"
                             >
-                                Log in
+                                Iniciar sesión
                             </Link>
                             <Link
                                 to="/directory"
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow"
                             >
-                                Book Appointment
+                                Agendar Cita
                             </Link>
                         </div>
                     </div>
@@ -59,20 +59,20 @@ const PublicLayout = () => {
                         <div>
                             <h3 className="text-lg font-semibold mb-4">Dentista.App</h3>
                             <p className="text-gray-400 text-sm">
-                                Connecting patients with the best dental care professionals.
-                                Simple, fast, and secure booking.
+                                Conectando pacientes con los mejores profesionales del cuidado dental.
+                                Reservas simples, rápidas y seguras.
                             </p>
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+                            <h3 className="text-lg font-semibold mb-4">Enlaces Rápidos</h3>
                             <ul className="space-y-2 text-sm text-gray-400">
-                                <li><Link to="/directory" className="hover:text-white">Find a Clinic</Link></li>
-                                <li><Link to="/directory" className="hover:text-white">Specialties</Link></li>
-                                <li><Link to="/login" className="hover:text-white">Dentist Login</Link></li>
+                                <li><Link to="/directory" className="hover:text-white">Buscar Clínica</Link></li>
+                                <li><Link to="/directory" className="hover:text-white">Especialidades</Link></li>
+                                <li><Link to="/login" className="hover:text-white">Acceso Dentistas</Link></li>
                             </ul>
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold mb-4">Contact</h3>
+                            <h3 className="text-lg font-semibold mb-4">Contacto</h3>
                             <ul className="space-y-2 text-sm text-gray-400">
                                 <li>support@dentista.app</li>
                                 <li>+1 (555) 123-4567</li>
@@ -80,7 +80,7 @@ const PublicLayout = () => {
                         </div>
                     </div>
                     <div className="mt-8 pt-8 border-t border-gray-700 text-center text-sm text-gray-500">
-                        &copy; {new Date().getFullYear()} Dentista.App. All rights reserved.
+                        &copy; {new Date().getFullYear()} Dentista.App. Todos los derechos reservados.
                     </div>
                 </div>
             </footer>

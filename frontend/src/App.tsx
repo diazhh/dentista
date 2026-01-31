@@ -73,7 +73,7 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isSuperAdmin, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
   }
 
   if (!isAuthenticated) {
@@ -91,7 +91,7 @@ function TenantRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isSuperAdmin, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
   }
 
   if (!isAuthenticated) {
@@ -109,7 +109,7 @@ function RootRedirect() {
   const { isAuthenticated, isSuperAdmin, user, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
   }
 
   if (!isAuthenticated) {
@@ -132,7 +132,7 @@ function PatientRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
   }
 
   if (!isAuthenticated) {
