@@ -121,6 +121,16 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current authenticated user' })
+  @ApiResponse({ status: 200, description: 'Current user information' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getMe(@Request() req) {
+    return this.authService.getMe(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('switch-tenant')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Switch to a different tenant' })

@@ -19,9 +19,20 @@ export default function Login() {
 
     try {
       await login(email, password);
-      // Small delay to ensure localStorage is updated
-      await new Promise(resolve => setTimeout(resolve, 100));
-      navigate('/admin');
+
+      // Wait for state to update before navigating
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Navigate to dashboard directly instead of relying on RootRedirect
+      const storedUser = JSON.parse(localStorage.getItem('denticloud_user') || '{}');
+
+      if (storedUser.role === 'SUPER_ADMIN') {
+        navigate('/superadmin', { replace: true });
+      } else if (storedUser.role === 'PATIENT') {
+        navigate('/patient/dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
       console.error('Login error:', err);

@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { authAPI } from '../services/api';
 import type { User, AuthResponse } from '../types';
+import { storage } from '../utils/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -20,27 +21,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const accessToken = localStorage.getItem('accessToken');
-    
-    if (storedUser && accessToken) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const initAuth = () => {
+      const storedUser = storage.getItem('user');
+      const accessToken = storage.getItem('accessToken');
+
+      // Simply restore the user from storage
+      // Don't try to refresh the token here - let the API interceptor handle it
+      if (storedUser && accessToken) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (error) {
+          console.error('Failed to parse stored user:', error);
+          storage.removeItem('accessToken');
+          storage.removeItem('refreshToken');
+          storage.removeItem('user');
+          setUser(null);
+        }
+      }
+      setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     const response: AuthResponse = await authAPI.login(email, password);
-    
-    localStorage.setItem('accessToken', response.accessToken);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    
+
+    storage.setItem('accessToken', response.accessToken);
+    storage.setItem('refreshToken', response.refreshToken);
+    storage.setItem('user', JSON.stringify(response.user));
+
     setUser(response.user);
   };
 
   const logout = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = storage.getItem('refreshToken');
     if (refreshToken) {
       try {
         await authAPI.logout(refreshToken);
@@ -49,18 +64,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    storage.removeItem('accessToken');
+    storage.removeItem('refreshToken');
+    storage.removeItem('user');
     setUser(null);
   };
 
   const switchTenant = async (tenantId: string) => {
     const response: AuthResponse = await authAPI.switchTenant(tenantId);
 
-    localStorage.setItem('accessToken', response.accessToken);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('user', JSON.stringify(response.user));
+    storage.setItem('accessToken', response.accessToken);
+    storage.setItem('refreshToken', response.refreshToken);
+    storage.setItem('user', JSON.stringify(response.user));
 
     setUser(response.user);
   };

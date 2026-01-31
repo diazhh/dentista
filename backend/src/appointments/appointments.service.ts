@@ -266,4 +266,90 @@ export class AppointmentsService {
       },
     });
   }
+
+  async findToday(dentistId: string, tenantId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return this.prisma.appointment.findMany({
+      where: {
+        dentistId,
+        tenantId,
+        appointmentDate: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+      select: {
+        id: true,
+        appointmentDate: true,
+        duration: true,
+        status: true,
+        procedureType: true,
+        notes: true,
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+          },
+        },
+        operatory: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        appointmentDate: 'asc',
+      },
+    });
+  }
+
+  async findUpcoming(dentistId: string, tenantId: string, daysAhead: number = 7) {
+    const now = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + daysAhead);
+
+    return this.prisma.appointment.findMany({
+      where: {
+        dentistId,
+        tenantId,
+        appointmentDate: {
+          gte: now,
+          lte: endDate,
+        },
+        status: AppointmentStatus.SCHEDULED,
+      },
+      select: {
+        id: true,
+        appointmentDate: true,
+        duration: true,
+        status: true,
+        procedureType: true,
+        notes: true,
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+          },
+        },
+        operatory: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        appointmentDate: 'asc',
+      },
+    });
+  }
 }

@@ -684,16 +684,7 @@ async function main() {
   console.log('✅ Created Membership: Assistant -> Tenant 3');
 
   // Create SMTP Configuration (example with Mailtrap for testing)
-  const crypto = require('crypto');
-  const encryptionKey = process.env.ENCRYPTION_KEY || 'default-encryption-key-change-in-production';
-  
-  function encrypt(text: string): string {
-    const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    return encrypted;
-  }
-
+  // Note: In production, use proper encryption for smtpPassword
   const smtpConfig = await prisma.emailConfiguration.upsert({
     where: { id: '00000000-0000-0000-0000-000000000001' },
     update: {},
@@ -702,7 +693,7 @@ async function main() {
       smtpHost: 'smtp.mailtrap.io',
       smtpPort: 587,
       smtpUser: 'your-mailtrap-user',
-      smtpPassword: encrypt('your-mailtrap-password'),
+      smtpPassword: 'your-mailtrap-password', // In production, encrypt this
       smtpSecure: false,
       fromEmail: 'noreply@denticloud.com',
       fromName: 'DentiCloud',

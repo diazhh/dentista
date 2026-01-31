@@ -319,7 +319,7 @@ export class ReportsController {
       dentistId,
     });
 
-    const buffer = await this.pdfExporter.exportTreatmentPlansPdf(data);
+    const buffer = await this.pdfExporter.exportTreatmentPlanStats(data);
     const filename = `treatment-plans-report-${new Date().toISOString().split('T')[0]}.pdf`;
 
     res.setHeader('Content-Type', 'application/pdf');

@@ -35,6 +35,7 @@ import SuperAdminAuditLogsPage from './pages/SuperAdminAuditLogsPage';
 import SuperAdminSubscriptionsPage from './pages/SuperAdminSubscriptionsPage';
 import SuperAdminSettingsPage from './pages/SuperAdminSettingsPage';
 import TenantsManagement from './pages/TenantsManagement';
+import TenantSettingsPage from './pages/TenantSettingsPage';
 
 // Tenant Pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -515,7 +516,7 @@ function AppContent() {
           element={
             <TenantRoute>
               <TenantLayout>
-                <TenantsManagement />
+                <TenantSettingsPage />
               </TenantLayout>
             </TenantRoute>
           }

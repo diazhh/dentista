@@ -18,9 +18,13 @@ async function bootstrap() {
     }),
   );
 
-  // CORS
+  // CORS - support multiple origins
+  const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3001')
+    .split(',')
+    .map(origin => origin.trim());
+
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+    origin: corsOrigins.length === 1 ? corsOrigins[0] : corsOrigins,
     credentials: true,
   });
 

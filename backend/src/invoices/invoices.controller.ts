@@ -27,6 +27,16 @@ export class InvoicesController {
     );
   }
 
+  @Get('stats')
+  @ApiOperation({ summary: 'Get invoice statistics' })
+  getStats(
+    @Request() req,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.invoicesService.getStats(req.user.userId, req.user.tenantId, startDate, endDate);
+  }
+
   @Get()
   @ApiOperation({ summary: 'Get all invoices' })
   findAll(

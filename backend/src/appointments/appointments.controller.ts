@@ -31,6 +31,24 @@ export class AppointmentsController {
     return this.appointmentsService.findAll(dentistId, tenantId, startDate, endDate);
   }
 
+  @Get('today')
+  @ApiOperation({ summary: 'Get today\'s appointments' })
+  findToday(@Request() req) {
+    const dentistId = req.user.userId;
+    const tenantId = req.user.tenantId || dentistId;
+    return this.appointmentsService.findToday(dentistId, tenantId);
+  }
+
+  @Get('upcoming')
+  @ApiOperation({ summary: 'Get upcoming appointments (next 7 days)' })
+  @ApiQuery({ name: 'days', required: false, description: 'Number of days to look ahead (default: 7)' })
+  findUpcoming(@Request() req, @Query('days') days?: string) {
+    const dentistId = req.user.userId;
+    const tenantId = req.user.tenantId || dentistId;
+    const daysAhead = days ? parseInt(days, 10) : 7;
+    return this.appointmentsService.findUpcoming(dentistId, tenantId, daysAhead);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get appointment by ID' })
   findOne(@Param('id') id: string, @Request() req) {

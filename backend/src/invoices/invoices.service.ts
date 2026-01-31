@@ -232,4 +232,107 @@ export class InvoicesService {
       where: { id },
     });
   }
+
+  async getStats(dentistId: string, tenantId: string, startDate?: string, endDate?: string) {
+    const where: any = {
+      dentistId,
+      tenantId,
+    };
+
+    // Filtrar por fecha si se proporcionan
+    if (startDate || endDate) {
+      where.issueDate = {};
+      if (startDate) {
+        where.issueDate.gte = new Date(startDate);
+      }
+      if (endDate) {
+        where.issueDate.lte = new Date(endDate);
+      }
+    }
+
+    // Obtener todas las facturas para calcular estadísticas
+    const invoices = await this.prisma.invoice.findMany({
+      where,
+      select: {
+        total: true,
+        balance: true,
+        status: true,
+        issueDate: true,
+        dueDate: true,
+      },
+    });
+
+    const now = new Date();
+
+    // Calcular estadísticas
+    // Estados válidos: DRAFT, SENT, PAID, OVERDUE, CANCELLED
+    const stats = invoices.reduce((acc, invoice) => {
+      acc.totalInvoiced += invoice.total;
+      acc.totalPaid += (invoice.total - invoice.balance);
+      acc.totalPending += invoice.balance;
+
+      if (invoice.status === 'PAID') {
+        acc.paidCount++;
+      } else if (invoice.status === 'SENT' || invoice.status === 'DRAFT') {
+        acc.pendingCount++;
+        // Verificar si está vencida
+        if (invoice.dueDate && invoice.dueDate < now) {
+          acc.overdueCount++;
+          acc.totalOverdue += invoice.balance;
+        }
+      } else if (invoice.status === 'OVERDUE') {
+        acc.overdueCount++;
+        acc.totalOverdue += invoice.balance;
+      } else if (invoice.status === 'CANCELLED') {
+        acc.cancelledCount++;
+      }
+
+      return acc;
+    }, {
+      totalInvoiced: 0,
+      totalPaid: 0,
+      totalPending: 0,
+      totalOverdue: 0,
+      invoiceCount: invoices.length,
+      paidCount: 0,
+      pendingCount: 0,
+      overdueCount: 0,
+      cancelledCount: 0,
+    });
+
+    // Calcular estadísticas mensuales (últimos 6 meses)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyInvoices = await this.prisma.invoice.findMany({
+      where: {
+        dentistId,
+        tenantId,
+        issueDate: {
+          gte: sixMonthsAgo,
+        },
+      },
+      select: {
+        total: true,
+        balance: true,
+        issueDate: true,
+      },
+    });
+
+    const monthlyStats = monthlyInvoices.reduce((acc, invoice) => {
+      const monthKey = `${invoice.issueDate.getFullYear()}-${String(invoice.issueDate.getMonth() + 1).padStart(2, '0')}`;
+      if (!acc[monthKey]) {
+        acc[monthKey] = { invoiced: 0, paid: 0, count: 0 };
+      }
+      acc[monthKey].invoiced += invoice.total;
+      acc[monthKey].paid += (invoice.total - invoice.balance);
+      acc[monthKey].count++;
+      return acc;
+    }, {} as Record<string, { invoiced: number; paid: number; count: number }>);
+
+    return {
+      ...stats,
+      monthlyStats,
+    };
+  }
 }

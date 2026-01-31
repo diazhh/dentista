@@ -1,26 +1,49 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-
-// Using pdfmake without strict types to avoid compatibility issues
-const PdfPrinter = require('pdfmake');
-
-// Define fonts
-const fonts = {
-  Roboto: {
-    normal: 'node_modules/pdfmake/build/vfs_fonts.js',
-    bold: 'node_modules/pdfmake/build/vfs_fonts.js',
-    italics: 'node_modules/pdfmake/build/vfs_fonts.js',
-    bolditalics: 'node_modules/pdfmake/build/vfs_fonts.js',
-  },
-};
+import * as path from 'path';
 
 @Injectable()
-export class PdfService {
+export class PdfService implements OnModuleInit {
   private readonly logger = new Logger(PdfService.name);
-  private readonly printer: any;
+  private printer: any;
 
-  constructor(private prisma: PrismaService) {
-    this.printer = new PdfPrinter(fonts);
+  constructor(private prisma: PrismaService) {}
+
+  async onModuleInit() {
+    try {
+      // Dynamic import for pdfmake to handle ESM compatibility
+      const PdfMake = await import('pdfmake/build/pdfmake');
+      const pdfFonts = await import('pdfmake/build/vfs_fonts');
+
+      // For server-side usage
+      const fonts = {
+        Roboto: {
+          normal: path.join(process.cwd(), 'node_modules/pdfmake/build/vfs_fonts.js'),
+          bold: path.join(process.cwd(), 'node_modules/pdfmake/build/vfs_fonts.js'),
+          italics: path.join(process.cwd(), 'node_modules/pdfmake/build/vfs_fonts.js'),
+          bolditalics: path.join(process.cwd(), 'node_modules/pdfmake/build/vfs_fonts.js'),
+        },
+      };
+
+      // Use the createPdf function directly with vfs
+      this.printer = {
+        createPdfKitDocument: (docDefinition: any) => {
+          // Create PDF using pdfmake
+          const PdfPrinter = require('pdfmake');
+          const printer = new PdfPrinter(fonts);
+          return printer.createPdfKitDocument(docDefinition);
+        }
+      };
+      this.logger.log('PDF service initialized successfully');
+    } catch (error) {
+      this.logger.error('Failed to initialize PDF service', error);
+      // Create a fallback printer that throws helpful errors
+      this.printer = {
+        createPdfKitDocument: () => {
+          throw new Error('PDF service not properly initialized');
+        }
+      };
+    }
   }
 
   /**

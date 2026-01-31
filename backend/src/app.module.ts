@@ -25,6 +25,8 @@ import { StripeModule } from './stripe/stripe.module';
 import { CalendarSyncModule } from './calendar-sync/calendar-sync.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { ReportsModule } from './reports/reports.module';
+import { ServicesModule } from './services/services.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -61,6 +63,8 @@ import { ReportsModule } from './reports/reports.module';
     CalendarSyncModule,
     ChatbotModule,
     ReportsModule,
+    ServicesModule,
+    SubscriptionModule,
   ],
 })
 export class AppModule { }

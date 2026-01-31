@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AuthResponse, Tenant, SystemMetrics, RevenueMetrics, TenantActivity } from '../types';
+import { storage } from '../utils/storage';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -13,7 +14,7 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -65,7 +66,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = storage.getItem('refreshToken');
         if (!refreshToken) {
           throw new Error('No refresh token');
         }
@@ -76,8 +77,8 @@ api.interceptors.response.use(
 
         const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', newRefreshToken);
+        storage.setItem('accessToken', accessToken);
+        storage.setItem('refreshToken', newRefreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         processQueue(null, accessToken);
@@ -85,9 +86,9 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
+        storage.removeItem('accessToken');
+        storage.removeItem('refreshToken');
+        storage.removeItem('user');
 
         // Only redirect if not already on login page
         if (!window.location.pathname.includes('/login')) {
@@ -247,13 +248,15 @@ export const clinicsAPI = {
   },
   create: async (data: {
     name: string;
-    address?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    postalCode?: string;
-    phone?: string;
-    email?: string;
+    address: {
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      zipCode?: string;
+    };
+    phone: string;
+    email: string;
   }) => {
     const response = await api.post('/clinics', data);
     return response.data;

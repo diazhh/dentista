@@ -6,17 +6,29 @@ import Stripe from 'stripe';
 @Injectable()
 export class StripeService {
   private readonly logger = new Logger(StripeService.name);
-  private readonly stripe: Stripe;
+  private readonly stripe: Stripe | null;
+  private readonly isConfigured: boolean;
 
   constructor(
     private configService: ConfigService,
     private prisma: PrismaService,
   ) {
     const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
-    if (!stripeSecretKey) {
+    if (!stripeSecretKey || stripeSecretKey === 'sk_test_dummy_key_for_development') {
       this.logger.warn('STRIPE_SECRET_KEY not configured - Stripe functionality will be limited');
+      this.stripe = null;
+      this.isConfigured = false;
+    } else {
+      this.stripe = new Stripe(stripeSecretKey);
+      this.isConfigured = true;
     }
-    this.stripe = new Stripe(stripeSecretKey || '');
+  }
+
+  private ensureConfigured(): Stripe {
+    if (!this.stripe || !this.isConfigured) {
+      throw new BadRequestException('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+    }
+    return this.stripe;
   }
 
   /**
@@ -32,10 +44,12 @@ export class StripeService {
       throw new NotFoundException('Tenant not found');
     }
 
+  const stripe = this.ensureConfigured();
+
     // If tenant already has a Stripe customer, retrieve it
     if (tenant.stripeCustomerId) {
       try {
-        const customer = await this.stripe.customers.retrieve(tenant.stripeCustomerId);
+        const customer = await stripe.customers.retrieve(tenant.stripeCustomerId);
         if (!customer.deleted) {
           return customer as Stripe.Customer;
         }
@@ -45,7 +59,7 @@ export class StripeService {
     }
 
     // Create new customer
-    const customer = await this.stripe.customers.create({
+    const customer = await stripe.customers.create({
       email: tenant.owner.email,
       name: tenant.name,
       metadata: {
@@ -75,7 +89,7 @@ export class StripeService {
   ): Promise<Stripe.Checkout.Session> {
     const customer = await this.getOrCreateCustomer(tenantId);
 
-    const session = await this.stripe.checkout.sessions.create({
+    const session = await this.ensureConfigured().checkout.sessions.create({
       customer: customer.id,
       payment_method_types: ['card'],
       line_items: [
@@ -113,7 +127,7 @@ export class StripeService {
       throw new BadRequestException('Tenant does not have a Stripe customer');
     }
 
-    const session = await this.stripe.billingPortal.sessions.create({
+    const session = await this.ensureConfigured().billingPortal.sessions.create({
       customer: tenant.stripeCustomerId,
       return_url: returnUrl,
     });
@@ -133,7 +147,7 @@ export class StripeService {
 
     let event: Stripe.Event;
     try {
-      event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      event = this.ensureConfigured().webhooks.constructEvent(payload, signature, webhookSecret);
     } catch (err) {
       this.logger.error(`Webhook signature verification failed: ${err.message}`);
       throw new BadRequestException('Invalid webhook signature');
@@ -268,7 +282,7 @@ export class StripeService {
 
     if (!tenant?.stripeCustomerId) return null;
 
-    const subscriptions = await this.stripe.subscriptions.list({
+    const subscriptions = await this.ensureConfigured().subscriptions.list({
       customer: tenant.stripeCustomerId,
       status: 'active',
       limit: 1,
@@ -281,7 +295,7 @@ export class StripeService {
    * Gets available subscription plans from Stripe
    */
   async getPlans(): Promise<Stripe.Price[]> {
-    const prices = await this.stripe.prices.list({
+    const prices = await this.ensureConfigured().prices.list({
       active: true,
       type: 'recurring',
       expand: ['data.product'],

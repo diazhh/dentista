@@ -221,4 +221,71 @@ export class ClinicsService {
       data: { isActive: false },
     });
   }
+
+  async getStats() {
+    // Obtener estadísticas generales de clínicas
+    const [
+      totalClinics,
+      activeClinics,
+      totalOperatories,
+      activeOperatories,
+      totalAssignments,
+      activeAssignments,
+    ] = await Promise.all([
+      this.prisma.clinic.count(),
+      this.prisma.clinic.count({ where: { isActive: true } }),
+      this.prisma.operatory.count(),
+      this.prisma.operatory.count({ where: { isActive: true } }),
+      this.prisma.operatoryAssignment.count(),
+      this.prisma.operatoryAssignment.count({ where: { isActive: true } }),
+    ]);
+
+    // Obtener clínicas con conteo de operatorios
+    const clinicsWithOperatories = await this.prisma.clinic.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            operatories: true,
+          },
+        },
+      },
+    });
+
+    // Obtener distribución de operatorios por piso
+    const operatories = await this.prisma.operatory.findMany({
+      where: { isActive: true },
+      select: { floor: true },
+    });
+
+    const operatoriesByFloor = operatories.reduce((acc, op) => {
+      const floor = `Piso ${op.floor}`;
+      acc[floor] = (acc[floor] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      overview: {
+        totalClinics,
+        activeClinics,
+        inactiveClinics: totalClinics - activeClinics,
+        totalOperatories,
+        activeOperatories,
+        inactiveOperatories: totalOperatories - activeOperatories,
+        totalAssignments,
+        activeAssignments,
+      },
+      clinicsWithOperatories: clinicsWithOperatories.map(c => ({
+        id: c.id,
+        name: c.name,
+        operatoryCount: c._count.operatories,
+      })),
+      operatoriesByFloor: Object.entries(operatoriesByFloor).map(([floor, count]) => ({
+        floor,
+        count,
+      })),
+    };
+  }
 }

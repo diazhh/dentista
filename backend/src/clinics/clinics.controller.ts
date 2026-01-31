@@ -16,6 +16,12 @@ export class ClinicsController {
   constructor(private readonly clinicsService: ClinicsService) {}
 
   // Clinics endpoints
+  @Get('stats')
+  @ApiOperation({ summary: 'Get clinic statistics' })
+  getStats() {
+    return this.clinicsService.getStats();
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a new clinic (Super Admin only)' })
   createClinic(@Body() createClinicDto: CreateClinicDto, @Request() req) {

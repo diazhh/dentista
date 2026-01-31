@@ -186,6 +186,20 @@ export class NotificationsService {
     });
   }
 
+  async getUnreadCount(userId: string, tenantId: string) {
+    // Count notifications that haven't been sent yet (pending) as "unread"
+    const count = await this.prisma.notification.count({
+      where: {
+        userId,
+        tenantId,
+        sent: false,
+        failed: false,
+      },
+    });
+
+    return { unreadCount: count };
+  }
+
   // ==================== Appointment Reminders ====================
 
   async scheduleAppointmentReminders(appointmentId: string) {

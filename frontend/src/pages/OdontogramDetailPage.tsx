@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, FileText, Trash2, Edit } from 'lucide-react';
+import { ArrowLeft, Calendar, User, FileText, Trash2, Filter, X, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import OdontogramChart from '../components/OdontogramChart';
+import OdontogramSVG, { ToothEditor } from '../components/OdontogramSVG';
 
 interface Odontogram {
   id: string;
@@ -55,6 +56,10 @@ export default function OdontogramDetailPage() {
   const navigate = useNavigate();
   const [odontogram, setOdontogram] = useState<Odontogram | null>(null);
   const [loading, setLoading] = useState(true);
+  const [useSVGView, setUseSVGView] = useState(true); // Usar vista SVG por defecto
+  const [filterCondition, setFilterCondition] = useState<string>('');
+  const [showTeethList, setShowTeethList] = useState(true);
+  const [editingTooth, setEditingTooth] = useState<number | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -93,6 +98,47 @@ export default function OdontogramDetailPage() {
       alert('Error al eliminar el odontograma');
     }
   };
+
+  const handleToothClick = (toothNumber: number) => {
+    setEditingTooth(toothNumber);
+  };
+
+  const handleToothSave = async (data: { condition: string; surfaces: string[]; notes: string }) => {
+    if (!editingTooth || !odontogram) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const existingTooth = odontogram.teeth.find(t => t.toothNumber === editingTooth);
+
+      if (existingTooth) {
+        // Actualizar diente existente
+        await axios.patch(
+          `http://localhost:3000/api/odontograms/${id}/teeth/${existingTooth.id}`,
+          data,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        // Crear nuevo diente
+        await axios.post(
+          `http://localhost:3000/api/odontograms/${id}/teeth`,
+          { toothNumber: editingTooth, ...data },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      await fetchOdontogram();
+      setEditingTooth(null);
+    } catch (error) {
+      console.error('Error saving tooth:', error);
+      alert('Error al guardar el diente');
+    }
+  };
+
+  const filteredTeeth = odontogram?.teeth.filter(t =>
+    filterCondition ? t.condition === filterCondition : true
+  ) || [];
+
+  const uniqueConditions = [...new Set(odontogram?.teeth.map(t => t.condition) || [])];
 
   if (loading) {
     return (
@@ -140,6 +186,18 @@ export default function OdontogramDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          {/* Toggle Vista */}
+          <button
+            onClick={() => setUseSVGView(!useSVGView)}
+            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+              useSVGView
+                ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                : 'bg-gray-100 text-gray-700 border border-gray-300'
+            }`}
+          >
+            {useSVGView ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            {useSVGView ? 'Vista SVG' : 'Vista Clásica'}
+          </button>
           <button
             onClick={handleDelete}
             className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 flex items-center gap-2"
@@ -203,17 +261,88 @@ export default function OdontogramDetailPage() {
 
       {/* Odontogram Chart */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="font-semibold text-gray-900 mb-4">Odontograma</h3>
-        <OdontogramChart teeth={odontogram.teeth} editable={false} />
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-900">Odontograma</h3>
+          {!useSVGView && (
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <select
+                value={filterCondition}
+                onChange={(e) => setFilterCondition(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Todas las condiciones</option>
+                {uniqueConditions.map(condition => (
+                  <option key={condition} value={condition}>
+                    {TOOTH_CONDITIONS[condition] || condition}
+                  </option>
+                ))}
+              </select>
+              {filterCondition && (
+                <button
+                  onClick={() => setFilterCondition('')}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <X className="h-4 w-4 text-gray-500" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {useSVGView ? (
+          <OdontogramSVG
+            teeth={odontogram.teeth}
+            editable={false}
+            showLegend={true}
+            highlightConditions={filterCondition ? [filterCondition] : []}
+            onToothClick={handleToothClick}
+          />
+        ) : (
+          <OdontogramChart
+            teeth={filterCondition ? filteredTeeth : odontogram.teeth}
+            editable={false}
+          />
+        )}
       </div>
+
+      {/* Modal de edición de diente */}
+      {editingTooth && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <ToothEditor
+            toothNumber={editingTooth}
+            currentCondition={
+              odontogram.teeth.find(t => t.toothNumber === editingTooth)?.condition || 'HEALTHY'
+            }
+            currentSurfaces={
+              odontogram.teeth.find(t => t.toothNumber === editingTooth)?.surfaces || []
+            }
+            currentNotes={
+              odontogram.teeth.find(t => t.toothNumber === editingTooth)?.notes || ''
+            }
+            onSave={handleToothSave}
+            onCancel={() => setEditingTooth(null)}
+          />
+        </div>
+      )}
 
       {/* Teeth Details */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="font-semibold text-gray-900 mb-4">
-          Detalle de Dientes ({odontogram.teeth.length})
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-900">
+            Detalle de Dientes ({filteredTeeth.length}
+            {filterCondition && ` de ${odontogram.teeth.length}`})
+          </h3>
+          <button
+            onClick={() => setShowTeethList(!showTeethList)}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            {showTeethList ? 'Ocultar lista' : 'Mostrar lista'}
+          </button>
+        </div>
+        {showTeethList && (
         <div className="space-y-4">
-          {odontogram.teeth.map((tooth) => (
+          {filteredTeeth.map((tooth) => (
             <div
               key={tooth.id}
               className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
@@ -259,6 +388,12 @@ export default function OdontogramDetailPage() {
             </div>
           ))}
         </div>
+        )}
+        {!showTeethList && filteredTeeth.length > 0 && (
+          <p className="text-sm text-gray-500 italic">
+            Haga clic en "Mostrar lista" para ver los detalles de los dientes.
+          </p>
+        )}
       </div>
     </div>
   );

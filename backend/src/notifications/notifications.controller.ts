@@ -45,6 +45,14 @@ export class NotificationsController {
     return this.notificationsService.getNotifications(userId, tenantId);
   }
 
+  @Get('unread-count')
+  @ApiOperation({ summary: 'Get count of unread notifications' })
+  getUnreadCount(@Request() req) {
+    const userId = req.user.userId;
+    const tenantId = req.user.tenantId || userId;
+    return this.notificationsService.getUnreadCount(userId, tenantId);
+  }
+
   @Post('send')
   @ApiOperation({ summary: 'Send a notification (admin/system)' })
   sendNotification(@Body() dto: SendNotificationDto, @Request() req) {

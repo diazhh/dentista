@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Building2, Plus, Search, MapPin, Phone, Mail, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { clinicsAPI } from '../services/api';
+import { useAbility } from '../casl/AbilityContext';
+import { Action } from '../casl/AbilityContext';
 
 interface Operatory {
   id: string;
@@ -9,14 +11,18 @@ interface Operatory {
   isActive: boolean;
 }
 
-interface Clinic {
-  id: string;
-  name: string;
-  address?: string;
+interface Address {
+  street?: string;
   city?: string;
   state?: string;
   country?: string;
-  postalCode?: string;
+  zipCode?: string;
+}
+
+interface Clinic {
+  id: string;
+  name: string;
+  address?: Address;
   phone?: string;
   email?: string;
   isActive: boolean;
@@ -25,6 +31,7 @@ interface Clinic {
 }
 
 export default function ClinicsListPage() {
+  const ability = useAbility();
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,11 +41,11 @@ export default function ClinicsListPage() {
   const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    address: '',
+    street: '',
     city: '',
     state: '',
     country: '',
-    postalCode: '',
+    zipCode: '',
     phone: '',
     email: '',
   });
@@ -66,15 +73,27 @@ export default function ClinicsListPage() {
   const handleCreateClinic = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await clinicsAPI.create(formData);
+      const clinicData = {
+        name: formData.name,
+        address: {
+          street: formData.street,
+          city: formData.city,
+          state: formData.state,
+          country: formData.country,
+          zipCode: formData.zipCode,
+        },
+        phone: formData.phone,
+        email: formData.email,
+      };
+      await clinicsAPI.create(clinicData);
       setShowCreateModal(false);
       setFormData({
         name: '',
-        address: '',
+        street: '',
         city: '',
         state: '',
         country: '',
-        postalCode: '',
+        zipCode: '',
         phone: '',
         email: '',
       });
@@ -134,8 +153,9 @@ export default function ClinicsListPage() {
     const search = searchTerm.toLowerCase();
     return (
       clinic.name.toLowerCase().includes(search) ||
-      clinic.city?.toLowerCase().includes(search) ||
-      clinic.address?.toLowerCase().includes(search)
+      clinic.address?.city?.toLowerCase().includes(search) ||
+      clinic.address?.street?.toLowerCase().includes(search) ||
+      clinic.address?.state?.toLowerCase().includes(search)
     );
   });
 
@@ -148,13 +168,15 @@ export default function ClinicsListPage() {
             <Building2 className="w-8 h-8 text-blue-600" />
             <h1 className="text-3xl font-bold text-gray-900">Clínicas</h1>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            Nueva Clínica
-          </button>
+          {ability.can(Action.Create, 'Clinic') && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Nueva Clínica
+            </button>
+          )}
         </div>
 
         {/* Search */}
@@ -186,13 +208,14 @@ export default function ClinicsListPage() {
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold text-gray-900">{clinic.name}</h3>
                       <div className="mt-2 space-y-1">
-                        {clinic.address && (
+                        {clinic.address && (clinic.address.street || clinic.address.city || clinic.address.state) && (
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <MapPin className="w-4 h-4" />
                             <span>
-                              {clinic.address}
-                              {clinic.city && `, ${clinic.city}`}
-                              {clinic.state && `, ${clinic.state}`}
+                              {clinic.address.street}
+                              {clinic.address.city && `${clinic.address.street ? ', ' : ''}${clinic.address.city}`}
+                              {clinic.address.state && `, ${clinic.address.state}`}
+                              {clinic.address.zipCode && ` ${clinic.address.zipCode}`}
                             </span>
                           </div>
                         )}
@@ -220,12 +243,14 @@ export default function ClinicsListPage() {
                       >
                         {clinic.isActive ? 'Activa' : 'Inactiva'}
                       </span>
-                      <button
-                        onClick={() => handleDeleteClinic(clinic.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                      {ability.can(Action.Delete, 'Clinic') && (
+                        <button
+                          onClick={() => handleDeleteClinic(clinic.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -255,16 +280,18 @@ export default function ClinicsListPage() {
                   <div className="border-t border-gray-200 bg-gray-50 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-medium text-gray-900">Consultorios</h4>
-                      <button
-                        onClick={() => {
-                          setSelectedClinicId(clinic.id);
-                          setShowOperatoryModal(true);
-                        }}
-                        className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Agregar
-                      </button>
+                      {ability.can(Action.Create, 'Operatory') && (
+                        <button
+                          onClick={() => {
+                            setSelectedClinicId(clinic.id);
+                            setShowOperatoryModal(true);
+                          }}
+                          className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Agregar
+                        </button>
+                      )}
                     </div>
 
                     {clinic.operatories.length === 0 ? (
@@ -277,7 +304,7 @@ export default function ClinicsListPage() {
                             className="bg-white rounded-lg border border-gray-200 p-4"
                           >
                             <div className="flex items-start justify-between">
-                              <div>
+                              <div className="flex-1">
                                 <h5 className="font-medium text-gray-900">{operatory.name}</h5>
                                 {operatory.description && (
                                   <p className="text-sm text-gray-600 mt-1">
@@ -285,12 +312,14 @@ export default function ClinicsListPage() {
                                   </p>
                                 )}
                               </div>
-                              <button
-                                onClick={() => handleDeleteOperatory(operatory.id)}
-                                className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              {ability.can(Action.Delete, 'Operatory') && (
+                                <button
+                                  onClick={() => handleDeleteOperatory(operatory.id)}
+                                  className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -336,12 +365,12 @@ export default function ClinicsListPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Dirección
+                  Dirección (Calle)
                 </label>
                 <input
                   type="text"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  value={formData.street}
+                  onChange={(e) => setFormData({ ...formData, street: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -389,8 +418,8 @@ export default function ClinicsListPage() {
                   </label>
                   <input
                     type="text"
-                    value={formData.postalCode}
-                    onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                    value={formData.zipCode}
+                    onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>

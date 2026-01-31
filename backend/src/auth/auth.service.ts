@@ -21,6 +21,48 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        avatarUrl: true,
+        phone: true,
+        createdAt: true,
+        ownedTenants: {
+          select: {
+            id: true,
+            name: true,
+            subdomain: true,
+          },
+        },
+        tenantMemberships: {
+          where: { isActive: true },
+          select: {
+            tenantId: true,
+            role: true,
+            tenant: {
+              select: {
+                id: true,
+                name: true,
+                subdomain: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
     if (!user || !user.passwordHash) {
