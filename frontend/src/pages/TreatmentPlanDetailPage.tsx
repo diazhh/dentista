@@ -198,7 +198,7 @@ export default function TreatmentPlanDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <button
@@ -208,62 +208,62 @@ export default function TreatmentPlanDetailPage() {
             <ArrowLeft className="w-5 h-5" />
             Volver
           </button>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <FileText className="w-8 h-8 text-blue-600" />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{plan.title}</h1>
-                <p className="text-gray-500">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 break-words">{plan.title}</h1>
+                <p className="text-sm sm:text-base text-gray-500 break-words">
                   {plan.patient?.firstName} {plan.patient?.lastName} - {plan.patient?.documentId}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-shrink-0">
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors text-sm sm:text-base"
               >
-                <Trash2 className="w-5 h-5" />
-                Eliminar
+                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden xs:inline">Eliminar</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <User className="w-5 h-5 text-gray-400" />
-              <h3 className="font-semibold text-gray-900">Paciente</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900">Paciente</h3>
             </div>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               {plan.patient?.firstName} {plan.patient?.lastName}
             </p>
-            <p className="text-sm text-gray-500">Cédula: {plan.patient?.documentId}</p>
-            <p className="text-sm text-gray-500">Tel: {plan.patient?.phone}</p>
+            <p className="text-xs sm:text-sm text-gray-500">Cédula: {plan.patient?.documentId}</p>
+            <p className="text-xs sm:text-sm text-gray-500">Tel: {plan.patient?.phone}</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <DollarSign className="w-5 h-5 text-gray-400" />
-              <h3 className="font-semibold text-gray-900">Costo Total</h3>
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900">Costo Total</h3>
             </div>
-            <p className="text-3xl font-bold text-blue-600">${plan.totalCost.toLocaleString()}</p>
-            <p className="text-sm text-gray-500 mt-1">{plan.items.length} procedimientos</p>
+            <p className="text-2xl sm:text-3xl font-bold text-blue-600">${plan.totalCost.toLocaleString()}</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">{plan.items.length} procedimientos</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <Calendar className="w-5 h-5 text-gray-400" />
-              <h3 className="font-semibold text-gray-900">Fechas</h3>
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900">Fechas</h3>
             </div>
             {plan.startDate && (
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 Inicio: {format(new Date(plan.startDate), 'dd/MM/yyyy', { locale: es })}
               </p>
             )}
             {plan.endDate && (
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 Fin: {format(new Date(plan.endDate), 'dd/MM/yyyy', { locale: es })}
               </p>
             )}
@@ -273,125 +273,127 @@ export default function TreatmentPlanDetailPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Estado del Plan</h3>
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Estado del Plan</h3>
             {getStatusBadge(plan.status)}
           </div>
 
           {plan.description && (
             <div className="mb-4">
-              <p className="text-sm font-medium text-gray-700 mb-1">Descripción:</p>
-              <p className="text-gray-600">{plan.description}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">Descripción:</p>
+              <p className="text-sm sm:text-base text-gray-600">{plan.description}</p>
             </div>
           )}
 
           {plan.diagnosis && (
             <div className="mb-4">
-              <p className="text-sm font-medium text-gray-700 mb-1">Diagnóstico:</p>
-              <p className="text-gray-600">{plan.diagnosis}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">Diagnóstico:</p>
+              <p className="text-sm sm:text-base text-gray-600">{plan.diagnosis}</p>
             </div>
           )}
 
           <div className="mb-4">
-            <div className="flex items-center justify-between text-sm mb-2">
+            <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
               <span className="font-medium text-gray-700">Progreso General:</span>
               <span className="font-semibold text-gray-900">{getProgressPercentage()}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
               <div
-                className="bg-blue-600 h-3 rounded-full transition-all"
+                className="bg-blue-600 h-2 sm:h-3 rounded-full transition-all"
                 style={{ width: `${getProgressPercentage()}%` }}
               ></div>
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleUpdatePlanStatus('PROPOSED')}
               disabled={plan.status === 'PROPOSED'}
-              className="px-3 py-1.5 text-sm border border-blue-300 text-blue-700 rounded hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm border border-blue-300 text-blue-700 rounded hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Proponer
             </button>
             <button
               onClick={() => handleUpdatePlanStatus('ACCEPTED')}
               disabled={plan.status === 'ACCEPTED'}
-              className="px-3 py-1.5 text-sm border border-green-300 text-green-700 rounded hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm border border-green-300 text-green-700 rounded hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Aceptar
             </button>
             <button
               onClick={() => handleUpdatePlanStatus('IN_PROGRESS')}
               disabled={plan.status === 'IN_PROGRESS'}
-              className="px-3 py-1.5 text-sm border border-amber-300 text-amber-700 rounded hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm border border-amber-300 text-amber-700 rounded hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               En Progreso
             </button>
             <button
               onClick={() => handleUpdatePlanStatus('COMPLETED')}
               disabled={plan.status === 'COMPLETED'}
-              className="px-3 py-1.5 text-sm border border-purple-300 text-purple-700 rounded hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm border border-purple-300 text-purple-700 rounded hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Completar
             </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Procedimientos</h3>
-          
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Procedimientos</h3>
+
           <div className="space-y-4">
             {plan.items.map((item, index) => (
-              <div key={item.id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
-                      <h4 className="font-semibold text-gray-900">{item.procedureName}</h4>
+              <div key={item.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                      <span className="text-xs sm:text-sm font-medium text-gray-500">#{index + 1}</span>
+                      <h4 className="font-semibold text-sm sm:text-base text-gray-900 break-words">{item.procedureName}</h4>
                       {getPriorityBadge(item.priority)}
                     </div>
-                    <p className="text-sm text-gray-600">Código: {item.procedureCode}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Código: {item.procedureCode}</p>
                     {item.tooth && (
-                      <p className="text-sm text-gray-600">
+                      <p className="text-xs sm:text-sm text-gray-600">
                         Diente: {item.tooth} {item.surface && `- Superficie: ${item.surface}`}
                       </p>
                     )}
                   </div>
-                  <div className="text-right">
+                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 flex-shrink-0">
                     {getStatusBadge(item.status)}
-                    <p className="text-lg font-bold text-gray-900 mt-2">
-                      ${item.estimatedCost.toLocaleString()}
-                    </p>
-                    {item.estimatedDuration && (
-                      <p className="text-xs text-gray-500">{item.estimatedDuration} min</p>
-                    )}
+                    <div className="text-right">
+                      <p className="text-base sm:text-lg font-bold text-gray-900">
+                        ${item.estimatedCost.toLocaleString()}
+                      </p>
+                      {item.estimatedDuration && (
+                        <p className="text-xs text-gray-500">{item.estimatedDuration} min</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {item.description && (
-                  <p className="text-sm text-gray-600 mb-3">{item.description}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-3">{item.description}</p>
                 )}
 
-                <div className="flex gap-2 pt-3 border-t">
+                <div className="flex flex-wrap gap-2 pt-3 border-t">
                   <button
                     onClick={() => handleUpdateItemStatus(item.id, 'PENDING')}
                     disabled={item.status === 'PENDING'}
-                    className="px-3 py-1 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-2 sm:px-3 py-1 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Pendiente
                   </button>
                   <button
                     onClick={() => handleUpdateItemStatus(item.id, 'IN_PROGRESS')}
                     disabled={item.status === 'IN_PROGRESS'}
-                    className="px-3 py-1 text-xs border border-amber-300 text-amber-700 rounded hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-2 sm:px-3 py-1 text-xs border border-amber-300 text-amber-700 rounded hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     En Progreso
                   </button>
                   <button
                     onClick={() => handleUpdateItemStatus(item.id, 'COMPLETED')}
                     disabled={item.status === 'COMPLETED'}
-                    className="flex items-center gap-1 px-3 py-1 text-xs border border-green-300 text-green-700 rounded hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1 px-2 sm:px-3 py-1 text-xs border border-green-300 text-green-700 rounded hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <CheckCircle className="w-3 h-3" />
                     Completado
@@ -403,9 +405,9 @@ export default function TreatmentPlanDetailPage() {
         </div>
 
         {plan.notes && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Notas</h3>
-            <p className="text-gray-600 whitespace-pre-wrap">{plan.notes}</p>
+          <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mt-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Notas</h3>
+            <p className="text-sm sm:text-base text-gray-600 whitespace-pre-wrap">{plan.notes}</p>
           </div>
         )}
       </div>
