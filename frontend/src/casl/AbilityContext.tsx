@@ -109,7 +109,7 @@ export const AbilityProvider: React.FC<{
     user: any;
     children: React.ReactNode;
 }> = ({ user, children }) => {
-    const ability = user ? createAbilityFor(user) : new Ability();
+    const ability = user ? createAbilityFor(user) : new Ability<[ActionType, Subjects]>();
 
     return (
         <AbilityContext.Provider value={ability}>

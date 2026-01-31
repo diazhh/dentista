@@ -34,7 +34,6 @@ import SuperAdminAnalyticsPage from './pages/SuperAdminAnalyticsPage';
 import SuperAdminAuditLogsPage from './pages/SuperAdminAuditLogsPage';
 import SuperAdminSubscriptionsPage from './pages/SuperAdminSubscriptionsPage';
 import SuperAdminSettingsPage from './pages/SuperAdminSettingsPage';
-import TenantsManagement from './pages/TenantsManagement';
 import TenantSettingsPage from './pages/TenantSettingsPage';
 
 // Tenant Pages
@@ -103,29 +102,6 @@ function TenantRoute({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>;
-}
-
-function RootRedirect() {
-  const { isAuthenticated, isSuperAdmin, user, loading } = useAuth();
-
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
-  }
-
-  if (!isAuthenticated) {
-    // Redirect to public landing page instead of login
-    return <LandingPage />;
-  }
-
-  if (isSuperAdmin) {
-    return <Navigate to="/superadmin" replace />;
-  }
-
-  if (user?.role === 'PATIENT') {
-    return <Navigate to="/patient/dashboard" replace />;
-  }
-
-  return <Navigate to="/dashboard" replace />;
 }
 
 function PatientRoute({ children }: { children: React.ReactNode }) {

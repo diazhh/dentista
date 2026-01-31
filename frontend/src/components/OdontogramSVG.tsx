@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Odontogram } from 'react-odontogram';
 
 // Mapeo de condiciones dentales a colores
