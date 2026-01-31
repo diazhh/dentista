@@ -6,11 +6,11 @@ services:
     container_name: dentista-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: dentista
-      POSTGRES_PASSWORD: dentista123
-      POSTGRES_DB: dentista_db
+      POSTGRES_USER: ${POSTGRES_USER:-dentista}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dentista123}
+      POSTGRES_DB: ${POSTGRES_DB:-dentista_db}
     ports:
-      - "5435:5432"
+      - "${POSTGRES_PORT:-5435}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -24,7 +24,7 @@ services:
     container_name: dentista-redis
     restart: unless-stopped
     ports:
-      - "6381:6379"
+      - "${REDIS_PORT:-6381}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
