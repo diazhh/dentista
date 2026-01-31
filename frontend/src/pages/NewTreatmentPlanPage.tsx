@@ -148,30 +148,30 @@ export default function NewTreatmentPlanPage() {
   const totalCost = items.reduce((sum, item) => sum + (item.estimatedCost || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <FileText className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Nuevo Plan de Tratamiento</h1>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Nuevo Plan de Tratamiento</h1>
           </div>
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm sm:text-base"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
             Cancelar
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Información General</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Información General</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div className="md:col-span-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <User className="w-4 h-4" />
+                <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                  <User className="w-3 h-3 sm:w-4 sm:h-4" />
                   Paciente *
                 </label>
                 <input
@@ -179,13 +179,13 @@ export default function NewTreatmentPlanPage() {
                   placeholder="Buscar paciente..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <select
                   required
                   value={formData.patientId}
                   onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Seleccionar paciente</option>
                   {filteredPatients.map((patient) => (
@@ -197,45 +197,45 @@ export default function NewTreatmentPlanPage() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Título *</label>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">Título *</label>
                 <input
                   type="text"
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ej: Plan de Ortodoncia Completo"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Descripción</label>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">Descripción</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Descripción general del plan de tratamiento"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Diagnóstico</label>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">Diagnóstico</label>
                 <textarea
                   value={formData.diagnosis}
                   onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Diagnóstico del paciente"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Estado</label>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">Estado</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="DRAFT">Borrador</option>
                   <option value="PROPOSED">Propuesto</option>
@@ -244,45 +244,45 @@ export default function NewTreatmentPlanPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Fecha Inicio</label>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">Fecha Inicio</label>
                 <input
                   type="date"
                   value={formData.startDate}
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Fecha Fin</label>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">Fecha Fin</label>
                 <input
                   type="date"
                   value={formData.endDate}
                   onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Notas</label>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">Notas</label>
                 <textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Notas adicionales"
                 />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Procedimientos</h3>
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Procedimientos</h3>
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4" />
                 Agregar Procedimiento
@@ -291,30 +291,30 @@ export default function NewTreatmentPlanPage() {
 
             <div className="space-y-4">
               {items.map((item, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div key={index} className="border border-gray-200 rounded-lg p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-xs sm:text-sm font-medium text-gray-700">
                       Procedimiento {index + 1}
                     </span>
                     {items.length > 1 && (
                       <button
                         type="button"
                         onClick={() => handleRemoveItem(index)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-600 hover:text-red-800 p-1"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <label className="text-xs text-gray-600 mb-1 block">Diente</label>
                       <input
                         type="text"
                         value={item.tooth}
                         onChange={(e) => handleItemChange(index, 'tooth', e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Ej: 11, 21"
                       />
                     </div>
@@ -325,7 +325,7 @@ export default function NewTreatmentPlanPage() {
                         type="text"
                         value={item.surface}
                         onChange={(e) => handleItemChange(index, 'surface', e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Ej: Oclusal"
                       />
                     </div>
@@ -337,25 +337,25 @@ export default function NewTreatmentPlanPage() {
                         required
                         value={item.procedureCode}
                         onChange={(e) => handleItemChange(index, 'procedureCode', e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Ej: D0120"
                       />
                     </div>
 
-                    <div className="md:col-span-2">
+                    <div className="col-span-2">
                       <label className="text-xs text-gray-600 mb-1 block">Nombre del Procedimiento *</label>
                       <input
                         type="text"
                         required
                         value={item.procedureName}
                         onChange={(e) => handleItemChange(index, 'procedureName', e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Ej: Limpieza Dental"
                       />
                     </div>
 
                     <div>
-                      <label className="text-xs text-gray-600 mb-1 block">Costo Estimado *</label>
+                      <label className="text-xs text-gray-600 mb-1 block">Costo *</label>
                       <input
                         type="number"
                         required
@@ -363,17 +363,17 @@ export default function NewTreatmentPlanPage() {
                         step="0.01"
                         value={item.estimatedCost}
                         onChange={(e) => handleItemChange(index, 'estimatedCost', parseFloat(e.target.value) || 0)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="0.00"
                       />
                     </div>
 
                     <div>
-                      <label className="text-xs text-gray-600 mb-1 block">Prioridad (1-5) *</label>
+                      <label className="text-xs text-gray-600 mb-1 block">Prioridad *</label>
                       <select
                         value={item.priority}
                         onChange={(e) => handleItemChange(index, 'priority', parseInt(e.target.value))}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value={1}>1 - Muy Alta</option>
                         <option value={2}>2 - Alta</option>
@@ -390,18 +390,18 @@ export default function NewTreatmentPlanPage() {
                         min="0"
                         value={item.estimatedDuration}
                         onChange={(e) => handleItemChange(index, 'estimatedDuration', parseInt(e.target.value) || 0)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="30"
                       />
                     </div>
 
-                    <div className="md:col-span-3">
+                    <div className="col-span-2 sm:col-span-3">
                       <label className="text-xs text-gray-600 mb-1 block">Descripción</label>
                       <textarea
                         value={item.description}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                         rows={2}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Descripción del procedimiento"
                       />
                     </div>
@@ -410,28 +410,28 @@ export default function NewTreatmentPlanPage() {
               ))}
             </div>
 
-            <div className="mt-6 pt-4 border-t">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold text-gray-900">Costo Total Estimado:</span>
-                <span className="text-2xl font-bold text-blue-600">${totalCost.toLocaleString()}</span>
+            <div className="mt-4 sm:mt-6 pt-4 border-t">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <span className="text-sm sm:text-lg font-semibold text-gray-900">Costo Total Estimado:</span>
+                <span className="text-xl sm:text-2xl font-bold text-blue-600">${totalCost.toLocaleString()}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 sm:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm sm:text-base"
             >
-              <Save className="w-5 h-5" />
+              <Save className="w-4 h-4 sm:w-5 sm:h-5" />
               {loading ? 'Guardando...' : 'Guardar Plan'}
             </button>
           </div>
