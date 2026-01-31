@@ -192,7 +192,9 @@ model Patient {
   payments                Payment[]
   documents               Document[]
   odontograms             Odontogram[]
-  
+  preVisitForms           PreVisitForm[]
+  insuranceDocuments      InsuranceDocument[]
+
   @@map("patients")
 }
 
@@ -1106,6 +1108,111 @@ model CalendarSyncLog {
 // ==========================================
 // Chatbot Configuration per Tenant
 // ==========================================
+
+// ==========================================
+// Pre-Visit Forms for Patient Portal
+// ==========================================
+
+enum PreVisitFormStatus {
+  PENDING
+  SUBMITTED
+  REVIEWED
+}
+
+model PreVisitForm {
+  id            String             @id @default(uuid())
+  patientId     String             @map("patient_id")
+  appointmentId String             @map("appointment_id")
+  tenantId      String             @map("tenant_id")
+
+  status        PreVisitFormStatus @default(PENDING)
+
+  // Medical History Updates
+  currentMedications    String[]   @map("current_medications")
+  allergiesUpdate       String[]   @map("allergies_update")
+  medicalConditions     String[]   @map("medical_conditions")
+  recentSurgeries       String?    @map("recent_surgeries")
+
+  // Current Symptoms/Concerns
+  chiefComplaint        String?    @map("chief_complaint")
+  painLevel             Int?       @map("pain_level") // 1-10
+  painLocation          String?    @map("pain_location")
+  symptomsDuration      String?    @map("symptoms_duration")
+
+  // Dental History
+  lastDentalVisit       DateTime?  @map("last_dental_visit")
+  brushingFrequency     String?    @map("brushing_frequency")
+  flossingFrequency     String?    @map("flossing_frequency")
+
+  // Insurance Information
+  hasInsuranceChanges   Boolean    @default(false) @map("has_insurance_changes")
+  insuranceProvider     String?    @map("insurance_provider")
+  insurancePolicyNumber String?    @map("insurance_policy_number")
+  insuranceGroupNumber  String?    @map("insurance_group_number")
+
+  // Emergency Contact Update
+  emergencyContactName  String?    @map("emergency_contact_name")
+  emergencyContactPhone String?    @map("emergency_contact_phone")
+  emergencyContactRelation String? @map("emergency_contact_relation")
+
+  // Consent
+  consentGiven          Boolean    @default(false) @map("consent_given")
+  consentDate           DateTime?  @map("consent_date")
+
+  // Additional Notes
+  additionalNotes       String?    @map("additional_notes") @db.Text
+
+  submittedAt           DateTime?  @map("submitted_at")
+  reviewedAt            DateTime?  @map("reviewed_at")
+  reviewedBy            String?    @map("reviewed_by")
+
+  createdAt             DateTime   @default(now()) @map("created_at")
+  updatedAt             DateTime   @updatedAt @map("updated_at")
+
+  patient               Patient    @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@index([appointmentId])
+  @@index([tenantId])
+  @@index([status])
+  @@map("pre_visit_forms")
+}
+
+// ==========================================
+// Insurance Documents for Patient Portal
+// ==========================================
+
+model InsuranceDocument {
+  id            String   @id @default(uuid())
+  patientId     String   @map("patient_id")
+  tenantId      String   @map("tenant_id")
+
+  documentType  String   @map("document_type") // 'insurance_card_front', 'insurance_card_back', 'policy_document'
+  title         String
+
+  filePath      String   @map("file_path")
+  fileName      String   @map("file_name")
+  fileSize      Int      @map("file_size")
+  mimeType      String   @map("mime_type")
+
+  insuranceProvider     String?  @map("insurance_provider")
+  policyNumber          String?  @map("policy_number")
+  groupNumber           String?  @map("group_number")
+  expirationDate        DateTime? @map("expiration_date")
+
+  isVerified            Boolean  @default(false) @map("is_verified")
+  verifiedAt            DateTime? @map("verified_at")
+  verifiedBy            String?  @map("verified_by")
+
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  patient               Patient  @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@index([tenantId])
+  @@map("insurance_documents")
+}
 
 model ChatbotConfig {
   id          String   @id @default(uuid())

@@ -65,6 +65,10 @@ import PatientDashboard from './pages/patient/PatientDashboard';
 import PatientAppointments from './pages/patient/PatientAppointments';
 import PatientDocuments from './pages/patient/PatientDocuments';
 import PatientInvoices from './pages/patient/PatientInvoices';
+import PatientTreatments from './pages/patient/PatientTreatments';
+import PatientPayments from './pages/patient/PatientPayments';
+import PatientPreVisitForm from './pages/patient/PatientPreVisitForm';
+import PatientInsurance from './pages/patient/PatientInsurance';
 
 const queryClient = new QueryClient();
 
@@ -563,11 +567,21 @@ function AppContent() {
           }
         />
         <Route
-          path="/patient/documents"
+          path="/patient/appointments/:appointmentId/pre-visit-form"
           element={
             <PatientRoute>
               <PatientLayout>
-                <PatientDocuments />
+                <PatientPreVisitForm />
+              </PatientLayout>
+            </PatientRoute>
+          }
+        />
+        <Route
+          path="/patient/treatments"
+          element={
+            <PatientRoute>
+              <PatientLayout>
+                <PatientTreatments />
               </PatientLayout>
             </PatientRoute>
           }
@@ -578,6 +592,36 @@ function AppContent() {
             <PatientRoute>
               <PatientLayout>
                 <PatientInvoices />
+              </PatientLayout>
+            </PatientRoute>
+          }
+        />
+        <Route
+          path="/patient/payments"
+          element={
+            <PatientRoute>
+              <PatientLayout>
+                <PatientPayments />
+              </PatientLayout>
+            </PatientRoute>
+          }
+        />
+        <Route
+          path="/patient/documents"
+          element={
+            <PatientRoute>
+              <PatientLayout>
+                <PatientDocuments />
+              </PatientLayout>
+            </PatientRoute>
+          }
+        />
+        <Route
+          path="/patient/insurance"
+          element={
+            <PatientRoute>
+              <PatientLayout>
+                <PatientInsurance />
               </PatientLayout>
             </PatientRoute>
           }

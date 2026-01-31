@@ -221,18 +221,101 @@ export const whatsappAPI = {
 };
 
 export const patientPortalAPI = {
+  // Dashboard
   getDashboard: async () => {
     const response = await api.get('/portal/dashboard');
     return response.data;
   },
+
+  // Appointments
   getAppointments: async () => {
     const response = await api.get('/portal/appointments');
     return response.data;
   },
+
+  // Documents
   getDocuments: async () => {
     const response = await api.get('/portal/documents');
     return response.data;
-  }
+  },
+
+  // Treatment Plans
+  getTreatmentPlans: async () => {
+    const response = await api.get('/portal/treatment-plans');
+    return response.data;
+  },
+  getTreatmentPlanById: async (id: string) => {
+    const response = await api.get(`/portal/treatment-plans/${id}`);
+    return response.data;
+  },
+  acceptTreatmentPlan: async (id: string) => {
+    const response = await api.post(`/portal/treatment-plans/${id}/accept`);
+    return response.data;
+  },
+  rejectTreatmentPlan: async (id: string, reason?: string) => {
+    const response = await api.post(`/portal/treatment-plans/${id}/reject`, { reason });
+    return response.data;
+  },
+
+  // Payments
+  getPayments: async () => {
+    const response = await api.get('/portal/payments');
+    return response.data;
+  },
+  getPaymentsSummary: async () => {
+    const response = await api.get('/portal/payments/summary');
+    return response.data;
+  },
+
+  // Invoices
+  getInvoices: async () => {
+    const response = await api.get('/portal/invoices');
+    return response.data;
+  },
+  getInvoiceById: async (id: string) => {
+    const response = await api.get(`/portal/invoices/${id}`);
+    return response.data;
+  },
+
+  // Pre-Visit Forms
+  getPreVisitForms: async () => {
+    const response = await api.get('/portal/pre-visit-forms');
+    return response.data;
+  },
+  getPreVisitFormForAppointment: async (appointmentId: string) => {
+    const response = await api.get(`/portal/appointments/${appointmentId}/pre-visit-form`);
+    return response.data;
+  },
+  submitPreVisitForm: async (appointmentId: string, data: any) => {
+    const response = await api.post(`/portal/appointments/${appointmentId}/pre-visit-form`, data);
+    return response.data;
+  },
+
+  // Insurance Documents
+  getInsuranceDocuments: async () => {
+    const response = await api.get('/portal/insurance-documents');
+    return response.data;
+  },
+  uploadInsuranceDocument: async (formData: FormData) => {
+    const response = await api.post('/portal/insurance-documents', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+  deleteInsuranceDocument: async (id: string) => {
+    const response = await api.delete(`/portal/insurance-documents/${id}`);
+    return response.data;
+  },
+
+  // Profile
+  getProfile: async () => {
+    const response = await api.get('/portal/profile');
+    return response.data;
+  },
+  updateProfile: async (data: { phone?: string; emergencyContactName?: string; emergencyContactPhone?: string }) => {
+    const response = await api.patch('/portal/profile', data);
+    return response.data;
+  },
 };
 
 // Clinics API

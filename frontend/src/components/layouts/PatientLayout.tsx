@@ -10,6 +10,9 @@ import {
     Menu,
     X,
     User,
+    ClipboardList,
+    DollarSign,
+    Shield,
 } from 'lucide-react';
 
 interface PatientLayoutProps {
@@ -34,14 +37,29 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
             path: '/patient/appointments',
         },
         {
+            name: 'Mis Tratamientos',
+            icon: ClipboardList,
+            path: '/patient/treatments',
+        },
+        {
             name: 'Facturas',
             icon: CreditCard,
             path: '/patient/invoices',
         },
         {
+            name: 'Mis Pagos',
+            icon: DollarSign,
+            path: '/patient/payments',
+        },
+        {
             name: 'Documentos',
             icon: FileText,
             path: '/patient/documents',
+        },
+        {
+            name: 'Seguro',
+            icon: Shield,
+            path: '/patient/insurance',
         },
     ];
 

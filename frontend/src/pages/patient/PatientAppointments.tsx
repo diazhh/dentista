@@ -1,17 +1,24 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { patientPortalAPI } from '../../services/api';
-import { Calendar, Clock, MapPin, Plus } from 'lucide-react';
+import { Calendar, Clock, MapPin, Plus, ClipboardCheck, CheckCircle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function PatientAppointments() {
+    const navigate = useNavigate();
     const { data: appointments, isLoading } = useQuery({
         queryKey: ['patientAppointments'],
         queryFn: patientPortalAPI.getAppointments,
     });
 
     const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
+
+    const getPreVisitFormStatus = (apt: any) => {
+        if (!apt.preVisitForm) return 'pending';
+        return apt.preVisitForm.status === 'SUBMITTED' ? 'submitted' : 'pending';
+    };
 
     if (isLoading) {
         return <div className="flex justify-center p-8">Cargando citas...</div>;
@@ -91,7 +98,22 @@ export default function PatientAppointments() {
 
                                     {/* Actions */}
                                     {!isPast && apt.status === 'SCHEDULED' && (
-                                        <div className="flex-shrink-0">
+                                        <div className="flex-shrink-0 flex items-center gap-2">
+                                            {/* Pre-Visit Form Button */}
+                                            {getPreVisitFormStatus(apt) === 'submitted' ? (
+                                                <span className="flex items-center gap-1 px-3 py-2 bg-green-50 text-green-700 text-sm font-medium rounded-lg">
+                                                    <CheckCircle className="w-4 h-4" />
+                                                    Formulario enviado
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    onClick={() => navigate(`/patient/appointments/${apt.id}/pre-visit-form`)}
+                                                    className="flex items-center gap-1 px-3 py-2 bg-blue-50 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-100 transition-colors"
+                                                >
+                                                    <ClipboardCheck className="w-4 h-4" />
+                                                    Formulario Pre-Visita
+                                                </button>
+                                            )}
                                             <button className="text-red-600 hover:text-red-700 text-sm font-medium hover:bg-red-50 px-3 py-2 rounded-lg transition-colors">
                                                 Cancelar
                                             </button>
