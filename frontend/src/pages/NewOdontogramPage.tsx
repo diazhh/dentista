@@ -70,7 +70,7 @@ export default function NewOdontogramPage() {
 
   const handleToothClick = (toothNumber: number) => {
     setSelectedTooth(toothNumber);
-    
+
     // Si el diente ya existe, no hacer nada (se editará en el formulario)
     const existingTooth = teeth.find(t => t.toothNumber === toothNumber);
     if (!existingTooth) {
@@ -85,8 +85,8 @@ export default function NewOdontogramPage() {
   };
 
   const updateToothData = (toothNumber: number, field: keyof ToothData, value: any) => {
-    setTeeth(teeth.map(tooth => 
-      tooth.toothNumber === toothNumber 
+    setTeeth(teeth.map(tooth =>
+      tooth.toothNumber === toothNumber
         ? { ...tooth, [field]: value }
         : tooth
     ));
@@ -112,7 +112,7 @@ export default function NewOdontogramPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedPatient) {
       alert('Por favor seleccione un paciente');
       return;
@@ -151,34 +151,34 @@ export default function NewOdontogramPage() {
   const selectedToothData = selectedTooth ? teeth.find(t => t.toothNumber === selectedTooth) : null;
 
   return (
-    <div className="space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <button
           onClick={() => navigate('/odontograms')}
           className="text-gray-600 hover:text-gray-900"
         >
-          <ArrowLeft className="h-6 w-6" />
+          <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Nuevo Odontograma</h1>
-          <p className="text-gray-600">Crear registro dental del paciente</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Nuevo Odontograma</h1>
+          <p className="text-sm sm:text-base text-gray-600">Crear registro dental del paciente</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Patient Selection */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Información del Paciente</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Información del Paciente</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Paciente *
               </label>
               <select
                 value={selectedPatient}
                 onChange={(e) => setSelectedPatient(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 required
               >
                 <option value="">Seleccionar paciente...</option>
@@ -190,14 +190,14 @@ export default function NewOdontogramPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Notas Generales
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 placeholder="Observaciones generales del examen..."
               />
             </div>
@@ -205,46 +205,48 @@ export default function NewOdontogramPage() {
         </div>
 
         {/* Odontogram Chart */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white p-3 sm:p-6 rounded-lg shadow">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
             Odontograma Interactivo
           </h2>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
             Haz clic en un diente para agregar o editar su información
           </p>
-          <OdontogramChart
-            teeth={teeth}
-            onToothClick={handleToothClick}
-            editable={true}
-          />
+          <div className="overflow-x-auto">
+            <OdontogramChart
+              teeth={teeth}
+              onToothClick={handleToothClick}
+              editable={true}
+            />
+          </div>
         </div>
 
         {/* Tooth Editor */}
         {selectedToothData && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900">
                 Editar Diente #{selectedToothData.toothNumber}
               </h2>
               <button
                 type="button"
                 onClick={() => removeTooth(selectedToothData.toothNumber)}
-                className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                className="text-red-600 hover:text-red-800 flex items-center gap-1 text-sm"
               >
                 <Trash2 className="h-4 w-4" />
                 Eliminar
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                   Condición
                 </label>
                 <select
                   value={selectedToothData.condition}
                   onChange={(e) => updateToothData(selectedToothData.toothNumber, 'condition', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 >
                   {TOOTH_CONDITIONS.map((condition) => (
                     <option key={condition.value} value={condition.value}>
@@ -255,10 +257,10 @@ export default function NewOdontogramPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                   Superficies Afectadas
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {TOOTH_SURFACES.map((surface) => (
                     <label
                       key={surface.value}
@@ -270,21 +272,21 @@ export default function NewOdontogramPage() {
                         onChange={() => toggleSurface(selectedToothData.toothNumber, surface.value)}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-gray-700">{surface.label}</span>
+                      <span className="text-xs sm:text-sm text-gray-700">{surface.label}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="lg:col-span-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                   Notas del Diente
                 </label>
                 <textarea
                   value={selectedToothData.notes}
                   onChange={(e) => updateToothData(selectedToothData.toothNumber, 'notes', e.target.value)}
                   rows={2}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="Observaciones específicas de este diente..."
                 />
               </div>
@@ -294,17 +296,17 @@ export default function NewOdontogramPage() {
 
         {/* Teeth Summary */}
         {teeth.length > 0 && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
               Resumen de Dientes Registrados ({teeth.length})
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
               {teeth.map((tooth) => (
                 <button
                   key={tooth.toothNumber}
                   type="button"
                   onClick={() => setSelectedTooth(tooth.toothNumber)}
-                  className={`p-2 rounded border text-sm ${
+                  className={`p-2 rounded border text-xs sm:text-sm ${
                     selectedTooth === tooth.toothNumber
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-300 hover:border-blue-300'
@@ -321,20 +323,20 @@ export default function NewOdontogramPage() {
         )}
 
         {/* Actions */}
-        <div className="flex justify-end gap-4">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
           <button
             type="button"
             onClick={() => navigate('/odontograms')}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={saving || !selectedPatient}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-2"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <Save className="h-5 w-5" />
+            <Save className="h-4 w-4 sm:h-5 sm:w-5" />
             {saving ? 'Guardando...' : 'Guardar Odontograma'}
           </button>
         </div>

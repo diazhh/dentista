@@ -194,7 +194,7 @@ export default function PermissionsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
+      <div className="p-3 sm:p-6">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
           <div className="h-64 bg-gray-200 rounded"></div>
@@ -204,35 +204,38 @@ export default function PermissionsPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Permissions</h1>
-        <p className="text-gray-600 mt-1">
-          Manage what each staff member can access and do
-        </p>
+    <div className="p-3 sm:p-6">
+      <div className="mb-6 sm:mb-8 flex items-center gap-3">
+        <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Permissions</h1>
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
+            Manage what each staff member can access and do
+          </p>
+        </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Staff List */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow">
-            <div className="p-4 border-b">
-              <h2 className="font-semibold flex items-center gap-2">
-                <Users className="w-5 h-5" />
+            <div className="p-3 sm:p-4 border-b">
+              <h2 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                 Staff Members
               </h2>
             </div>
-            <div className="divide-y max-h-[600px] overflow-y-auto">
+            <div className="divide-y max-h-[400px] lg:max-h-[600px] overflow-y-auto">
               {staffMembers?.map((member: StaffMember) => (
                 <button
                   key={member.id}
                   onClick={() => selectMember(member)}
-                  className={`w-full p-4 text-left hover:bg-gray-50 transition ${
+                  className={`w-full p-3 sm:p-4 text-left hover:bg-gray-50 transition ${
                     selectedMember?.id === member.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
                   }`}
                 >
-                  <p className="font-medium text-gray-900">{member.user.name}</p>
-                  <p className="text-sm text-gray-500">{member.user.email}</p>
+                  <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{member.user.name}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 truncate">{member.user.email}</p>
                   <span
                     className={`inline-block mt-2 text-xs px-2 py-1 rounded-full ${getRoleBadgeColor(
                       member.role
@@ -243,9 +246,9 @@ export default function PermissionsPage() {
                 </button>
               ))}
               {(!staffMembers || staffMembers.length === 0) && (
-                <div className="p-8 text-center text-gray-500">
-                  <Users className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                  <p>No staff members found</p>
+                <div className="p-6 sm:p-8 text-center text-gray-500">
+                  <Users className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 text-gray-300" />
+                  <p className="text-sm sm:text-base">No staff members found</p>
                 </div>
               )}
             </div>
@@ -256,14 +259,14 @@ export default function PermissionsPage() {
         <div className="lg:col-span-2">
           {selectedMember ? (
             <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold">{selectedMember.user.name}</h2>
-                    <p className="text-gray-500">{selectedMember.user.email}</p>
+              <div className="p-4 sm:p-6 border-b">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="text-base sm:text-lg font-semibold truncate">{selectedMember.user.name}</h2>
+                    <p className="text-gray-500 text-xs sm:text-sm truncate">{selectedMember.user.email}</p>
                   </div>
                   <span
-                    className={`text-sm px-3 py-1 rounded-full ${getRoleBadgeColor(
+                    className={`self-start sm:self-auto text-xs sm:text-sm px-3 py-1 rounded-full flex-shrink-0 ${getRoleBadgeColor(
                       selectedMember.role
                     )}`}
                   >
@@ -272,10 +275,10 @@ export default function PermissionsPage() {
                 </div>
               </div>
 
-              <div className="p-6 space-y-4">
-                <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
-                  <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-blue-700">
+              <div className="p-3 sm:p-6 space-y-3 sm:space-y-4">
+                <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-blue-50 rounded-lg">
+                  <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                  <div className="text-xs sm:text-sm text-blue-700">
                     <p className="font-medium">Custom Permissions</p>
                     <p>
                       Override the default permissions for this role. Unchecked permissions will be
@@ -297,15 +300,15 @@ export default function PermissionsPage() {
                     <div key={groupKey} className="border rounded-lg overflow-hidden">
                       <button
                         onClick={() => toggleGroup(groupKey)}
-                        className="w-full p-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition"
+                        className="w-full p-3 sm:p-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleGroupPermissions(groupKey);
                             }}
-                            className={`w-5 h-5 rounded border flex items-center justify-center transition ${
+                            className={`w-4 h-4 sm:w-5 sm:h-5 rounded border flex items-center justify-center transition flex-shrink-0 ${
                               allSelected
                                 ? 'bg-blue-600 border-blue-600 text-white'
                                 : someSelected
@@ -313,33 +316,33 @@ export default function PermissionsPage() {
                                 : 'border-gray-300'
                             }`}
                           >
-                            {allSelected && <Check className="w-3 h-3" />}
-                            {someSelected && <div className="w-2 h-2 bg-blue-600 rounded-sm" />}
+                            {allSelected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
+                            {someSelected && <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-600 rounded-sm" />}
                           </button>
-                          <div className="text-left">
-                            <p className="font-medium">{group.label}</p>
-                            <p className="text-sm text-gray-500">{group.description}</p>
+                          <div className="text-left min-w-0">
+                            <p className="font-medium text-sm sm:text-base">{group.label}</p>
+                            <p className="text-xs sm:text-sm text-gray-500 truncate hidden sm:block">{group.description}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500">
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-xs sm:text-sm text-gray-500">
                             {selectedCount}/{groupPermissions.length}
                           </span>
                           {isExpanded ? (
-                            <ChevronUp className="w-5 h-5 text-gray-400" />
+                            <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                           ) : (
-                            <ChevronDown className="w-5 h-5 text-gray-400" />
+                            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                           )}
                         </div>
                       </button>
                       {isExpanded && (
-                        <div className="p-4 grid sm:grid-cols-2 gap-2">
+                        <div className="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {group.permissions.map((permission) => {
                             const isChecked = editedPermissions.includes(permission.key);
                             return (
                               <label
                                 key={permission.key}
-                                className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
+                                className="flex items-center gap-2 sm:gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
                               >
                                 <input
                                   type="checkbox"
@@ -347,7 +350,7 @@ export default function PermissionsPage() {
                                   onChange={() => togglePermission(permission.key)}
                                   className="w-4 h-4 text-blue-600 rounded"
                                 />
-                                <span className="text-sm">{permission.label}</span>
+                                <span className="text-xs sm:text-sm">{permission.label}</span>
                               </label>
                             );
                           })}
@@ -358,10 +361,10 @@ export default function PermissionsPage() {
                 })}
               </div>
 
-              <div className="p-6 border-t flex justify-end gap-3">
+              <div className="p-4 sm:p-6 border-t flex flex-col-reverse sm:flex-row justify-end gap-3">
                 <button
                   onClick={() => setSelectedMember(null)}
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition text-sm sm:text-base"
                 >
                   Cancel
                 </button>
@@ -373,7 +376,7 @@ export default function PermissionsPage() {
                     })
                   }
                   disabled={updatePermissionsMutation.isPending}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
                   <Shield className="w-4 h-4" />
                   {updatePermissionsMutation.isPending ? 'Saving...' : 'Save Permissions'}
@@ -381,12 +384,12 @@ export default function PermissionsPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow p-12 text-center">
-              <Shield className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <div className="bg-white rounded-lg shadow p-8 sm:p-12 text-center">
+              <Shield className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
                 Select a staff member
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-500 text-sm sm:text-base">
                 Choose a staff member from the list to view and edit their permissions
               </p>
             </div>

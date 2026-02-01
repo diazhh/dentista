@@ -38,7 +38,7 @@ export default function DocumentsListPage() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploading, setUploading] = useState(false);
-  
+
   const [uploadData, setUploadData] = useState({
     patientId: '',
     type: 'OTHER',
@@ -154,7 +154,7 @@ export default function DocumentsListPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Está seguro de que desea eliminar este documento?')) return;
+    if (!confirm('Esta seguro de que desea eliminar este documento?')) return;
 
     try {
       const token = localStorage.getItem('token');
@@ -181,10 +181,10 @@ export default function DocumentsListPage() {
     };
 
     const labels: Record<string, string> = {
-      XRAY: 'Radiografía',
+      XRAY: 'Radiografia',
       PHOTO: 'Foto',
       CONSENT_FORM: 'Consentimiento',
-      MEDICAL_RECORD: 'Historia Clínica',
+      MEDICAL_RECORD: 'Historia Clinica',
       PRESCRIPTION: 'Receta',
       INVOICE: 'Factura',
       INSURANCE_CLAIM: 'Reclamo Seguro',
@@ -217,47 +217,47 @@ export default function DocumentsListPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <FileText className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Documentos</h1>
+            <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Documentos</h1>
           </div>
           <button
             onClick={() => setShowUploadModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             Subir Documento
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col md:flex-row gap-3 sm:gap-4">
             <div className="flex-1 flex items-center gap-3">
-              <Search className="w-5 h-5 text-gray-400" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
               <input
                 type="text"
-                placeholder="Buscar por título, archivo o paciente..."
+                placeholder="Buscar por titulo, archivo o paciente..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               />
             </div>
 
             <div className="flex items-center gap-3">
-              <Filter className="w-5 h-5 text-gray-400" />
+              <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 md:flex-none px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="all">Todos los tipos</option>
-                <option value="XRAY">Radiografía</option>
+                <option value="XRAY">Radiografia</option>
                 <option value="PHOTO">Foto</option>
                 <option value="CONSENT_FORM">Consentimiento</option>
-                <option value="MEDICAL_RECORD">Historia Clínica</option>
+                <option value="MEDICAL_RECORD">Historia Clinica</option>
                 <option value="PRESCRIPTION">Receta</option>
                 <option value="INVOICE">Factura</option>
                 <option value="INSURANCE_CLAIM">Reclamo Seguro</option>
@@ -269,103 +269,161 @@ export default function DocumentsListPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : filteredDocuments.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">No se encontraron documentos</p>
+          <div className="bg-white rounded-lg shadow-sm p-8 sm:p-12 text-center">
+            <FileText className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 mb-4 text-sm sm:text-base">No se encontraron documentos</p>
             <button
               onClick={() => setShowUploadModal(true)}
-              className="text-blue-600 hover:underline"
+              className="text-blue-600 hover:underline text-sm sm:text-base"
             >
               Subir primer documento
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Título
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Paciente
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tipo
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Archivo
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tamaño
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fecha
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredDocuments.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{doc.title}</div>
-                        {doc.description && (
-                          <div className="text-sm text-gray-500">{doc.description}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {doc.patient?.firstName} {doc.patient?.lastName}
-                        </div>
-                        <div className="text-sm text-gray-500">{doc.patient?.documentId}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">{getTypeBadge(doc.type)}</td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">{doc.fileName}</div>
-                        <div className="text-xs text-gray-500">{doc.mimeType}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatFileSize(doc.fileSize)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {format(new Date(doc.createdAt), 'dd MMM yyyy', { locale: es })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleDownload(doc.id, doc.fileName)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            <Download className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(doc.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Titulo
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Paciente
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tipo
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Archivo
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tamano
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fecha
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredDocuments.map((doc) => (
+                      <tr key={doc.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-gray-900">{doc.title}</div>
+                          {doc.description && (
+                            <div className="text-sm text-gray-500">{doc.description}</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {doc.patient?.firstName} {doc.patient?.lastName}
+                          </div>
+                          <div className="text-sm text-gray-500">{doc.patient?.documentId}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">{getTypeBadge(doc.type)}</td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900">{doc.fileName}</div>
+                          <div className="text-xs text-gray-500">{doc.mimeType}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatFileSize(doc.fileSize)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {format(new Date(doc.createdAt), 'dd MMM yyyy', { locale: es })}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleDownload(doc.id, doc.fileName)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              <Download className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(doc.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-3">
+              {filteredDocuments.map((doc) => (
+                <div key={doc.id} className="bg-white rounded-lg shadow-sm p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-medium text-gray-900 truncate">{doc.title}</h3>
+                      {doc.description && (
+                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{doc.description}</p>
+                      )}
+                    </div>
+                    {getTypeBadge(doc.type)}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+                    <div>
+                      <p className="text-xs text-gray-500">Paciente</p>
+                      <p className="font-medium truncate">
+                        {doc.patient?.firstName} {doc.patient?.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500">{doc.patient?.documentId}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Fecha</p>
+                      <p className="font-medium">
+                        {format(new Date(doc.createdAt), 'dd MMM yyyy', { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                    <span className="truncate max-w-[60%]">{doc.fileName}</span>
+                    <span>{formatFileSize(doc.fileSize)}</span>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+                    <button
+                      onClick={() => handleDownload(doc.id, doc.fileName)}
+                      className="text-sm text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                    >
+                      <Download className="w-4 h-4" />
+                      Descargar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(doc.id)}
+                      className="text-sm text-red-600 hover:text-red-900 flex items-center gap-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {showUploadModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Subir Documento</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Subir Documento</h3>
                 <button
                   onClick={() => setShowUploadModal(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -376,14 +434,14 @@ export default function DocumentsListPage() {
 
               <form onSubmit={handleUpload} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Paciente *
                   </label>
                   <select
                     value={uploadData.patientId}
                     onChange={(e) => setUploadData({ ...uploadData, patientId: e.target.value })}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   >
                     <option value="">Seleccione un paciente</option>
                     {patients.map((patient) => (
@@ -395,19 +453,19 @@ export default function DocumentsListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Tipo de Documento *
                   </label>
                   <select
                     value={uploadData.type}
                     onChange={(e) => setUploadData({ ...uploadData, type: e.target.value })}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   >
-                    <option value="XRAY">Radiografía</option>
+                    <option value="XRAY">Radiografia</option>
                     <option value="PHOTO">Foto</option>
                     <option value="CONSENT_FORM">Consentimiento</option>
-                    <option value="MEDICAL_RECORD">Historia Clínica</option>
+                    <option value="MEDICAL_RECORD">Historia Clinica</option>
                     <option value="PRESCRIPTION">Receta</option>
                     <option value="INVOICE">Factura</option>
                     <option value="INSURANCE_CLAIM">Reclamo Seguro</option>
@@ -416,34 +474,34 @@ export default function DocumentsListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Título *
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                    Titulo *
                   </label>
                   <input
                     type="text"
                     value={uploadData.title}
                     onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
                     required
-                    placeholder="Ej: Radiografía panorámica"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Ej: Radiografia panoramica"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Descripción
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                    Descripcion
                   </label>
                   <textarea
                     value={uploadData.description}
                     onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
                     rows={3}
-                    placeholder="Descripción adicional del documento..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Descripcion adicional del documento..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Etiquetas (separadas por comas)
                   </label>
                   <input
@@ -451,41 +509,41 @@ export default function DocumentsListPage() {
                     value={uploadData.tags}
                     onChange={(e) => setUploadData({ ...uploadData, tags: e.target.value })}
                     placeholder="Ej: urgente, seguimiento, control"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Archivo * (Máx. 10MB)
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                    Archivo * (Max. 10MB)
                   </label>
                   <input
                     type="file"
                     onChange={(e) => setUploadData({ ...uploadData, file: e.target.files?.[0] || null })}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   />
                   {uploadData.file && (
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
                       {uploadData.file.name} ({formatFileSize(uploadData.file.size)})
                     </p>
                   )}
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4">
+                <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
                   <button
                     type="button"
                     onClick={() => setShowUploadModal(false)}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={uploading}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 text-sm sm:text-base"
                   >
-                    <Upload className="w-5 h-5" />
+                    <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
                     {uploading ? 'Subiendo...' : 'Subir Documento'}
                   </button>
                 </div>

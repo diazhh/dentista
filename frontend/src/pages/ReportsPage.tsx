@@ -24,6 +24,7 @@ import {
   Download,
   TrendingUp,
   TrendingDown,
+  BarChart3,
 } from 'lucide-react';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
@@ -113,76 +114,81 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
-        <p className="text-gray-600 mt-1">Track your clinic's performance</p>
+    <div className="p-3 sm:p-6">
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Reports & Analytics</h1>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">Track your clinic's performance</p>
+          </div>
+        </div>
       </div>
 
       {/* KPI Cards */}
       {dashboardData && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Monthly Revenue</p>
-                <p className="text-2xl font-bold">{formatCurrency(dashboardData.revenue?.currentMonth || 0)}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm text-gray-500">Monthly Revenue</p>
+                <p className="text-lg sm:text-2xl font-bold truncate">{formatCurrency(dashboardData.revenue?.currentMonth || 0)}</p>
                 <div className="flex items-center mt-1">
                   {parseFloat(dashboardData.revenue?.growth || 0) >= 0 ? (
-                    <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 mr-1 flex-shrink-0" />
                   ) : (
-                    <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
+                    <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 mr-1 flex-shrink-0" />
                   )}
-                  <span className={`text-sm ${parseFloat(dashboardData.revenue?.growth || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`text-xs sm:text-sm ${parseFloat(dashboardData.revenue?.growth || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {dashboardData.revenue?.growth || 0}%
                   </span>
-                  <span className="text-gray-500 text-sm ml-1">vs last month</span>
+                  <span className="text-gray-500 text-xs sm:text-sm ml-1 hidden sm:inline">vs last month</span>
                 </div>
               </div>
-              <div className="p-3 bg-green-100 rounded-lg">
-                <DollarSign className="w-6 h-6 text-green-600" />
+              <div className="p-2 sm:p-3 bg-green-100 rounded-lg flex-shrink-0 ml-2">
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Today's Appointments</p>
-                <p className="text-2xl font-bold">{dashboardData.appointments?.today || 0}</p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-xs sm:text-sm text-gray-500">Today's Appointments</p>
+                <p className="text-lg sm:text-2xl font-bold">{dashboardData.appointments?.today || 0}</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">
                   {dashboardData.appointments?.thisMonth || 0} this month
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Calendar className="w-6 h-6 text-blue-600" />
+              <div className="p-2 sm:p-3 bg-blue-100 rounded-lg flex-shrink-0 ml-2">
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Active Patients</p>
-                <p className="text-2xl font-bold">{dashboardData.patients?.active || 0}</p>
+                <p className="text-xs sm:text-sm text-gray-500">Active Patients</p>
+                <p className="text-lg sm:text-2xl font-bold">{dashboardData.patients?.active || 0}</p>
               </div>
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <Users className="w-6 h-6 text-purple-600" />
+              <div className="p-2 sm:p-3 bg-purple-100 rounded-lg flex-shrink-0 ml-2">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Pending Invoices</p>
-                <p className="text-2xl font-bold">{dashboardData.invoices?.pendingCount || 0}</p>
-                <p className="text-sm text-gray-500 mt-1">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm text-gray-500">Pending Invoices</p>
+                <p className="text-lg sm:text-2xl font-bold">{dashboardData.invoices?.pendingCount || 0}</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 truncate">
                   {formatCurrency(dashboardData.invoices?.pendingAmount || 0)}
                 </p>
               </div>
-              <div className="p-3 bg-orange-100 rounded-lg">
-                <FileText className="w-6 h-6 text-orange-600" />
+              <div className="p-2 sm:p-3 bg-orange-100 rounded-lg flex-shrink-0 ml-2">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
               </div>
             </div>
           </div>
@@ -190,39 +196,39 @@ export default function ReportsPage() {
       )}
 
       {/* Date Range & Export */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="p-4 border-b flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div>
-              <label className="block text-sm text-gray-500 mb-1">Start Date</label>
+      <div className="bg-white rounded-lg shadow mb-4 sm:mb-6">
+        <div className="p-3 sm:p-4 border-b flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <div className="w-full sm:w-auto">
+              <label className="block text-xs sm:text-sm text-gray-500 mb-1">Start Date</label>
               <input
                 type="date"
                 value={dateRange.startDate}
                 onChange={(e) => setDateRange((prev) => ({ ...prev, startDate: e.target.value }))}
-                className="border border-gray-300 rounded-lg px-3 py-2"
+                className="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base"
               />
             </div>
-            <div>
-              <label className="block text-sm text-gray-500 mb-1">End Date</label>
+            <div className="w-full sm:w-auto">
+              <label className="block text-xs sm:text-sm text-gray-500 mb-1">End Date</label>
               <input
                 type="date"
                 value={dateRange.endDate}
                 onChange={(e) => setDateRange((prev) => ({ ...prev, endDate: e.target.value }))}
-                className="border border-gray-300 rounded-lg px-3 py-2"
+                className="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base"
               />
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleExport('excel')}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm sm:text-base"
             >
               <Download className="w-4 h-4" />
               Excel
             </button>
             <button
               onClick={() => handleExport('pdf')}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm sm:text-base"
             >
               <Download className="w-4 h-4" />
               PDF
@@ -231,13 +237,13 @@ export default function ReportsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b">
-          <nav className="flex -mb-px">
+        <div className="border-b overflow-x-auto">
+          <nav className="flex -mb-px min-w-max">
             {(['financial', 'appointments', 'patients', 'treatments'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 text-sm font-medium border-b-2 transition ${
+                className={`px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium border-b-2 transition whitespace-nowrap ${
                   activeTab === tab
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -250,22 +256,23 @@ export default function ReportsPage() {
         </div>
 
         {/* Tab Content */}
-        <div className="p-6">
+        <div className="p-3 sm:p-6">
           {/* Financial Tab */}
           {activeTab === 'financial' && financialData && (
-            <div className="space-y-8">
-              <div className="grid lg:grid-cols-2 gap-6">
+            <div className="space-y-6 sm:space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <h3 className="font-semibold mb-4">Revenue by Day</h3>
-                  <div className="h-[300px]">
+                  <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Revenue by Day</h3>
+                  <div className="h-[250px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={financialData.dailyRevenue || []}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
                           dataKey="date"
                           tickFormatter={(value) => new Date(value).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                          tick={{ fontSize: 10 }}
                         />
-                        <YAxis tickFormatter={(value) => `$${value}`} />
+                        <YAxis tickFormatter={(value) => `$${value}`} tick={{ fontSize: 10 }} />
                         <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                         <Line type="monotone" dataKey="total" stroke="#3B82F6" strokeWidth={2} dot={false} />
                       </LineChart>
@@ -273,8 +280,8 @@ export default function ReportsPage() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-4">Invoices by Status</h3>
-                  <div className="h-[300px]">
+                  <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Invoices by Status</h3>
+                  <div className="h-[250px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -283,7 +290,7 @@ export default function ReportsPage() {
                           nameKey="status"
                           cx="50%"
                           cy="50%"
-                          outerRadius={100}
+                          outerRadius={80}
                           label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                         >
                           {(financialData.invoicesByStatus || []).map((entry: any, index: number) => (
@@ -291,7 +298,7 @@ export default function ReportsPage() {
                           ))}
                         </Pie>
                         <Tooltip />
-                        <Legend />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -299,13 +306,13 @@ export default function ReportsPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-4">Payments by Method</h3>
-                <div className="h-[300px]">
+                <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Payments by Method</h3>
+                <div className="h-[250px] sm:h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={financialData.paymentsByMethod || []}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="method" />
-                      <YAxis tickFormatter={(value) => `$${value}`} />
+                      <XAxis dataKey="method" tick={{ fontSize: 10 }} />
+                      <YAxis tickFormatter={(value) => `$${value}`} tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                       <Bar dataKey="total" fill="#3B82F6" radius={[4, 4, 0, 0]} />
                     </BarChart>
@@ -317,11 +324,11 @@ export default function ReportsPage() {
 
           {/* Appointments Tab */}
           {activeTab === 'appointments' && appointmentsData && (
-            <div className="space-y-8">
-              <div className="grid lg:grid-cols-2 gap-6">
+            <div className="space-y-6 sm:space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <h3 className="font-semibold mb-4">Appointments by Status</h3>
-                  <div className="h-[300px]">
+                  <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Appointments by Status</h3>
+                  <div className="h-[250px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -330,7 +337,7 @@ export default function ReportsPage() {
                           nameKey="status"
                           cx="50%"
                           cy="50%"
-                          outerRadius={100}
+                          outerRadius={80}
                           label
                         >
                           {(appointmentsData.byStatus || []).map((entry: any, index: number) => (
@@ -338,19 +345,19 @@ export default function ReportsPage() {
                           ))}
                         </Pie>
                         <Tooltip />
-                        <Legend />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-4">Top Procedures</h3>
-                  <div className="h-[300px]">
+                  <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Top Procedures</h3>
+                  <div className="h-[250px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={appointmentsData.byProcedure || []} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" />
-                        <YAxis dataKey="procedure" type="category" width={150} />
+                        <XAxis type="number" tick={{ fontSize: 10 }} />
+                        <YAxis dataKey="procedure" type="category" width={100} tick={{ fontSize: 10 }} />
                         <Tooltip />
                         <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} />
                       </BarChart>
@@ -360,16 +367,17 @@ export default function ReportsPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-4">Daily Appointments</h3>
-                <div className="h-[300px]">
+                <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Daily Appointments</h3>
+                <div className="h-[250px] sm:h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={appointmentsData.dailyAppointments || []}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="date"
                         tickFormatter={(value) => new Date(value).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                        tick={{ fontSize: 10 }}
                       />
-                      <YAxis />
+                      <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip />
                       <Line type="monotone" dataKey="count" stroke="#10B981" strokeWidth={2} dot={false} />
                     </LineChart>
@@ -378,22 +386,22 @@ export default function ReportsPage() {
               </div>
 
               {/* Summary Stats */}
-              <div className="grid sm:grid-cols-4 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Total</p>
-                  <p className="text-2xl font-bold">{appointmentsData.summary?.total || 0}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">Total</p>
+                  <p className="text-lg sm:text-2xl font-bold">{appointmentsData.summary?.total || 0}</p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Completion Rate</p>
-                  <p className="text-2xl font-bold text-green-600">{appointmentsData.summary?.completionRate || 0}%</p>
+                <div className="bg-green-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">Completion Rate</p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-600">{appointmentsData.summary?.completionRate || 0}%</p>
                 </div>
-                <div className="bg-red-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">No-Show Rate</p>
-                  <p className="text-2xl font-bold text-red-600">{appointmentsData.summary?.noShowRate || 0}%</p>
+                <div className="bg-red-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">No-Show Rate</p>
+                  <p className="text-lg sm:text-2xl font-bold text-red-600">{appointmentsData.summary?.noShowRate || 0}%</p>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Avg Duration</p>
-                  <p className="text-2xl font-bold text-blue-600">{appointmentsData.summary?.avgDuration || 0} min</p>
+                <div className="bg-blue-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">Avg Duration</p>
+                  <p className="text-lg sm:text-2xl font-bold text-blue-600">{appointmentsData.summary?.avgDuration || 0} min</p>
                 </div>
               </div>
             </div>
@@ -401,16 +409,16 @@ export default function ReportsPage() {
 
           {/* Patients Tab */}
           {activeTab === 'patients' && patientsData && (
-            <div className="space-y-8">
-              <div className="grid lg:grid-cols-2 gap-6">
+            <div className="space-y-6 sm:space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <h3 className="font-semibold mb-4">Patients by Age Group</h3>
-                  <div className="h-[300px]">
+                  <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Patients by Age Group</h3>
+                  <div className="h-[250px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={patientsData.byAgeGroup || []}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="group" />
-                        <YAxis />
+                        <XAxis dataKey="group" tick={{ fontSize: 10 }} />
+                        <YAxis tick={{ fontSize: 10 }} />
                         <Tooltip />
                         <Bar dataKey="count" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
                       </BarChart>
@@ -418,8 +426,8 @@ export default function ReportsPage() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-4">Patients by Gender</h3>
-                  <div className="h-[300px]">
+                  <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Patients by Gender</h3>
+                  <div className="h-[250px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -428,7 +436,7 @@ export default function ReportsPage() {
                           nameKey="gender"
                           cx="50%"
                           cy="50%"
-                          outerRadius={100}
+                          outerRadius={80}
                           label
                         >
                           {(patientsData.byGender || []).map((entry: any, index: number) => (
@@ -436,7 +444,7 @@ export default function ReportsPage() {
                           ))}
                         </Pie>
                         <Tooltip />
-                        <Legend />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -444,22 +452,22 @@ export default function ReportsPage() {
               </div>
 
               {/* Summary Stats */}
-              <div className="grid sm:grid-cols-4 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Total Active</p>
-                  <p className="text-2xl font-bold">{patientsData.summary?.totalActive || 0}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">Total Active</p>
+                  <p className="text-lg sm:text-2xl font-bold">{patientsData.summary?.totalActive || 0}</p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">New This Period</p>
-                  <p className="text-2xl font-bold text-green-600">{patientsData.summary?.newInPeriod || 0}</p>
+                <div className="bg-green-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">New This Period</p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-600">{patientsData.summary?.newInPeriod || 0}</p>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Portal Enabled</p>
-                  <p className="text-2xl font-bold text-blue-600">{patientsData.summary?.portalEnabled || 0}</p>
+                <div className="bg-blue-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">Portal Enabled</p>
+                  <p className="text-lg sm:text-2xl font-bold text-blue-600">{patientsData.summary?.portalEnabled || 0}</p>
                 </div>
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Portal Adoption</p>
-                  <p className="text-2xl font-bold text-purple-600">{patientsData.summary?.portalAdoptionRate || 0}%</p>
+                <div className="bg-purple-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">Portal Adoption</p>
+                  <p className="text-lg sm:text-2xl font-bold text-purple-600">{patientsData.summary?.portalAdoptionRate || 0}%</p>
                 </div>
               </div>
             </div>
@@ -467,11 +475,11 @@ export default function ReportsPage() {
 
           {/* Treatments Tab */}
           {activeTab === 'treatments' && treatmentsData && (
-            <div className="space-y-8">
-              <div className="grid lg:grid-cols-2 gap-6">
+            <div className="space-y-6 sm:space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <h3 className="font-semibold mb-4">Treatment Plans by Status</h3>
-                  <div className="h-[300px]">
+                  <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Treatment Plans by Status</h3>
+                  <div className="h-[250px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -480,7 +488,7 @@ export default function ReportsPage() {
                           nameKey="status"
                           cx="50%"
                           cy="50%"
-                          outerRadius={100}
+                          outerRadius={80}
                           label
                         >
                           {(treatmentsData.byStatus || []).map((entry: any, index: number) => (
@@ -488,19 +496,19 @@ export default function ReportsPage() {
                           ))}
                         </Pie>
                         <Tooltip />
-                        <Legend />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-4">Value by Status</h3>
-                  <div className="h-[300px]">
+                  <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Value by Status</h3>
+                  <div className="h-[250px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={treatmentsData.byStatus || []}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="status" />
-                        <YAxis tickFormatter={(value) => `$${value}`} />
+                        <XAxis dataKey="status" tick={{ fontSize: 10 }} />
+                        <YAxis tickFormatter={(value) => `$${value}`} tick={{ fontSize: 10 }} />
                         <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                         <Bar dataKey="totalValue" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                       </BarChart>
@@ -510,22 +518,22 @@ export default function ReportsPage() {
               </div>
 
               {/* Summary Stats */}
-              <div className="grid sm:grid-cols-4 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Total Plans</p>
-                  <p className="text-2xl font-bold">{treatmentsData.summary?.total || 0}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">Total Plans</p>
+                  <p className="text-lg sm:text-2xl font-bold">{treatmentsData.summary?.total || 0}</p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Acceptance Rate</p>
-                  <p className="text-2xl font-bold text-green-600">{treatmentsData.summary?.acceptanceRate || 0}%</p>
+                <div className="bg-green-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">Acceptance Rate</p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-600">{treatmentsData.summary?.acceptanceRate || 0}%</p>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">In Progress</p>
-                  <p className="text-2xl font-bold text-blue-600">{treatmentsData.summary?.inProgress || 0}</p>
+                <div className="bg-blue-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">In Progress</p>
+                  <p className="text-lg sm:text-2xl font-bold text-blue-600">{treatmentsData.summary?.inProgress || 0}</p>
                 </div>
-                <div className="bg-orange-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Total Value</p>
-                  <p className="text-2xl font-bold text-orange-600">{formatCurrency(treatmentsData.summary?.totalValue || 0)}</p>
+                <div className="bg-orange-50 rounded-lg p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-500">Total Value</p>
+                  <p className="text-base sm:text-2xl font-bold text-orange-600 truncate">{formatCurrency(treatmentsData.summary?.totalValue || 0)}</p>
                 </div>
               </div>
             </div>
