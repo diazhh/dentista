@@ -149,7 +149,7 @@ export default function AppointmentDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <button
@@ -159,75 +159,74 @@ export default function AppointmentDetailPage() {
             <ArrowLeft className="w-5 h-5" />
             Volver
           </button>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-8 h-8 text-blue-600" />
-              <h1 className="text-3xl font-bold text-gray-900">Detalle de Cita</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Detalle de Cita</h1>
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-2 px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors"
-              >
-                <Trash2 className="w-5 h-5" />
-                Cancelar Cita
-              </button>
-            </div>
+            <button
+              onClick={handleDelete}
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm sm:text-base"
+            >
+              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline">Cancelar Cita</span>
+              <span className="xs:hidden">Cancelar</span>
+            </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Información de la Cita</h2>
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-xl font-semibold text-gray-900">Información de la Cita</h2>
             {getStatusBadge(appointment.status)}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div className="space-y-4">
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-1">
-                  <User className="w-4 h-4" />
+                <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-500 mb-1">
+                  <User className="w-3 h-3 sm:w-4 sm:h-4" />
                   Paciente
                 </label>
-                <p className="text-lg font-medium text-gray-900">
+                <p className="text-base sm:text-lg font-medium text-gray-900">
                   {appointment.patient
                     ? `${appointment.patient.firstName} ${appointment.patient.lastName}`
                     : 'Sin paciente'}
                 </p>
                 {appointment.patient && (
                   <div className="mt-1 space-y-1">
-                    <p className="text-sm text-gray-600">Cédula: {appointment.patient.documentId}</p>
-                    <p className="text-sm text-gray-600">Teléfono: {appointment.patient.phone}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Cédula: {appointment.patient.documentId}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Teléfono: {appointment.patient.phone}</p>
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-1">
-                  <FileText className="w-4 h-4" />
+                <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-500 mb-1">
+                  <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                   Tipo de Cita
                 </label>
-                <p className="text-lg text-gray-900">{getTypeLabel(appointment.type)}</p>
+                <p className="text-base sm:text-lg text-gray-900">{getTypeLabel(appointment.type)}</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-1">
-                  <Calendar className="w-4 h-4" />
+                <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-500 mb-1">
+                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                   Fecha
                 </label>
-                <p className="text-lg text-gray-900">
+                <p className="text-base sm:text-lg text-gray-900">
                   {format(new Date(appointment.startTime), 'PPPP', { locale: es })}
                 </p>
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-1">
-                  <Clock className="w-4 h-4" />
+                <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-500 mb-1">
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                   Hora
                 </label>
-                <p className="text-lg text-gray-900">
+                <p className="text-base sm:text-lg text-gray-900">
                   {format(new Date(appointment.startTime), 'p', { locale: es })} -{' '}
                   {format(new Date(appointment.endTime), 'p', { locale: es })}
                 </p>
@@ -236,57 +235,58 @@ export default function AppointmentDetailPage() {
           </div>
 
           {appointment.notes && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-2">
-                <FileText className="w-4 h-4" />
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+              <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-500 mb-2">
+                <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                 Notas
               </label>
-              <p className="text-gray-900 whitespace-pre-wrap">{appointment.notes}</p>
+              <p className="text-sm sm:text-base text-gray-900 whitespace-pre-wrap">{appointment.notes}</p>
             </div>
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Cambiar Estado</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-900 mb-4">Cambiar Estado</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
             <button
               onClick={() => handleStatusChange('CONFIRMED')}
               disabled={appointment.status === 'CONFIRMED'}
-              className="flex items-center justify-center gap-2 px-4 py-3 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm"
             >
-              <CheckCircle className="w-5 h-5" />
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               Confirmar
             </button>
             <button
               onClick={() => handleStatusChange('IN_PROGRESS')}
               disabled={appointment.status === 'IN_PROGRESS'}
-              className="flex items-center justify-center gap-2 px-4 py-3 border border-amber-600 text-amber-600 rounded-lg hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 border border-amber-600 text-amber-600 rounded-lg hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm"
             >
-              <Clock className="w-5 h-5" />
-              En Progreso
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">En Progreso</span>
+              <span className="sm:hidden">Progreso</span>
             </button>
             <button
               onClick={() => handleStatusChange('COMPLETED')}
               disabled={appointment.status === 'COMPLETED'}
-              className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-600 text-gray-600 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 border border-gray-600 text-gray-600 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm"
             >
-              <CheckCircle className="w-5 h-5" />
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               Completar
             </button>
             <button
               onClick={() => handleStatusChange('CANCELLED')}
               disabled={appointment.status === 'CANCELLED'}
-              className="flex items-center justify-center gap-2 px-4 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm"
             >
-              <XCircle className="w-5 h-5" />
+              <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               Cancelar
             </button>
             <button
               onClick={() => handleStatusChange('NO_SHOW')}
               disabled={appointment.status === 'NO_SHOW'}
-              className="flex items-center justify-center gap-2 px-4 py-3 border border-red-700 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 border border-red-700 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm"
             >
-              <XCircle className="w-5 h-5" />
+              <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               No Asistió
             </button>
           </div>

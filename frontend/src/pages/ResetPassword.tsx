@@ -71,10 +71,10 @@ export default function ResetPassword() {
   // Loading state
   if (validating) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Validando enlace...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-3 sm:p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md text-center">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600 mx-auto mb-3 sm:mb-4"></div>
+          <p className="text-sm sm:text-base text-gray-600">Validando enlace...</p>
         </div>
       </div>
     );
@@ -83,26 +83,26 @@ export default function ResetPassword() {
   // Invalid or missing token
   if (!token || !isValidToken) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-red-600" />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-3 sm:p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md text-center">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Enlace Inválido</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Enlace Inválido</h2>
+          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
             Este enlace de recuperación no es válido o ha expirado. Los enlaces de recuperación son válidos por 1 hora.
           </p>
           <Link
             to="/forgot-password"
-            className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 w-full py-2 sm:py-3 px-3 sm:px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
             Solicitar nuevo enlace
           </Link>
           <Link
             to="/login"
-            className="inline-flex items-center justify-center gap-2 mt-4 text-sm text-gray-600 hover:text-blue-600"
+            className="inline-flex items-center justify-center gap-2 mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 hover:text-blue-600"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
             Volver al inicio de sesión
           </Link>
         </div>
@@ -113,18 +113,18 @@ export default function ResetPassword() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-green-600" />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-3 sm:p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md text-center">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Contraseña Actualizada</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Contraseña Actualizada</h2>
+          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
             Tu contraseña ha sido restablecida exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.
           </p>
           <button
             onClick={() => navigate('/login')}
-            className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 w-full py-2 sm:py-3 px-3 sm:px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
             Ir a iniciar sesión
           </button>
@@ -135,32 +135,32 @@ export default function ResetPassword() {
 
   // Reset form
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-3 sm:p-6">
+      <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-blue-600" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <Lock className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Nueva Contraseña</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Nueva Contraseña</h1>
           {maskedEmail && (
-            <p className="text-gray-600 mt-2">
+            <p className="text-sm sm:text-base text-gray-600 mt-2">
               Ingresa una nueva contraseña para <strong>{maskedEmail}</strong>
             </p>
           )}
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-start gap-2">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div className="p-2 sm:p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs sm:text-sm flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
               Nueva contraseña
             </label>
             <div className="relative">
@@ -169,7 +169,7 @@ export default function ResetPassword() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="Mínimo 8 caracteres"
                 required
                 minLength={8}
@@ -180,13 +180,13 @@ export default function ResetPassword() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
               </button>
             </div>
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="confirmPassword" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
               Confirmar contraseña
             </label>
             <div className="relative">
@@ -195,7 +195,7 @@ export default function ResetPassword() {
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="Repite la contraseña"
                 required
                 minLength={8}
@@ -206,13 +206,13 @@ export default function ResetPassword() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showConfirmPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
               </button>
             </div>
           </div>
 
           {/* Password requirements */}
-          <div className="text-sm text-gray-500">
+          <div className="text-xs sm:text-sm text-gray-500">
             <p className="font-medium mb-1">La contraseña debe:</p>
             <ul className="list-disc list-inside space-y-1">
               <li className={password.length >= 8 ? 'text-green-600' : ''}>
@@ -224,7 +224,7 @@ export default function ResetPassword() {
           <button
             type="submit"
             disabled={loading || password.length < 8 || password !== confirmPassword}
-            className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-2 sm:py-3 px-3 sm:px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -253,12 +253,12 @@ export default function ResetPassword() {
         </form>
 
         {/* Footer */}
-        <div className="mt-6 text-center">
+        <div className="mt-4 sm:mt-6 text-center">
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm text-gray-600 hover:text-blue-600 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
             Volver al inicio de sesión
           </Link>
         </div>

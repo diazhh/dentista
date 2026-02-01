@@ -77,10 +77,10 @@ export default function StaffListPage() {
       setShowInviteModal(false);
       setInviteForm({ email: '', name: '', role: 'ASSISTANT', permissions: [] });
       fetchStaff();
-      alert('Invitación enviada exitosamente');
+      alert('Invitacion enviada exitosamente');
     } catch (error: any) {
       console.error('Error inviting staff:', error);
-      alert(error.response?.data?.message || 'Error al enviar la invitación');
+      alert(error.response?.data?.message || 'Error al enviar la invitacion');
     }
   };
 
@@ -100,7 +100,7 @@ export default function StaffListPage() {
   };
 
   const handleRemove = async (id: string) => {
-    if (!confirm('¿Está seguro de que desea remover a este miembro del equipo?')) return;
+    if (!confirm('Esta seguro de que desea remover a este miembro del equipo?')) return;
 
     try {
       await staffAPI.remove(id);
@@ -188,33 +188,33 @@ export default function StaffListPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Users className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Equipo</h1>
+            <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Equipo</h1>
           </div>
           <button
             onClick={() => setShowInviteModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
-            <UserPlus className="w-5 h-5" />
+            <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" />
             Invitar Miembro
           </button>
         </div>
 
         {/* Search */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
-            <Search className="w-5 h-5 text-gray-400" />
+            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar por nombre, email o rol..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
             />
           </div>
         </div>
@@ -222,11 +222,12 @@ export default function StaffListPage() {
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
           <>
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white rounded-lg shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -326,20 +327,102 @@ export default function StaffListPage() {
               </div>
             </div>
 
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-3">
+              {filteredStaff.map((member) => (
+                <div key={member.id} className="bg-white rounded-lg shadow-sm p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-blue-600 font-medium">
+                          {member.user.name?.[0]?.toUpperCase() || member.user.email[0].toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {member.user.name || 'Sin nombre'}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate flex items-center gap-1">
+                          <Mail className="w-3 h-3 flex-shrink-0" />
+                          {member.user.email}
+                        </p>
+                      </div>
+                    </div>
+                    {getStatusBadge(member.status)}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+                    <div>
+                      <p className="text-xs text-gray-500">Rol</p>
+                      <p className="font-medium flex items-center gap-1">
+                        <Shield className="w-3 h-3 text-blue-500" />
+                        {getRoleLabel(member.role)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Fecha</p>
+                      <p className="font-medium">
+                        {member.acceptedAt
+                          ? new Date(member.acceptedAt).toLocaleDateString('es-ES')
+                          : new Date(member.invitedAt).toLocaleDateString('es-ES')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {member.permissions && member.permissions.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-1">Permisos</p>
+                      <div className="flex flex-wrap gap-1">
+                        {member.permissions.slice(0, 2).map((perm) => (
+                          <span
+                            key={perm}
+                            className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded"
+                          >
+                            {PERMISSIONS.find((p) => p.value === perm)?.label || perm}
+                          </span>
+                        ))}
+                        {member.permissions.length > 2 && (
+                          <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
+                            +{member.permissions.length - 2} mas
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+                    <button
+                      onClick={() => openEditModal(member)}
+                      className="text-sm text-blue-600 hover:text-blue-900 font-medium"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleRemove(member.id)}
+                      className="text-sm text-red-600 hover:text-red-900 flex items-center gap-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             {filteredStaff.length === 0 && (
               <div className="text-center py-12">
-                <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">No se encontraron miembros del equipo</p>
+                <Users className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-sm sm:text-base">No se encontraron miembros del equipo</p>
                 <button
                   onClick={() => setShowInviteModal(true)}
-                  className="mt-4 text-blue-600 hover:text-blue-700"
+                  className="mt-4 text-blue-600 hover:text-blue-700 text-sm sm:text-base"
                 >
                   Invitar al primer miembro
                 </button>
               </div>
             )}
 
-            <div className="mt-4 text-sm text-gray-500">
+            <div className="mt-4 text-xs sm:text-sm text-gray-500">
               Mostrando {filteredStaff.length} de {staff.length} miembros
             </div>
           </>
@@ -348,46 +431,46 @@ export default function StaffListPage() {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Invitar Miembro</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Invitar Miembro</h2>
             <form onSubmit={handleInvite} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Email *
                 </label>
                 <input
                   type="email"
                   value={inviteForm.email}
                   onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="correo@ejemplo.com"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Nombre *
                 </label>
                 <input
                   type="text"
                   value={inviteForm.name}
                   onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="Nombre completo"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Rol *
                 </label>
                 <select
                   value={inviteForm.role}
                   onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 >
                   {ROLES.map((role) => (
                     <option key={role.value} value={role.value}>
@@ -398,10 +481,10 @@ export default function StaffListPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   Permisos
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {PERMISSIONS.map((perm) => (
                     <label
                       key={perm.value}
@@ -413,25 +496,25 @@ export default function StaffListPage() {
                         onChange={() => togglePermission(perm.value, 'invite')}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-gray-700">{perm.label}</span>
+                      <span className="text-xs sm:text-sm text-gray-700">{perm.label}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowInviteModal(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm sm:text-base"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm sm:text-base"
                 >
-                  Enviar Invitación
+                  Enviar Invitacion
                 </button>
               </div>
             </form>
@@ -441,20 +524,20 @@ export default function StaffListPage() {
 
       {/* Edit Modal */}
       {showEditModal && selectedMember && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
               Editar Miembro: {selectedMember.user.name || selectedMember.user.email}
             </h2>
             <form onSubmit={handleEdit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Rol
                 </label>
                 <select
                   value={editForm.role}
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 >
                   {ROLES.map((role) => (
                     <option key={role.value} value={role.value}>
@@ -465,10 +548,10 @@ export default function StaffListPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   Permisos
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {PERMISSIONS.map((perm) => (
                     <label
                       key={perm.value}
@@ -480,26 +563,26 @@ export default function StaffListPage() {
                         onChange={() => togglePermission(perm.value, 'edit')}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-gray-700">{perm.label}</span>
+                      <span className="text-xs sm:text-sm text-gray-700">{perm.label}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => {
                     setShowEditModal(false);
                     setSelectedMember(null);
                   }}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm sm:text-base"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm sm:text-base"
                 >
                   Guardar Cambios
                 </button>

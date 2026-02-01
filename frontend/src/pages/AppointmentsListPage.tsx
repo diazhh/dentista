@@ -114,54 +114,54 @@ export default function AppointmentsListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Calendar className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Citas</h1>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Citas</h1>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               onClick={() => navigate('/calendar')}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base text-center"
             >
               Ver Calendario
             </button>
             <button
               onClick={() => navigate('/appointments/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               Nueva Cita
             </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <Search className="w-5 h-5 text-gray-400" />
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
               <input
                 type="text"
-                placeholder="Buscar por nombre o teléfono del paciente..."
+                placeholder="Buscar por nombre o teléfono..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
-            <div className="flex items-center gap-4">
-              <Filter className="w-5 h-5 text-gray-500" />
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+              <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0 hidden sm:block mt-2" />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 flex-1">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                     Estado
                   </label>
                   <select
                     value={filters.status}
                     onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">Todos</option>
                     <option value="SCHEDULED">Programada</option>
@@ -173,11 +173,11 @@ export default function AppointmentsListPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Tipo</label>
                   <select
                     value={filters.type}
                     onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">Todos</option>
                     <option value="CHECKUP">Revisión</option>
@@ -190,21 +190,21 @@ export default function AppointmentsListPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Desde</label>
                   <input
                     type="date"
                     value={filters.dateFrom}
                     onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Hasta</label>
                   <input
                     type="date"
                     value={filters.dateTo}
                     onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -218,80 +218,118 @@ export default function AppointmentsListPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           ) : filteredAppointments.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No se encontraron citas</p>
+            <div className="text-center py-8 sm:py-12">
+              <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-sm sm:text-base text-gray-500">No se encontraron citas</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Paciente
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fecha y Hora
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tipo
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredAppointments.map((appointment) => (
-                    <tr key={appointment.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+            <>
+              {/* Vista de tabla para pantallas medianas y grandes */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Paciente
+                      </th>
+                      <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fecha y Hora
+                      </th>
+                      <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tipo
+                      </th>
+                      <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Estado
+                      </th>
+                      <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredAppointments.map((appointment) => (
+                      <tr key={appointment.id} className="hover:bg-gray-50">
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {appointment.patient
+                              ? `${appointment.patient.firstName} ${appointment.patient.lastName}`
+                              : 'Sin paciente'}
+                          </div>
+                          {appointment.patient && (
+                            <div className="text-sm text-gray-500">{appointment.patient.phone}</div>
+                          )}
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {format(new Date(appointment.startTime), 'PPP', { locale: es })}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {format(new Date(appointment.startTime), 'p', { locale: es })} -{' '}
+                            {format(new Date(appointment.endTime), 'p', { locale: es })}
+                          </div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm text-gray-900">
+                            {getTypeLabel(appointment.type)}
+                          </span>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(appointment.status)}
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm">
+                          <button
+                            onClick={() => navigate(`/appointments/${appointment.id}`)}
+                            className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Ver
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Vista de cards para móvil */}
+              <div className="md:hidden divide-y divide-gray-200">
+                {filteredAppointments.map((appointment) => (
+                  <div
+                    key={appointment.id}
+                    className="p-4 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => navigate(`/appointments/${appointment.id}`)}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
                           {appointment.patient
                             ? `${appointment.patient.firstName} ${appointment.patient.lastName}`
                             : 'Sin paciente'}
-                        </div>
+                        </p>
                         {appointment.patient && (
-                          <div className="text-sm text-gray-500">{appointment.patient.phone}</div>
+                          <p className="text-xs text-gray-500">{appointment.patient.phone}</p>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {format(new Date(appointment.startTime), 'PPP', { locale: es })}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {format(new Date(appointment.startTime), 'p', { locale: es })} -{' '}
-                          {format(new Date(appointment.endTime), 'p', { locale: es })}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-900">
-                          {getTypeLabel(appointment.type)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(appointment.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => navigate(`/appointments/${appointment.id}`)}
-                          className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
-                        >
-                          <Eye className="w-4 h-4" />
-                          Ver
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                      {getStatusBadge(appointment.status)}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
+                      <span>{format(new Date(appointment.startTime), 'dd/MM/yyyy', { locale: es })}</span>
+                      <span>•</span>
+                      <span>
+                        {format(new Date(appointment.startTime), 'p', { locale: es })} -{' '}
+                        {format(new Date(appointment.endTime), 'p', { locale: es })}
+                      </span>
+                      <span>•</span>
+                      <span>{getTypeLabel(appointment.type)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
 
-        <div className="mt-4 text-sm text-gray-600">
+        <div className="mt-4 text-xs sm:text-sm text-gray-600 text-center sm:text-left">
           Mostrando {filteredAppointments.length} de {appointments.length} citas
         </div>
       </div>

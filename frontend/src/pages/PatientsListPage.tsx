@@ -168,55 +168,57 @@ export default function PatientsListPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Users className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Pacientes</h1>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Pacientes</h1>
           </div>
           <button
             onClick={() => navigate('/patients/new')}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base w-full sm:w-auto"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             Nuevo Paciente
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <Search className="w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar por cédula, nombre, teléfono o email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Buscar por cédula, nombre, teléfono..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  className="flex-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
               <button
                 onClick={handleSearch}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
               >
                 Buscar
               </button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <button
                 onClick={handleExport}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm"
               >
                 <Download className="w-4 h-4" />
-                Exportar CSV
+                <span className="hidden xs:inline">Exportar</span> CSV
               </button>
 
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                <label className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer text-xs sm:text-sm">
                   <Upload className="w-4 h-4" />
-                  {importFile ? importFile.name : 'Seleccionar CSV'}
+                  <span className="truncate max-w-[100px] sm:max-w-none">{importFile ? importFile.name : 'Seleccionar CSV'}</span>
                   <input
                     type="file"
                     accept=".csv"
@@ -227,7 +229,7 @@ export default function PatientsListPage() {
                 {importFile && (
                   <button
                     onClick={handleImport}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm"
                   >
                     Importar
                   </button>
@@ -244,29 +246,30 @@ export default function PatientsListPage() {
         ) : (
           <>
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
+              {/* Vista de tabla para pantallas grandes */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Cédula
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Nombre
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Teléfono
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Fecha Nacimiento
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fecha Nac.
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Género
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Acciones
                       </th>
                     </tr>
@@ -274,35 +277,35 @@ export default function PatientsListPage() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredPatients.map((patient) => (
                       <tr key={patient.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {patient.documentId}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                           {patient.firstName} {patient.lastName}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                           {patient.phone}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                           {patient.user?.email || '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                           {format(new Date(patient.dateOfBirth), 'dd/MM/yyyy', { locale: es })}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {patient.gender === 'MALE' ? 'Masculino' : 'Femenino'}
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {patient.gender === 'MALE' ? 'M' : 'F'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => navigate(`/patients/${patient.id}`)}
-                              className="text-blue-600 hover:text-blue-900"
+                              className="text-blue-600 hover:text-blue-900 p-1"
                             >
                               <Eye className="w-5 h-5" />
                             </button>
                             <button
                               onClick={() => handleDelete(patient.id)}
-                              className="text-red-600 hover:text-red-900"
+                              className="text-red-600 hover:text-red-900 p-1"
                             >
                               <Trash2 className="w-5 h-5" />
                             </button>
@@ -313,16 +316,55 @@ export default function PatientsListPage() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Vista de cards para móvil y tablet */}
+              <div className="lg:hidden divide-y divide-gray-200">
+                {filteredPatients.map((patient) => (
+                  <div
+                    key={patient.id}
+                    className="p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {patient.firstName} {patient.lastName}
+                        </p>
+                        <p className="text-xs text-gray-500">Cédula: {patient.documentId}</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                        <button
+                          onClick={() => navigate(`/patients/${patient.id}`)}
+                          className="text-blue-600 hover:text-blue-900 p-1"
+                        >
+                          <Eye className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(patient.id)}
+                          className="text-red-600 hover:text-red-900 p-1"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
+                      <span>{patient.phone}</span>
+                      <span>{patient.user?.email || '-'}</span>
+                      <span>{format(new Date(patient.dateOfBirth), 'dd/MM/yyyy', { locale: es })}</span>
+                      <span>{patient.gender === 'MALE' ? 'Masculino' : 'Femenino'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {filteredPatients.length === 0 && (
-              <div className="text-center py-12">
-                <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">No se encontraron pacientes</p>
+              <div className="text-center py-8 sm:py-12">
+                <Users className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-sm sm:text-base text-gray-500">No se encontraron pacientes</p>
               </div>
             )}
 
-            <div className="mt-4 text-sm text-gray-500">
+            <div className="mt-4 text-xs sm:text-sm text-gray-500 text-center sm:text-left">
               Mostrando {filteredPatients.length} de {patients.length} pacientes
             </div>
           </>

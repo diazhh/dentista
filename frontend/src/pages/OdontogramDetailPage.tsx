@@ -168,84 +168,84 @@ export default function OdontogramDetailPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => navigate('/odontograms')}
             className="text-gray-600 hover:text-gray-900"
           >
-            <ArrowLeft className="h-6 w-6" />
+            <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Detalle del Odontograma</h1>
-            <p className="text-gray-600">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Detalle del Odontograma</h1>
+            <p className="text-sm sm:text-base text-gray-600">
               {odontogram.patient.firstName} {odontogram.patient.lastName}
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {/* Toggle Vista */}
           <button
             onClick={() => setUseSVGView(!useSVGView)}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm sm:text-base ${
               useSVGView
                 ? 'bg-blue-100 text-blue-700 border border-blue-300'
                 : 'bg-gray-100 text-gray-700 border border-gray-300'
             }`}
           >
             {useSVGView ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-            {useSVGView ? 'Vista SVG' : 'Vista Clásica'}
+            <span className="hidden xs:inline">{useSVGView ? 'Vista SVG' : 'Vista Clásica'}</span>
           </button>
           <button
             onClick={handleDelete}
-            className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 flex items-center gap-2"
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <Trash2 className="h-4 w-4" />
-            Eliminar
+            <span className="hidden xs:inline">Eliminar</span>
           </button>
         </div>
       </div>
 
       {/* Patient Info */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center gap-3 mb-2">
-            <User className="h-5 w-5 text-blue-500" />
-            <h3 className="font-semibold text-gray-900">Paciente</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <User className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+            <h3 className="font-semibold text-sm sm:text-base text-gray-900">Paciente</h3>
           </div>
-          <p className="text-gray-900 font-medium">
+          <p className="text-sm sm:text-base text-gray-900 font-medium">
             {odontogram.patient.firstName} {odontogram.patient.lastName}
           </p>
-          <p className="text-sm text-gray-600">CI: {odontogram.patient.documentId}</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">CI: {odontogram.patient.documentId}</p>
+          <p className="text-xs sm:text-sm text-gray-600">
             Edad: {calculateAge(odontogram.patient.dateOfBirth)} años
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center gap-3 mb-2">
-            <Calendar className="h-5 w-5 text-green-500" />
-            <h3 className="font-semibold text-gray-900">Fecha de Registro</h3>
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+            <h3 className="font-semibold text-sm sm:text-base text-gray-900">Fecha de Registro</h3>
           </div>
-          <p className="text-gray-900 font-medium">
+          <p className="text-sm sm:text-base text-gray-900 font-medium">
             {format(new Date(odontogram.date), 'dd MMMM yyyy', { locale: es })}
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             {format(new Date(odontogram.date), 'HH:mm', { locale: es })}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center gap-3 mb-2">
-            <FileText className="h-5 w-5 text-purple-500" />
-            <h3 className="font-semibold text-gray-900">Estadísticas</h3>
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow sm:col-span-2 lg:col-span-1">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+            <h3 className="font-semibold text-sm sm:text-base text-gray-900">Estadísticas</h3>
           </div>
-          <p className="text-gray-900 font-medium">
+          <p className="text-sm sm:text-base text-gray-900 font-medium">
             {odontogram.teeth.length} dientes registrados
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             {odontogram.teeth.filter(t => t.condition !== 'HEALTHY').length} con condiciones
           </p>
         </div>
@@ -253,23 +253,23 @@ export default function OdontogramDetailPage() {
 
       {/* Notes */}
       {odontogram.notes && (
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="font-semibold text-gray-900 mb-2">Notas Generales</h3>
-          <p className="text-gray-700">{odontogram.notes}</p>
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+          <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-2">Notas Generales</h3>
+          <p className="text-sm sm:text-base text-gray-700">{odontogram.notes}</p>
         </div>
       )}
 
       {/* Odontogram Chart */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900">Odontograma</h3>
+      <div className="bg-white p-3 sm:p-6 rounded-lg shadow">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4">
+          <h3 className="font-semibold text-sm sm:text-base text-gray-900">Odontograma</h3>
           {!useSVGView && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <Filter className="h-4 w-4 text-gray-500" />
               <select
                 value={filterCondition}
                 onChange={(e) => setFilterCondition(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500"
+                className="flex-1 sm:flex-none border border-gray-300 rounded-lg px-2 sm:px-3 py-1.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Todas las condiciones</option>
                 {uniqueConditions.map(condition => (
@@ -290,107 +290,111 @@ export default function OdontogramDetailPage() {
           )}
         </div>
 
-        {useSVGView ? (
-          <OdontogramSVG
-            teeth={odontogram.teeth}
-            editable={false}
-            showLegend={true}
-            highlightConditions={filterCondition ? [filterCondition] : []}
-            onToothClick={handleToothClick}
-          />
-        ) : (
-          <OdontogramChart
-            teeth={filterCondition ? filteredTeeth : odontogram.teeth}
-            editable={false}
-          />
-        )}
+        <div className="overflow-x-auto">
+          {useSVGView ? (
+            <OdontogramSVG
+              teeth={odontogram.teeth}
+              editable={false}
+              showLegend={true}
+              highlightConditions={filterCondition ? [filterCondition] : []}
+              onToothClick={handleToothClick}
+            />
+          ) : (
+            <OdontogramChart
+              teeth={filterCondition ? filteredTeeth : odontogram.teeth}
+              editable={false}
+            />
+          )}
+        </div>
       </div>
 
       {/* Modal de edición de diente */}
       {editingTooth && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <ToothEditor
-            toothNumber={editingTooth}
-            currentCondition={
-              odontogram.teeth.find(t => t.toothNumber === editingTooth)?.condition || 'HEALTHY'
-            }
-            currentSurfaces={
-              odontogram.teeth.find(t => t.toothNumber === editingTooth)?.surfaces || []
-            }
-            currentNotes={
-              odontogram.teeth.find(t => t.toothNumber === editingTooth)?.notes || ''
-            }
-            onSave={handleToothSave}
-            onCancel={() => setEditingTooth(null)}
-          />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="w-full max-w-md">
+            <ToothEditor
+              toothNumber={editingTooth}
+              currentCondition={
+                odontogram.teeth.find(t => t.toothNumber === editingTooth)?.condition || 'HEALTHY'
+              }
+              currentSurfaces={
+                odontogram.teeth.find(t => t.toothNumber === editingTooth)?.surfaces || []
+              }
+              currentNotes={
+                odontogram.teeth.find(t => t.toothNumber === editingTooth)?.notes || ''
+              }
+              onSave={handleToothSave}
+              onCancel={() => setEditingTooth(null)}
+            />
+          </div>
         </div>
       )}
 
       {/* Teeth Details */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900">
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+          <h3 className="font-semibold text-sm sm:text-base text-gray-900">
             Detalle de Dientes ({filteredTeeth.length}
             {filterCondition && ` de ${odontogram.teeth.length}`})
           </h3>
           <button
             onClick={() => setShowTeethList(!showTeethList)}
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-xs sm:text-sm text-blue-600 hover:text-blue-800"
           >
             {showTeethList ? 'Ocultar lista' : 'Mostrar lista'}
           </button>
         </div>
         {showTeethList && (
-        <div className="space-y-4">
-          {filteredTeeth.map((tooth) => (
-            <div
-              key={tooth.id}
-              className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-lg font-bold text-gray-900">
-                      Diente #{tooth.toothNumber}
-                    </span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {TOOTH_CONDITIONS[tooth.condition] || tooth.condition}
-                    </span>
+          <div className="space-y-3 sm:space-y-4">
+            {filteredTeeth.map((tooth) => (
+              <div
+                key={tooth.id}
+                className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-blue-300 transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                      <span className="text-base sm:text-lg font-bold text-gray-900">
+                        Diente #{tooth.toothNumber}
+                      </span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {TOOTH_CONDITIONS[tooth.condition] || tooth.condition}
+                      </span>
+                    </div>
+
+                    {tooth.surfaces.length > 0 && (
+                      <div className="mb-2">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700">
+                          Superficies afectadas:{' '}
+                        </span>
+                        <span className="text-xs sm:text-sm text-gray-600">
+                          {tooth.surfaces.map(s => TOOTH_SURFACES[s] || s).join(', ')}
+                        </span>
+                      </div>
+                    )}
+
+                    {tooth.notes && (
+                      <div>
+                        <span className="text-xs sm:text-sm font-medium text-gray-700">Notas: </span>
+                        <span className="text-xs sm:text-sm text-gray-600">{tooth.notes}</span>
+                      </div>
+                    )}
                   </div>
 
-                  {tooth.surfaces.length > 0 && (
-                    <div className="mb-2">
-                      <span className="text-sm font-medium text-gray-700">
-                        Superficies afectadas:{' '}
-                      </span>
-                      <span className="text-sm text-gray-600">
-                        {tooth.surfaces.map(s => TOOTH_SURFACES[s] || s).join(', ')}
-                      </span>
-                    </div>
-                  )}
-
-                  {tooth.notes && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-700">Notas: </span>
-                      <span className="text-sm text-gray-600">{tooth.notes}</span>
-                    </div>
+                  {tooth.color && (
+                    <div
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded border-2 border-gray-300 flex-shrink-0 ml-2"
+                      style={{ backgroundColor: tooth.color }}
+                      title="Color personalizado"
+                    />
                   )}
                 </div>
-
-                {tooth.color && (
-                  <div
-                    className="w-8 h-8 rounded border-2 border-gray-300"
-                    style={{ backgroundColor: tooth.color }}
-                    title="Color personalizado"
-                  />
-                )}
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
         {!showTeethList && filteredTeeth.length > 0 && (
-          <p className="text-sm text-gray-500 italic">
+          <p className="text-xs sm:text-sm text-gray-500 italic">
             Haga clic en "Mostrar lista" para ver los detalles de los dientes.
           </p>
         )}

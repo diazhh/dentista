@@ -125,7 +125,7 @@ export default function PatientDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <button
@@ -135,117 +135,119 @@ export default function PatientDetailPage() {
             <ArrowLeft className="w-5 h-5" />
             Volver
           </button>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Users className="w-8 h-8 text-blue-600" />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-2 sm:gap-3">
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 break-words">
                   {patient.firstName} {patient.lastName}
                 </h1>
-                <p className="text-gray-500">Cédula: {patient.documentId}</p>
+                <p className="text-sm sm:text-base text-gray-500">Cédula: {patient.documentId}</p>
               </div>
             </div>
             <button
               onClick={() => navigate(`/patients/${id}/edit`)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
             >
-              <Edit className="w-5 h-5" />
+              <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
               Editar
             </button>
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <nav className="flex -mb-px min-w-max">
               <button
                 onClick={() => setActiveTab('info')}
-                className={`px-6 py-3 border-b-2 font-medium text-sm ${
+                className={`px-3 sm:px-6 py-3 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                   activeTab === 'info'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <User className="w-4 h-4 inline mr-2" />
-                Información
+                <User className="w-4 h-4 inline mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Información</span>
+                <span className="sm:hidden">Info</span>
               </button>
               <button
                 onClick={() => setActiveTab('appointments')}
-                className={`px-6 py-3 border-b-2 font-medium text-sm ${
+                className={`px-3 sm:px-6 py-3 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                   activeTab === 'appointments'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <Calendar className="w-4 h-4 inline mr-2" />
+                <Calendar className="w-4 h-4 inline mr-1 sm:mr-2" />
                 Citas ({appointments.length})
               </button>
               <button
                 onClick={() => setActiveTab('treatments')}
-                className={`px-6 py-3 border-b-2 font-medium text-sm ${
+                className={`px-3 sm:px-6 py-3 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                   activeTab === 'treatments'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <FileText className="w-4 h-4 inline mr-2" />
-                Tratamientos
+                <FileText className="w-4 h-4 inline mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Tratamientos</span>
+                <span className="sm:hidden">Trat.</span>
               </button>
               <button
                 onClick={() => setActiveTab('invoices')}
-                className={`px-6 py-3 border-b-2 font-medium text-sm ${
+                className={`px-3 sm:px-6 py-3 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                   activeTab === 'invoices'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <DollarSign className="w-4 h-4 inline mr-2" />
+                <DollarSign className="w-4 h-4 inline mr-1 sm:mr-2" />
                 Facturas
               </button>
             </nav>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {activeTab === 'info' && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Datos Personales</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-start gap-3">
-                      <IdCard className="w-5 h-5 text-gray-400 mt-1" />
-                      <div>
-                        <p className="text-sm text-gray-500">Cédula</p>
-                        <p className="font-medium">{patient.documentId}</p>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Datos Personales</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <IdCard className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mt-1 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-sm text-gray-500">Cédula</p>
+                        <p className="text-sm sm:text-base font-medium break-all">{patient.documentId}</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <Mail className="w-5 h-5 text-gray-400 mt-1" />
-                      <div>
-                        <p className="text-sm text-gray-500">Email</p>
-                        <p className="font-medium">{patient.user?.email || '-'}</p>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mt-1 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-sm text-gray-500">Email</p>
+                        <p className="text-sm sm:text-base font-medium break-all">{patient.user?.email || '-'}</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <Phone className="w-5 h-5 text-gray-400 mt-1" />
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="text-sm text-gray-500">Teléfono</p>
-                        <p className="font-medium">{patient.phone}</p>
+                        <p className="text-xs sm:text-sm text-gray-500">Teléfono</p>
+                        <p className="text-sm sm:text-base font-medium">{patient.phone}</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <Calendar className="w-5 h-5 text-gray-400 mt-1" />
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="text-sm text-gray-500">Fecha de Nacimiento</p>
-                        <p className="font-medium">
+                        <p className="text-xs sm:text-sm text-gray-500">Fecha de Nacimiento</p>
+                        <p className="text-sm sm:text-base font-medium">
                           {format(new Date(patient.dateOfBirth), 'dd/MM/yyyy', { locale: es })}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <User className="w-5 h-5 text-gray-400 mt-1" />
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="text-sm text-gray-500">Género</p>
-                        <p className="font-medium">
+                        <p className="text-xs sm:text-sm text-gray-500">Género</p>
+                        <p className="text-sm sm:text-base font-medium">
                           {patient.gender === 'MALE' ? 'Masculino' : 'Femenino'}
                         </p>
                       </div>
@@ -253,40 +255,40 @@ export default function PatientDetailPage() {
                   </div>
                 </div>
 
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Información Médica</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border-t pt-4 sm:pt-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Información Médica</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <p className="text-sm text-gray-500 mb-2">Alergias</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-2">Alergias</p>
                       <div className="flex flex-wrap gap-2">
                         {patient.allergies && patient.allergies.length > 0 ? (
                           patient.allergies.map((allergy, idx) => (
                             <span
                               key={idx}
-                              className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm"
+                              className="px-2 sm:px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs sm:text-sm"
                             >
                               {allergy}
                             </span>
                           ))
                         ) : (
-                          <span className="text-gray-400">Ninguna</span>
+                          <span className="text-sm text-gray-400">Ninguna</span>
                         )}
                       </div>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-2">Medicamentos</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-2">Medicamentos</p>
                       <div className="flex flex-wrap gap-2">
                         {patient.medications && patient.medications.length > 0 ? (
                           patient.medications.map((med, idx) => (
                             <span
                               key={idx}
-                              className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                              className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs sm:text-sm"
                             >
                               {med}
                             </span>
                           ))
                         ) : (
-                          <span className="text-gray-400">Ninguno</span>
+                          <span className="text-sm text-gray-400">Ninguno</span>
                         )}
                       </div>
                     </div>
@@ -294,21 +296,21 @@ export default function PatientDetailPage() {
                 </div>
 
                 {(patient.emergencyContactName || patient.emergencyContactPhone) && (
-                  <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <div className="border-t pt-4 sm:pt-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
                       Contacto de Emergencia
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       {patient.emergencyContactName && (
                         <div>
-                          <p className="text-sm text-gray-500">Nombre</p>
-                          <p className="font-medium">{patient.emergencyContactName}</p>
+                          <p className="text-xs sm:text-sm text-gray-500">Nombre</p>
+                          <p className="text-sm sm:text-base font-medium">{patient.emergencyContactName}</p>
                         </div>
                       )}
                       {patient.emergencyContactPhone && (
                         <div>
-                          <p className="text-sm text-gray-500">Teléfono</p>
-                          <p className="font-medium">{patient.emergencyContactPhone}</p>
+                          <p className="text-xs sm:text-sm text-gray-500">Teléfono</p>
+                          <p className="text-sm sm:text-base font-medium">{patient.emergencyContactPhone}</p>
                         </div>
                       )}
                     </div>
@@ -319,11 +321,11 @@ export default function PatientDetailPage() {
 
             {activeTab === 'appointments' && (
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Historial de Citas</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">Historial de Citas</h3>
                   <button
                     onClick={() => navigate(`/appointments/new?patientId=${id}`)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base w-full sm:w-auto text-center"
                   >
                     Nueva Cita
                   </button>
@@ -333,18 +335,18 @@ export default function PatientDetailPage() {
                     {appointments.map((apt) => (
                       <div
                         key={apt.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                        className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:bg-gray-50 cursor-pointer"
                         onClick={() => navigate(`/appointments/${apt.id}`)}
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-sm sm:text-base font-medium text-gray-900">
                               {format(new Date(apt.startTime), "dd/MM/yyyy 'a las' HH:mm", {
                                 locale: es,
                               })}
                             </p>
-                            <p className="text-sm text-gray-500">{apt.type}</p>
-                            {apt.notes && <p className="text-sm text-gray-600 mt-1">{apt.notes}</p>}
+                            <p className="text-xs sm:text-sm text-gray-500">{apt.type}</p>
+                            {apt.notes && <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">{apt.notes}</p>}
                           </div>
                           {getStatusBadge(apt.status)}
                         </div>
@@ -352,25 +354,25 @@ export default function PatientDetailPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">No hay citas registradas</p>
+                  <div className="text-center py-8 sm:py-12">
+                    <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-sm sm:text-base text-gray-500">No hay citas registradas</p>
                   </div>
                 )}
               </div>
             )}
 
             {activeTab === 'treatments' && (
-              <div className="text-center py-12">
-                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Módulo de tratamientos próximamente</p>
+              <div className="text-center py-8 sm:py-12">
+                <FileText className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-sm sm:text-base text-gray-500">Módulo de tratamientos próximamente</p>
               </div>
             )}
 
             {activeTab === 'invoices' && (
-              <div className="text-center py-12">
-                <DollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Módulo de facturas próximamente</p>
+              <div className="text-center py-8 sm:py-12">
+                <DollarSign className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-sm sm:text-base text-gray-500">Módulo de facturas próximamente</p>
               </div>
             )}
           </div>

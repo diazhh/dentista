@@ -93,46 +93,47 @@ export default function PatientDashboardPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto p-3 sm:p-6 max-w-7xl">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <Button
           variant="ghost"
           onClick={() => navigate('/patients')}
-          className="mb-4"
+          className="mb-4 text-sm sm:text-base"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver a Pacientes
+          <span className="hidden sm:inline">Volver a Pacientes</span>
+          <span className="sm:hidden">Volver</span>
         </Button>
 
         <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
-                  <User className="h-8 w-8 text-blue-600" />
+          <CardHeader className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <User className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
                 </div>
-                <div>
-                  <CardTitle className="text-2xl">
+                <div className="min-w-0">
+                  <CardTitle className="text-lg sm:text-2xl break-words">
                     {patient.firstName} {patient.lastName}
                   </CardTitle>
-                  <CardDescription className="text-lg">
+                  <CardDescription className="text-sm sm:text-lg">
                     {calculateAge(patient.dateOfBirth)} años • {patient.gender === 'MALE' ? 'Masculino' : 'Femenino'}
                   </CardDescription>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-6 mt-4 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-4 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center">
-                <Mail className="mr-2 h-4 w-4" />
-                {patient.email || 'No registrado'}
+                <Mail className="mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="truncate">{patient.email || 'No registrado'}</span>
               </div>
               <div className="flex items-center">
-                <Phone className="mr-2 h-4 w-4" />
+                <Phone className="mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                 {patient.phone}
               </div>
               <div className="flex items-center">
-                <Calendar className="mr-2 h-4 w-4" />
+                <Calendar className="mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                 {new Date(patient.dateOfBirth).toLocaleDateString('es-ES')}
               </div>
             </div>
@@ -142,15 +143,27 @@ export default function PatientDashboardPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-4 lg:grid-cols-8 gap-2">
-          <TabsTrigger value="summary">Resumen</TabsTrigger>
-          <TabsTrigger value="appointments">Citas</TabsTrigger>
-          <TabsTrigger value="treatments">Tratamientos</TabsTrigger>
-          <TabsTrigger value="odontograms">Odontogramas</TabsTrigger>
-          <TabsTrigger value="invoices">Facturas</TabsTrigger>
-          <TabsTrigger value="payments">Pagos</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
-          <TabsTrigger value="medical">Historia Médica</TabsTrigger>
+        <TabsList className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-2 h-auto p-1">
+          <TabsTrigger value="summary" className="text-xs sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2">Resumen</TabsTrigger>
+          <TabsTrigger value="appointments" className="text-xs sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2">Citas</TabsTrigger>
+          <TabsTrigger value="treatments" className="text-xs sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2">
+            <span className="hidden sm:inline">Tratamientos</span>
+            <span className="sm:hidden">Trat.</span>
+          </TabsTrigger>
+          <TabsTrigger value="odontograms" className="text-xs sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2">
+            <span className="hidden sm:inline">Odontogramas</span>
+            <span className="sm:hidden">Odont.</span>
+          </TabsTrigger>
+          <TabsTrigger value="invoices" className="text-xs sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2">Facturas</TabsTrigger>
+          <TabsTrigger value="payments" className="text-xs sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2">Pagos</TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2">
+            <span className="hidden sm:inline">Documentos</span>
+            <span className="sm:hidden">Docs</span>
+          </TabsTrigger>
+          <TabsTrigger value="medical" className="text-xs sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2">
+            <span className="hidden sm:inline">Historia Médica</span>
+            <span className="sm:hidden">Médica</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="summary">

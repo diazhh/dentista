@@ -84,26 +84,26 @@ export default function NewAppointmentPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-3xl mx-auto">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Calendar className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Nueva Cita</h1>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Nueva Cita</h1>
           </div>
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm sm:text-base"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
             Cancelar
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-              <User className="w-4 h-4" />
+            <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-2">
+              <User className="w-3 h-3 sm:w-4 sm:h-4" />
               Paciente *
             </label>
             <input
@@ -111,13 +111,13 @@ export default function NewAppointmentPage() {
               placeholder="Buscar paciente por nombre o cédula..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <select
               value={formData.patientId}
               onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Seleccionar paciente</option>
               {filteredPatients.map((patient) => (
@@ -127,7 +127,7 @@ export default function NewAppointmentPage() {
               ))}
             </select>
             {patients.length === 0 && (
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-xs sm:text-sm text-gray-500">
                 No hay pacientes registrados.{' '}
                 <button
                   type="button"
@@ -140,10 +140,10 @@ export default function NewAppointmentPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <Calendar className="w-4 h-4" />
+              <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                 Fecha y Hora *
               </label>
               <input
@@ -151,20 +151,20 @@ export default function NewAppointmentPage() {
                 value={formData.startTime}
                 onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <Clock className="w-4 h-4" />
-                Duración (minutos) *
+              <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                Duración *
               </label>
               <select
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: Number(e.target.value) })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value={15}>15 minutos</option>
                 <option value={30}>30 minutos</option>
@@ -177,15 +177,15 @@ export default function NewAppointmentPage() {
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-              <FileText className="w-4 h-4" />
+            <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-2">
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
               Tipo de Cita *
             </label>
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="CHECKUP">Revisión</option>
               <option value="CLEANING">Limpieza</option>
@@ -200,8 +200,8 @@ export default function NewAppointmentPage() {
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-              <FileText className="w-4 h-4" />
+            <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-2">
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
               Notas
             </label>
             <textarea
@@ -209,34 +209,34 @@ export default function NewAppointmentPage() {
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={4}
               placeholder="Notas adicionales sobre la cita..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
+            >
+              Cancelar
+            </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
                   Creando...
                 </>
               ) : (
                 <>
-                  <Save className="w-5 h-5" />
+                  <Save className="w-4 h-4 sm:w-5 sm:h-5" />
                   Crear Cita
                 </>
               )}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancelar
             </button>
           </div>
         </form>
