@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { AIAgentEngine } from './ai-agent.engine';
 import OpenAI from 'openai';
 
 interface ConversationContext {
@@ -22,6 +23,7 @@ export class ChatbotService {
   constructor(
     private configService: ConfigService,
     private prisma: PrismaService,
+    private aiAgentEngine: AIAgentEngine,
   ) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
     if (apiKey) {
@@ -52,7 +54,30 @@ export class ChatbotService {
       }
     }
 
-    // Process the message based on intent
+    // Try AI engine first
+    if (context.tenantId) {
+      try {
+        const result = await this.aiAgentEngine.process(
+          phoneNumber, // sessionId
+          context.tenantId,
+          message,
+          context.patientId,
+        );
+        if (result?.text) {
+          // Update context from AI result
+          if (result.metadata?.patientId) {
+            context.patientId = result.metadata.patientId;
+            context.patientName = result.metadata.patientName;
+          }
+          conversationContexts.set(phoneNumber, context);
+          return result.text;
+        }
+      } catch (error) {
+        this.logger.warn(`AI engine failed, falling back to keyword matching: ${error.message}`);
+      }
+    }
+
+    // Fall through to existing keyword matching...
     const normalizedMessage = message.toLowerCase().trim();
     let response: string;
 

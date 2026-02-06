@@ -179,11 +179,16 @@ Un proveedor activa los módulos que necesita según su especialidad. Un proveed
 - ✅ 1.5: Consultorios compartidos (availability algorithm, conflict prevention, room/clinic calendars)
 - ✅ 1.6: Staff flexible multi-provider (granular permissions, tenant switcher, staff management)
 
-### Fase 2: Asistente Virtual IA (2-3 semanas)
-- Chatbot IA por provider (no solo WhatsApp, también web chat)
-- RAG con datos del provider (horarios, servicios, precios)
-- Agendamiento via chat
-- Escalamiento a humano
+### Fase 2: Asistente Virtual IA ✅ COMPLETADA
+- ✅ 2.1: AI Agent Engine con RAG (contexto de provider: servicios, horarios, precios, FAQs, clínicas)
+- ✅ 2.2: Web Chat via Socket.io (ChatGateway + ChatWidget frontend embeddable)
+- ✅ 2.3: Message Router multi-canal (WhatsApp, WebChat, SMS) + Chat Session management
+- ✅ 2.4: Chatbot refactorizado para usar AI Agent Engine con OpenAI function-calling
+- ✅ 2.5: ChatbotConfig actualizado (canales, FAQs, instrucciones especiales, tema widget)
+- ✅ 2.6: Chat Metrics + conversation logging con analytics
+- ✅ 2.7: REST Chat Controller (endpoint público para widget)
+- ✅ 2.8: Frontend ChatWidget flotante con soporte de temas y quick replies
+- ✅ 2.9: Página de configuración del chatbot actualizada (tabs: General, Channels, FAQs)
 
 ### Fase 3: Módulos por Especialidad (4-6 semanas)
 - Sistema de plugins

@@ -12,6 +12,8 @@ import {
   Plus,
   Trash2,
   Info,
+  Globe,
+  HelpCircle,
 } from 'lucide-react';
 
 interface OperatingHours {
@@ -24,15 +26,20 @@ interface PricingItem {
   description?: string;
 }
 
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 interface ChatbotConfig {
   id: string;
   isEnabled: boolean;
   welcomeMessage: string | null;
   fallbackMessage: string | null;
-  clinicName: string | null;
-  clinicAddress: string | null;
-  clinicPhone: string | null;
-  clinicWebsite: string | null;
+  practiceName: string | null;
+  practiceAddress: string | null;
+  practicePhone: string | null;
+  practiceWebsite: string | null;
   operatingHours: OperatingHours | null;
   pricingInfo: PricingItem[] | null;
   aiModel: string;
@@ -45,6 +52,16 @@ interface ChatbotConfig {
   requireIdentification: boolean;
   humanHandoffKeywords: string[];
   maxMessagesPerHour: number;
+  enabledChannels: string[];
+  webChatTheme: string;
+  webChatPosition: string;
+  faqs: FaqItem[] | null;
+  escalationEmail: string | null;
+  escalationPhone: string | null;
+  maxUnanswered: number;
+  specialInstructions: string | null;
+  cancellationPolicy: string | null;
+  paymentMethods: string[];
 }
 
 const DAYS = [
@@ -59,7 +76,7 @@ const DAYS = [
 
 export default function ChatbotConfigPage() {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'general' | 'messages' | 'hours' | 'pricing' | 'ai'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'messages' | 'hours' | 'pricing' | 'channels' | 'faqs' | 'ai'>('general');
   const [formData, setFormData] = useState<Partial<ChatbotConfig>>({});
   const [testMessage, setTestMessage] = useState('');
   const [testResult, setTestResult] = useState<any>(null);
@@ -129,6 +146,34 @@ export default function ChatbotConfigPage() {
     setFormData({ ...formData, pricingInfo: pricing });
   };
 
+  const addFaqItem = () => {
+    const faqs = [...(formData.faqs || [])];
+    faqs.push({ question: '', answer: '' });
+    setFormData({ ...formData, faqs });
+  };
+
+  const updateFaqItem = (index: number, field: keyof FaqItem, value: string) => {
+    const faqs = [...(formData.faqs || [])];
+    faqs[index] = { ...faqs[index], [field]: value };
+    setFormData({ ...formData, faqs });
+  };
+
+  const removeFaqItem = (index: number) => {
+    const faqs = (formData.faqs || []).filter((_, i) => i !== index);
+    setFormData({ ...formData, faqs });
+  };
+
+  const toggleChannel = (channel: string) => {
+    const channels = [...(formData.enabledChannels || [])];
+    const idx = channels.indexOf(channel);
+    if (idx >= 0) {
+      channels.splice(idx, 1);
+    } else {
+      channels.push(channel);
+    }
+    setFormData({ ...formData, enabledChannels: channels });
+  };
+
   if (isLoading) {
     return (
       <div className="p-3 sm:p-6">
@@ -188,6 +233,8 @@ export default function ChatbotConfigPage() {
               { id: 'messages', label: 'Messages', icon: MessageSquare },
               { id: 'hours', label: 'Hours', icon: Clock },
               { id: 'pricing', label: 'Pricing', icon: DollarSign },
+              { id: 'channels', label: 'Channels', icon: Globe },
+              { id: 'faqs', label: 'FAQs', icon: HelpCircle },
               { id: 'ai', label: 'AI Settings', icon: Bot },
             ].map((tab) => (
               <button
@@ -212,20 +259,20 @@ export default function ChatbotConfigPage() {
           {activeTab === 'general' && (
             <div className="space-y-4 sm:space-y-6">
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Clinic Name</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Practice Name</label>
                 <input
                   type="text"
-                  value={formData.clinicName || ''}
-                  onChange={(e) => setFormData({ ...formData, clinicName: e.target.value })}
+                  value={formData.practiceName || ''}
+                  onChange={(e) => setFormData({ ...formData, practiceName: e.target.value })}
                   className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base"
-                  placeholder="Your Dental Clinic"
+                  placeholder="Your Medical Practice"
                 />
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Address</label>
                 <textarea
-                  value={formData.clinicAddress || ''}
-                  onChange={(e) => setFormData({ ...formData, clinicAddress: e.target.value })}
+                  value={formData.practiceAddress || ''}
+                  onChange={(e) => setFormData({ ...formData, practiceAddress: e.target.value })}
                   rows={2}
                   className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base"
                   placeholder="123 Main St, City, State"
@@ -236,8 +283,8 @@ export default function ChatbotConfigPage() {
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
                   <input
                     type="text"
-                    value={formData.clinicPhone || ''}
-                    onChange={(e) => setFormData({ ...formData, clinicPhone: e.target.value })}
+                    value={formData.practicePhone || ''}
+                    onChange={(e) => setFormData({ ...formData, practicePhone: e.target.value })}
                     className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base"
                     placeholder="+1 (555) 123-4567"
                   />
@@ -246,8 +293,8 @@ export default function ChatbotConfigPage() {
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Website</label>
                   <input
                     type="url"
-                    value={formData.clinicWebsite || ''}
-                    onChange={(e) => setFormData({ ...formData, clinicWebsite: e.target.value })}
+                    value={formData.practiceWebsite || ''}
+                    onChange={(e) => setFormData({ ...formData, practiceWebsite: e.target.value })}
                     className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base"
                     placeholder="https://yourwebsite.com"
                   />
@@ -275,6 +322,56 @@ export default function ChatbotConfigPage() {
                       <span className="text-sm sm:text-base">{feature.label}</span>
                     </label>
                   ))}
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
+                <h3 className="text-sm sm:text-base font-medium mb-4">Policies & Instructions</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Special Instructions</label>
+                    <textarea
+                      value={formData.specialInstructions || ''}
+                      onChange={(e) => setFormData({ ...formData, specialInstructions: e.target.value })}
+                      rows={3}
+                      className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base"
+                      placeholder="Any special instructions for the chatbot (e.g., always recommend calling for emergencies)..."
+                    />
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                      Additional context or rules the chatbot should follow
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cancellation Policy</label>
+                    <textarea
+                      value={formData.cancellationPolicy || ''}
+                      onChange={(e) => setFormData({ ...formData, cancellationPolicy: e.target.value })}
+                      rows={3}
+                      className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base"
+                      placeholder="e.g., Cancellations must be made at least 24 hours in advance..."
+                    />
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                      Shared with patients when they ask about cancellations
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Payment Methods</label>
+                    <input
+                      type="text"
+                      value={(formData.paymentMethods || []).join(', ')}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          paymentMethods: e.target.value.split(',').map((s) => s.trim()).filter(Boolean),
+                        })
+                      }
+                      className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base"
+                      placeholder="Cash, Credit Card, Debit Card, Insurance"
+                    />
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                      Comma-separated list of accepted payment methods
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -432,6 +529,202 @@ export default function ChatbotConfigPage() {
               >
                 <Plus className="w-4 h-4" />
                 Add Service
+              </button>
+            </div>
+          )}
+
+          {/* Channels Tab */}
+          {activeTab === 'channels' && (
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex items-start gap-3 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-4 sm:mb-6">
+                <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                <div className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
+                  <p className="font-medium">Communication Channels</p>
+                  <p>Enable and configure the channels through which patients can interact with the chatbot.</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm sm:text-base font-medium mb-4">Enabled Channels</h3>
+                <div className="space-y-3">
+                  {[
+                    { key: 'whatsapp', label: 'WhatsApp', description: 'Respond to patients via WhatsApp Business' },
+                    { key: 'webchat', label: 'Web Chat', description: 'Embeddable chat widget for your website' },
+                    { key: 'sms', label: 'SMS', description: 'Respond to patients via text messages' },
+                  ].map((channel) => (
+                    <label
+                      key={channel.key}
+                      className="flex items-start gap-3 p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={(formData.enabledChannels || []).includes(channel.key)}
+                        onChange={() => toggleChannel(channel.key)}
+                        className="w-4 h-4 text-blue-600 rounded mt-0.5"
+                      />
+                      <div>
+                        <span className="text-sm sm:text-base font-medium">{channel.label}</span>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">{channel.description}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {(formData.enabledChannels || []).includes('webchat') && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
+                  <h3 className="text-sm sm:text-base font-medium mb-4">Web Chat Settings</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Color Theme</label>
+                      <div className="flex gap-3">
+                        {[
+                          { value: 'blue', color: 'bg-blue-600' },
+                          { value: 'green', color: 'bg-green-600' },
+                          { value: 'purple', color: 'bg-purple-600' },
+                          { value: 'red', color: 'bg-red-600' },
+                        ].map((opt) => (
+                          <button
+                            key={opt.value}
+                            onClick={() => setFormData({ ...formData, webChatTheme: opt.value })}
+                            className={`w-10 h-10 rounded-full ${opt.color} transition-all ${
+                              (formData.webChatTheme || 'blue') === opt.value
+                                ? 'ring-4 ring-offset-2 ring-gray-400 scale-110'
+                                : 'hover:scale-105'
+                            }`}
+                            title={opt.value}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Widget Position</label>
+                      <div className="flex gap-3">
+                        {[
+                          { value: 'bottom-right', label: 'Bottom Right' },
+                          { value: 'bottom-left', label: 'Bottom Left' },
+                        ].map((opt) => (
+                          <button
+                            key={opt.value}
+                            onClick={() => setFormData({ ...formData, webChatPosition: opt.value })}
+                            className={`px-4 py-2 text-sm rounded-lg border transition ${
+                              (formData.webChatPosition || 'bottom-right') === opt.value
+                                ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
+                <h3 className="text-sm sm:text-base font-medium mb-4">Escalation Settings</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Escalation Email</label>
+                      <input
+                        type="email"
+                        value={formData.escalationEmail || ''}
+                        onChange={(e) => setFormData({ ...formData, escalationEmail: e.target.value })}
+                        className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base"
+                        placeholder="support@yourpractice.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Escalation Phone</label>
+                      <input
+                        type="text"
+                        value={formData.escalationPhone || ''}
+                        onChange={(e) => setFormData({ ...formData, escalationPhone: e.target.value })}
+                        className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base"
+                        placeholder="+1 (555) 123-4567"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Max Unanswered Before Escalation: {formData.maxUnanswered || 3}
+                    </label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      step="1"
+                      value={formData.maxUnanswered || 3}
+                      onChange={(e) => setFormData({ ...formData, maxUnanswered: parseInt(e.target.value) })}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>1 message</span>
+                      <span>10 messages</span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                      Number of unanswered questions before the conversation is escalated to a human
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FAQs Tab */}
+          {activeTab === 'faqs' && (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-4 sm:mb-6">
+                <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                <div className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
+                  <p className="font-medium">Frequently Asked Questions</p>
+                  <p>Add common questions and their answers. The chatbot will use these as a knowledge base to respond to patients.</p>
+                </div>
+              </div>
+
+              {(formData.faqs || []).map((item, index) => (
+                <div key={index} className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Question</label>
+                        <input
+                          type="text"
+                          value={item.question}
+                          onChange={(e) => updateFaqItem(index, 'question', e.target.value)}
+                          placeholder="e.g., What are your office hours?"
+                          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded px-3 py-2 text-sm sm:text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Answer</label>
+                        <textarea
+                          value={item.answer}
+                          onChange={(e) => updateFaqItem(index, 'answer', e.target.value)}
+                          rows={3}
+                          placeholder="e.g., We are open Monday through Friday, 9 AM to 6 PM..."
+                          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded px-3 py-2 text-sm sm:text-base"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removeFaqItem(index)}
+                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded flex-shrink-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              <button
+                onClick={addFaqItem}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
+              >
+                <Plus className="w-4 h-4" />
+                Add FAQ
               </button>
             </div>
           )}

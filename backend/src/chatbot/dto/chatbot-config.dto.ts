@@ -87,6 +87,49 @@ export class CreateChatbotConfigDto {
   @Min(10)
   @Max(1000)
   maxMessagesPerHour?: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  enabledChannels?: string[];
+
+  @IsString()
+  @IsOptional()
+  webChatTheme?: string;
+
+  @IsString()
+  @IsOptional()
+  webChatPosition?: string;
+
+  @IsOptional()
+  faqs?: Array<{ question: string; answer: string }>;
+
+  @IsString()
+  @IsOptional()
+  escalationEmail?: string;
+
+  @IsString()
+  @IsOptional()
+  escalationPhone?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  @Max(10)
+  maxUnanswered?: number;
+
+  @IsString()
+  @IsOptional()
+  specialInstructions?: string;
+
+  @IsString()
+  @IsOptional()
+  cancellationPolicy?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  paymentMethods?: string[];
 }
 
 export class UpdateChatbotConfigDto extends CreateChatbotConfigDto {}

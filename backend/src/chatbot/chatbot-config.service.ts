@@ -120,6 +120,11 @@ export class ChatbotConfigService {
         autoResponseDelay: 1000,
         humanHandoffKeywords: ['humano', 'persona', 'agente', 'recepcionista', 'hablar con alguien'],
         maxMessagesPerHour: 100,
+        enabledChannels: ['whatsapp'],
+        webChatTheme: 'blue',
+        webChatPosition: 'bottom-right',
+        maxUnanswered: 3,
+        paymentMethods: [],
         operatingHours: {
           monday: { open: '08:00', close: '18:00' },
           tuesday: { open: '08:00', close: '18:00' },
@@ -219,6 +224,35 @@ Reglas importantes:
             prompt += ` (${item.description})`;
           }
         }
+      }
+    }
+
+    // Add FAQs
+    if (config.faqs) {
+      const faqs = config.faqs as Array<{ question: string; answer: string }>;
+      if (faqs.length > 0) {
+        prompt += '\n\nPreguntas frecuentes:';
+        for (const faq of faqs) {
+          prompt += `\n- P: ${faq.question}\n  R: ${faq.answer}`;
+        }
+      }
+    }
+
+    // Add special instructions
+    if (config.specialInstructions) {
+      prompt += `\n\nInstrucciones especiales:\n${config.specialInstructions}`;
+    }
+
+    // Add cancellation policy
+    if (config.cancellationPolicy) {
+      prompt += `\n\nPolítica de cancelación:\n${config.cancellationPolicy}`;
+    }
+
+    // Add payment methods
+    if (config.paymentMethods?.length) {
+      prompt += '\n\nMétodos de pago aceptados:';
+      for (const method of config.paymentMethods) {
+        prompt += `\n- ${method}`;
       }
     }
 

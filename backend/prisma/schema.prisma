@@ -1478,6 +1478,24 @@ model ChatbotConfig {
 
   maxMessagesPerHour Int @default(100) @map("max_messages_per_hour")
 
+  // Multi-channel settings
+  enabledChannels String[] @default(["whatsapp"]) @map("enabled_channels")
+  webChatTheme    String   @default("blue") @map("web_chat_theme")
+  webChatPosition String   @default("bottom-right") @map("web_chat_position")
+
+  // FAQs
+  faqs Json? @map("faqs") // Array of { question: string, answer: string }
+
+  // Escalation settings
+  escalationEmail    String?  @map("escalation_email")
+  escalationPhone    String?  @map("escalation_phone")
+  maxUnanswered      Int      @default(3) @map("max_unanswered") // Auto-escalate after N unanswered
+
+  // Special instructions for AI
+  specialInstructions String? @map("special_instructions") @db.Text
+  cancellationPolicy  String? @map("cancellation_policy") @db.Text
+  paymentMethods      String[] @default([]) @map("payment_methods")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

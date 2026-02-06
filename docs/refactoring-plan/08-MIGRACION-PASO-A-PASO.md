@@ -339,26 +339,46 @@ model ProviderPatientRelation {
 
 ## Fase 2: Asistente Virtual IA (Semanas 7-9)
 
-### Paso 2.1: Refactorizar Chatbot Existente
+### Paso 2.1: Refactorizar Chatbot Existente ✅ COMPLETADO
 
-1. Extraer lógica de AI del chatbot WhatsApp
-2. Crear AIAgentEngine como servicio independiente
-3. Implementar RAG con datos del provider
-4. Crear MessageRouter para multi-canal
+> **Estado:** Completado. AI Agent Engine creado como servicio independiente con RAG y Message Router multi-canal.
+> - `backend/src/chatbot/ai-agent.engine.ts`: Motor IA con RAG context builder (servicios, horarios, precios, FAQs, clínicas, slots disponibles), OpenAI function-calling (check_availability, schedule_appointment, cancel_appointment, identify_patient), fallback keyword-based intent classification
+> - `backend/src/chatbot/message-router.service.ts`: Router multi-canal (WhatsApp/WebChat/SMS), pipeline: session → human handoff check → AI engine → quick replies, interfaces IncomingMessage/OutgoingMessage/ChatAction
+> - `backend/src/chatbot/chat-session.service.ts`: Gestión de sesiones en memoria con auto-expiración 30min, dual-index por ID y sender composite key
+> - `backend/src/chatbot/chatbot.service.ts`: Refactorizado para delegar a AIAgentEngine con fallback a keyword matching
 
-### Paso 2.2: Web Chat
+1. ✅ Extraer lógica de AI del chatbot WhatsApp
+2. ✅ Crear AIAgentEngine como servicio independiente
+3. ✅ Implementar RAG con datos del provider
+4. ✅ Crear MessageRouter para multi-canal
 
-1. Implementar WebSocket gateway (Socket.io)
-2. Crear widget de chat embeddable
-3. Integrar con AIAgentEngine
-4. Crear UI de chat en el portal del paciente
+### Paso 2.2: Web Chat ✅ COMPLETADO
 
-### Paso 2.3: Configuración del Asistente
+> **Estado:** Completado. WebSocket gateway con Socket.io y widget de chat embeddable en frontend.
+> - `backend/src/chatbot/chat.gateway.ts`: WebSocket gateway en namespace `/chat`, eventos: connection, message, end_session, join_staff, human handoff notifications
+> - `backend/src/chatbot/chat.controller.ts`: REST controller público (POST /chat/message, POST /chat/end-session) para widget sin WebSocket
+> - `frontend/src/components/chat/ChatWidget.tsx`: Widget flotante con soporte de temas (blue/green/purple/red), typing indicator, quick reply actions, responsive, auto-scroll
 
-1. Actualizar ChatbotConfig para multi-canal
-2. Crear UI de configuración del asistente
-3. Agregar FAQs personalizables
-4. Implementar métricas del chatbot
+1. ✅ Implementar WebSocket gateway (Socket.io)
+2. ✅ Crear widget de chat embeddable
+3. ✅ Integrar con AIAgentEngine
+4. ✅ Crear UI de chat en el portal del paciente
+
+### Paso 2.3: Configuración del Asistente ✅ COMPLETADO
+
+> **Estado:** Completado. ChatbotConfig actualizado con soporte multi-canal, FAQs, métricas y analytics.
+> - `backend/prisma/schema.prisma`: 11 nuevos campos en ChatbotConfig (enabledChannels, webChatTheme, webChatPosition, faqs, escalationEmail, escalationPhone, maxUnanswered, specialInstructions, cancellationPolicy, paymentMethods)
+> - `backend/src/chatbot/dto/chatbot-config.dto.ts`: 10 nuevas propiedades con class-validator
+> - `backend/src/chatbot/chatbot-config.service.ts`: System prompt incluye FAQs, instrucciones especiales, política de cancelación, métodos de pago
+> - `backend/src/chatbot/chatbot-config.controller.ts`: Endpoints de métricas (GET /chatbot-config/metrics) y sesiones activas (GET /chatbot-config/sessions)
+> - `backend/src/chatbot/chat-metrics.service.ts`: Analytics en memoria con conversationStart/End, logMessage, getMetrics (booking rate, handoff rate, top intents, channel breakdown)
+> - `frontend/src/pages/ChatbotConfigPage.tsx`: 3 tabs (General, Channels, FAQs) con gestión de canales habilitados, tema del widget, FAQs CRUD
+> - `frontend/src/services/api.ts`: webChatAPI object, campos renombrados clinic→practice
+
+1. ✅ Actualizar ChatbotConfig para multi-canal
+2. ✅ Crear UI de configuración del asistente
+3. ✅ Agregar FAQs personalizables
+4. ✅ Implementar métricas del chatbot
 
 ---
 

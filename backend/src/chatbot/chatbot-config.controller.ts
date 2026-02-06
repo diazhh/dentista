@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -13,12 +14,18 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ChatbotConfigService } from './chatbot-config.service';
+import { ChatMetricsService } from './chat-metrics.service';
+import { ChatSessionService } from './chat-session.service';
 import { CreateChatbotConfigDto, UpdateChatbotConfigDto } from './dto/chatbot-config.dto';
 
 @Controller('chatbot-config')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ChatbotConfigController {
-  constructor(private readonly chatbotConfigService: ChatbotConfigService) {}
+  constructor(
+    private readonly chatbotConfigService: ChatbotConfigService,
+    private readonly chatMetricsService: ChatMetricsService,
+    private readonly chatSessionService: ChatSessionService,
+  ) {}
 
   /**
    * Get chatbot configuration for current tenant
@@ -79,6 +86,34 @@ export class ChatbotConfigController {
   async deleteConfig(@Request() req: any) {
     const tenantId = req.user.tenantId;
     return this.chatbotConfigService.deleteConfig(tenantId);
+  }
+
+  /**
+   * Get chatbot metrics/analytics
+   */
+  @Get('metrics')
+  @Roles('PROVIDER', 'SUPER_ADMIN')
+  async getMetrics(
+    @Request() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const tenantId = req.user.tenantId;
+    return this.chatMetricsService.getMetrics(
+      tenantId,
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined,
+    );
+  }
+
+  /**
+   * Get active chat sessions (for human handoff dashboard)
+   */
+  @Get('sessions')
+  @Roles('PROVIDER', 'STAFF_RECEPTIONIST', 'SUPER_ADMIN')
+  async getActiveSessions(@Request() req: any) {
+    const tenantId = req.user.tenantId;
+    return this.chatSessionService.getActiveSessions(tenantId);
   }
 
   /**

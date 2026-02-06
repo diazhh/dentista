@@ -33,7 +33,9 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.0",
+    "@nestjs/platform-socket.io": "^10.4.22",
     "@nestjs/swagger": "^7.1.17",
+    "@nestjs/websockets": "^10.4.22",
     "@prisma/client": "^5.8.0",
     "@types/multer": "^2.0.0",
     "@types/nodemailer": "^7.0.4",
@@ -62,8 +64,10 @@
     "qrcode": "^1.5.4",
     "reflect-metadata": "^0.1.14",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.8.3",
     "stripe": "^20.3.0",
-    "twilio": "^5.11.1"
+    "twilio": "^5.11.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.2.1",
@@ -75,6 +79,7 @@
     "@types/node": "^20.10.6",
     "@types/passport-jwt": "^4.0.0",
     "@types/passport-local": "^1.0.38",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.16.0",
     "eslint": "^8.56.0",

@@ -409,10 +409,10 @@ export const chatbotConfigAPI = {
     isEnabled?: boolean;
     welcomeMessage?: string;
     fallbackMessage?: string;
-    clinicName?: string;
-    clinicAddress?: string;
-    clinicPhone?: string;
-    clinicWebsite?: string;
+    practiceName?: string;
+    practiceAddress?: string;
+    practicePhone?: string;
+    practiceWebsite?: string;
     operatingHours?: Record<string, { open: string; close: string } | null>;
     pricingInfo?: Array<{ service: string; price: number; description?: string }>;
     aiModel?: string;
@@ -425,12 +425,42 @@ export const chatbotConfigAPI = {
     requireIdentification?: boolean;
     humanHandoffKeywords?: string[];
     maxMessagesPerHour?: number;
+    enabledChannels?: string[];
+    webChatTheme?: string;
+    webChatPosition?: string;
+    faqs?: Array<{ question: string; answer: string }>;
+    escalationEmail?: string;
+    escalationPhone?: string;
+    maxUnanswered?: number;
+    specialInstructions?: string;
+    cancellationPolicy?: string;
+    paymentMethods?: string[];
   }) => {
     const response = await api.put('/chatbot-config', data);
     return response.data;
   },
   testChatbot: async (message: string) => {
     const response = await api.post('/chatbot-config/test', { message });
+    return response.data;
+  },
+};
+
+// Web Chat API (for chat widget)
+export const webChatAPI = {
+  sendMessage: async (tenantId: string, message: string, sessionId?: string) => {
+    const response = await api.post('/chat/message', { tenantId, message, sessionId });
+    return response.data;
+  },
+  endSession: async (sessionId: string) => {
+    const response = await api.post('/chat/end-session', { sessionId });
+    return response.data;
+  },
+  getMetrics: async (params?: { startDate?: string; endDate?: string }) => {
+    const response = await api.get('/chatbot-config/metrics', { params });
+    return response.data;
+  },
+  getActiveSessions: async () => {
+    const response = await api.get('/chatbot-config/sessions');
     return response.data;
   },
 };
