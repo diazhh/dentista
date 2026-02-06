@@ -47,7 +47,7 @@ export const createAbilityFor = (user: {
         return build();
     }
 
-    // DENTIST: Full tenant access
+    // PROVIDER: Full tenant access
     if (user.role === 'DENTIST') {
         can(Action.Manage, 'Patient');
         can(Action.Manage, 'Appointment');

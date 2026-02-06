@@ -5,7 +5,7 @@ import { whatsappAPI } from '../services/api';
 
 export default function WhatsappSettingsPage() {
     const [testNumber, setTestNumber] = useState('');
-    const [testMessage, setTestMessage] = useState('Hola! Este es un mensaje de prueba desde DentiCloud.');
+    const [testMessage, setTestMessage] = useState('Hola! Este es un mensaje de prueba desde MediCloud.');
 
     const { data: statusData, refetch, isLoading: isLoadingStatus } = useQuery({
         queryKey: ['whatsappStatus'],

@@ -30,17 +30,17 @@ export class InvoicesService {
     return result;
   }
 
-  async create(dto: CreateInvoiceDto, dentistId: string, tenantId: string) {
-    const relation = await this.prisma.patientDentistRelation.findFirst({
+  async create(dto: CreateInvoiceDto, providerId: string, tenantId: string) {
+    const relation = await this.prisma.providerPatientRelation.findFirst({
       where: {
         patientId: dto.patientId,
-        dentistId,
+        providerId,
         isActive: true,
       },
     });
 
     if (!relation) {
-      throw new ForbiddenException('Patient is not associated with this dentist');
+      throw new ForbiddenException('Patient is not associated with this provider');
     }
 
     const subtotal = dto.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
@@ -54,7 +54,7 @@ export class InvoicesService {
       data: {
         invoiceNumber,
         patientId: dto.patientId,
-        dentistId,
+        providerId,
         tenantId,
         treatmentPlanId: dto.treatmentPlanId,
         issueDate: new Date(dto.issueDate),
@@ -89,9 +89,9 @@ export class InvoicesService {
     });
   }
 
-  async findAll(dentistId: string, tenantId: string, patientId?: string, status?: string) {
+  async findAll(providerId: string, tenantId: string, patientId?: string, status?: string) {
     const where: any = {
-      dentistId,
+      providerId,
       tenantId,
     };
 
@@ -123,11 +123,11 @@ export class InvoicesService {
     });
   }
 
-  async findOne(id: string, dentistId: string, tenantId: string) {
+  async findOne(id: string, providerId: string, tenantId: string) {
     const invoice = await this.prisma.invoice.findFirst({
       where: {
         id,
-        dentistId,
+        providerId,
         tenantId,
       },
       include: {
@@ -162,8 +162,8 @@ export class InvoicesService {
     return invoice;
   }
 
-  async update(id: string, dto: UpdateInvoiceDto, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async update(id: string, dto: UpdateInvoiceDto, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     let updateData: any = {
       issueDate: dto.issueDate ? new Date(dto.issueDate) : undefined,
@@ -205,8 +205,8 @@ export class InvoicesService {
     });
   }
 
-  async updateStatus(id: string, status: string, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async updateStatus(id: string, status: string, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.invoice.update({
       where: { id },
@@ -225,17 +225,17 @@ export class InvoicesService {
     });
   }
 
-  async remove(id: string, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async remove(id: string, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.invoice.delete({
       where: { id },
     });
   }
 
-  async getStats(dentistId: string, tenantId: string, startDate?: string, endDate?: string) {
+  async getStats(providerId: string, tenantId: string, startDate?: string, endDate?: string) {
     const where: any = {
-      dentistId,
+      providerId,
       tenantId,
     };
 
@@ -306,7 +306,7 @@ export class InvoicesService {
 
     const monthlyInvoices = await this.prisma.invoice.findMany({
       where: {
-        dentistId,
+        providerId,
         tenantId,
         issueDate: {
           gte: sixMonthsAgo,

@@ -2,9 +2,9 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
-import { CreateOperatoryDto } from './dto/create-operatory.dto';
-import { UpdateOperatoryDto } from './dto/update-operatory.dto';
-import { AssignOperatoryDto } from './dto/assign-operatory.dto';
+import { CreateConsultationRoomDto } from './dto/create-consultation-room.dto';
+import { UpdateConsultationRoomDto } from './dto/update-consultation-room.dto';
+import { AssignRoomDto } from './dto/assign-room.dto';
 
 @Injectable()
 export class ClinicsService {
@@ -18,7 +18,7 @@ export class ClinicsService {
         createdBy,
       },
       include: {
-        operatories: true,
+        rooms: true,
       },
     });
   }
@@ -27,7 +27,7 @@ export class ClinicsService {
     return this.prisma.clinic.findMany({
       where: { isActive: true },
       include: {
-        operatories: {
+        rooms: {
           where: { isActive: true },
         },
       },
@@ -38,10 +38,10 @@ export class ClinicsService {
     const clinic = await this.prisma.clinic.findUnique({
       where: { id },
       include: {
-        operatories: {
+        rooms: {
           where: { isActive: true },
           include: {
-            operatoryAssignments: {
+            roomAssignments: {
               where: { isActive: true },
             },
           },
@@ -63,7 +63,7 @@ export class ClinicsService {
       where: { id },
       data: updateClinicDto,
       include: {
-        operatories: true,
+        rooms: true,
       },
     });
   }
@@ -77,107 +77,107 @@ export class ClinicsService {
     });
   }
 
-  // Operatories CRUD
-  async createOperatory(createOperatoryDto: CreateOperatoryDto) {
+  // Consultation Rooms CRUD
+  async createConsultationRoom(createConsultationRoomDto: CreateConsultationRoomDto) {
     // Verify clinic exists
-    await this.findOneClinic(createOperatoryDto.clinicId);
+    await this.findOneClinic(createConsultationRoomDto.clinicId);
 
-    return this.prisma.operatory.create({
-      data: createOperatoryDto,
+    return this.prisma.consultationRoom.create({
+      data: createConsultationRoomDto,
       include: {
         clinic: true,
       },
     });
   }
 
-  async findAllOperatories(clinicId?: string) {
+  async findAllConsultationRooms(clinicId?: string) {
     const where: any = { isActive: true };
     if (clinicId) {
       where.clinicId = clinicId;
     }
 
-    return this.prisma.operatory.findMany({
+    return this.prisma.consultationRoom.findMany({
       where,
       include: {
         clinic: true,
-        operatoryAssignments: {
+        roomAssignments: {
           where: { isActive: true },
         },
       },
     });
   }
 
-  async findOneOperatory(id: string) {
-    const operatory = await this.prisma.operatory.findUnique({
+  async findOneConsultationRoom(id: string) {
+    const room = await this.prisma.consultationRoom.findUnique({
       where: { id },
       include: {
         clinic: true,
-        operatoryAssignments: {
+        roomAssignments: {
           where: { isActive: true },
         },
       },
     });
 
-    if (!operatory) {
-      throw new NotFoundException('Operatory not found');
+    if (!room) {
+      throw new NotFoundException('Consultation room not found');
     }
 
-    return operatory;
+    return room;
   }
 
-  async updateOperatory(id: string, updateOperatoryDto: UpdateOperatoryDto) {
-    await this.findOneOperatory(id);
+  async updateConsultationRoom(id: string, updateConsultationRoomDto: UpdateConsultationRoomDto) {
+    await this.findOneConsultationRoom(id);
 
-    return this.prisma.operatory.update({
+    return this.prisma.consultationRoom.update({
       where: { id },
-      data: updateOperatoryDto,
+      data: updateConsultationRoomDto,
       include: {
         clinic: true,
       },
     });
   }
 
-  async removeOperatory(id: string) {
-    await this.findOneOperatory(id);
+  async removeConsultationRoom(id: string) {
+    await this.findOneConsultationRoom(id);
 
-    return this.prisma.operatory.update({
+    return this.prisma.consultationRoom.update({
       where: { id },
       data: { isActive: false },
     });
   }
 
-  // Operatory Assignments
-  async assignOperatory(assignOperatoryDto: AssignOperatoryDto) {
-    // Verify operatory exists
-    await this.findOneOperatory(assignOperatoryDto.operatoryId);
+  // Room Assignments
+  async assignRoom(assignRoomDto: AssignRoomDto) {
+    // Verify consultation room exists
+    await this.findOneConsultationRoom(assignRoomDto.roomId);
 
-    // Verify dentist exists
-    const dentist = await this.prisma.user.findUnique({
-      where: { id: assignOperatoryDto.dentistId },
+    // Verify provider exists
+    const provider = await this.prisma.user.findUnique({
+      where: { id: assignRoomDto.providerId },
       include: { ownedTenants: true },
     });
 
-    if (!dentist || dentist.role !== 'DENTIST') {
-      throw new NotFoundException('Dentist not found');
+    if (!provider || provider.role !== 'PROVIDER') {
+      throw new NotFoundException('Provider not found');
     }
 
-    if (!dentist.ownedTenants || dentist.ownedTenants.length === 0) {
-      throw new ForbiddenException('Dentist does not have a tenant');
+    if (!provider.ownedTenants || provider.ownedTenants.length === 0) {
+      throw new ForbiddenException('Provider does not have a tenant');
     }
 
-    const tenantId = dentist.ownedTenants[0].id;
+    const tenantId = provider.ownedTenants[0].id;
 
-    return this.prisma.operatoryAssignment.create({
+    return this.prisma.roomAssignment.create({
       data: {
-        operatoryId: assignOperatoryDto.operatoryId,
-        dentistId: assignOperatoryDto.dentistId,
+        roomId: assignRoomDto.roomId,
+        providerId: assignRoomDto.providerId,
         tenantId: tenantId,
-        schedule: assignOperatoryDto.schedule,
-        startDate: new Date(assignOperatoryDto.startDate),
-        endDate: assignOperatoryDto.endDate ? new Date(assignOperatoryDto.endDate) : null,
+        schedule: assignRoomDto.schedule,
+        startDate: new Date(assignRoomDto.startDate),
+        endDate: assignRoomDto.endDate ? new Date(assignRoomDto.endDate) : null,
       },
       include: {
-        operatory: {
+        room: {
           include: {
             clinic: true,
           },
@@ -186,19 +186,19 @@ export class ClinicsService {
     });
   }
 
-  async findOperatoryAssignments(operatoryId?: string, dentistId?: string) {
+  async findRoomAssignments(roomId?: string, providerId?: string) {
     const where: any = { isActive: true };
-    if (operatoryId) {
-      where.operatoryId = operatoryId;
+    if (roomId) {
+      where.roomId = roomId;
     }
-    if (dentistId) {
-      where.dentistId = dentistId;
+    if (providerId) {
+      where.providerId = providerId;
     }
 
-    return this.prisma.operatoryAssignment.findMany({
+    return this.prisma.roomAssignment.findMany({
       where,
       include: {
-        operatory: {
+        room: {
           include: {
             clinic: true,
           },
@@ -207,61 +207,61 @@ export class ClinicsService {
     });
   }
 
-  async removeOperatoryAssignment(id: string) {
-    const assignment = await this.prisma.operatoryAssignment.findUnique({
+  async removeRoomAssignment(id: string) {
+    const assignment = await this.prisma.roomAssignment.findUnique({
       where: { id },
     });
 
     if (!assignment) {
-      throw new NotFoundException('Operatory assignment not found');
+      throw new NotFoundException('Room assignment not found');
     }
 
-    return this.prisma.operatoryAssignment.update({
+    return this.prisma.roomAssignment.update({
       where: { id },
       data: { isActive: false },
     });
   }
 
   async getStats() {
-    // Obtener estadísticas generales de clínicas
+    // Obtener estadisticas generales de clinicas
     const [
       totalClinics,
       activeClinics,
-      totalOperatories,
-      activeOperatories,
+      totalRooms,
+      activeRooms,
       totalAssignments,
       activeAssignments,
     ] = await Promise.all([
       this.prisma.clinic.count(),
       this.prisma.clinic.count({ where: { isActive: true } }),
-      this.prisma.operatory.count(),
-      this.prisma.operatory.count({ where: { isActive: true } }),
-      this.prisma.operatoryAssignment.count(),
-      this.prisma.operatoryAssignment.count({ where: { isActive: true } }),
+      this.prisma.consultationRoom.count(),
+      this.prisma.consultationRoom.count({ where: { isActive: true } }),
+      this.prisma.roomAssignment.count(),
+      this.prisma.roomAssignment.count({ where: { isActive: true } }),
     ]);
 
-    // Obtener clínicas con conteo de operatorios
-    const clinicsWithOperatories = await this.prisma.clinic.findMany({
+    // Obtener clinicas con conteo de consultorios
+    const clinicsWithRooms = await this.prisma.clinic.findMany({
       where: { isActive: true },
       select: {
         id: true,
         name: true,
         _count: {
           select: {
-            operatories: true,
+            rooms: true,
           },
         },
       },
     });
 
-    // Obtener distribución de operatorios por piso
-    const operatories = await this.prisma.operatory.findMany({
+    // Obtener distribucion de consultorios por piso
+    const rooms = await this.prisma.consultationRoom.findMany({
       where: { isActive: true },
       select: { floor: true },
     });
 
-    const operatoriesByFloor = operatories.reduce((acc, op) => {
-      const floor = `Piso ${op.floor}`;
+    const roomsByFloor = rooms.reduce((acc, room) => {
+      const floor = `Piso ${room.floor}`;
       acc[floor] = (acc[floor] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
@@ -271,18 +271,18 @@ export class ClinicsService {
         totalClinics,
         activeClinics,
         inactiveClinics: totalClinics - activeClinics,
-        totalOperatories,
-        activeOperatories,
-        inactiveOperatories: totalOperatories - activeOperatories,
+        totalRooms,
+        activeRooms,
+        inactiveRooms: totalRooms - activeRooms,
         totalAssignments,
         activeAssignments,
       },
-      clinicsWithOperatories: clinicsWithOperatories.map(c => ({
+      clinicsWithRooms: clinicsWithRooms.map(c => ({
         id: c.id,
         name: c.name,
-        operatoryCount: c._count.operatories,
+        roomCount: c._count.rooms,
       })),
-      operatoriesByFloor: Object.entries(operatoriesByFloor).map(([floor, count]) => ({
+      roomsByFloor: Object.entries(roomsByFloor).map(([floor, count]) => ({
         floor,
         count,
       })),

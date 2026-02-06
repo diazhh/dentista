@@ -103,7 +103,7 @@ export class ChatbotService {
       },
       include: {
         user: true,
-        patientDentistRelations: {
+        providerPatientRelations: {
           where: { isActive: true },
           include: { tenant: true },
         },
@@ -114,7 +114,7 @@ export class ChatbotService {
   private async handleGreeting(context: ConversationContext): Promise<string> {
     const greeting = context.patientName
       ? `¡Hola ${context.patientName}! 👋`
-      : '¡Hola! 👋 Bienvenido a DentiCloud.';
+      : '¡Hola! 👋 Bienvenido a MediCloud.';
 
     return `${greeting}
 
@@ -124,7 +124,7 @@ export class ChatbotService {
 2️⃣ Ver mis próximas citas
 3️⃣ Cancelar o reprogramar
 4️⃣ Consultar horarios
-5️⃣ Preguntas sobre tratamientos
+5️⃣ Preguntas sobre servicios
 
 Escribe el número de la opción o describe tu consulta.`;
   }
@@ -181,11 +181,11 @@ ${appointmentsList}
 
 ¿Qué tipo de consulta necesitas?
 
-1️⃣ Limpieza dental
-2️⃣ Revisión general
-3️⃣ Ortodoncia
-4️⃣ Endodoncia
-5️⃣ Otro tratamiento
+1️⃣ Consulta general
+2️⃣ Revisión de seguimiento
+3️⃣ Consulta especializada
+4️⃣ Procedimiento
+5️⃣ Otro servicio
 
 Escribe el número o describe tu necesidad.`;
   }
@@ -242,14 +242,14 @@ Escribe el número de la cita que deseas modificar.`;
   }
 
   private async handleScheduleQuery(context: ConversationContext): Promise<string> {
-    // Get clinic schedule - this would typically come from the database
+    // Get practice schedule - this would typically come from the database
     return `📅 *Horarios de Atención*
 
 Lunes a Viernes: 8:00 AM - 6:00 PM
 Sábados: 9:00 AM - 2:00 PM
 Domingos: Cerrado
 
-Los horarios pueden variar según el doctor y tipo de tratamiento.
+Los horarios pueden variar según el profesional y tipo de servicio.
 
 ¿Deseas agendar una cita? Escribe "agendar cita" para ver disponibilidad.`;
   }
@@ -258,14 +258,7 @@ Los horarios pueden variar según el doctor y tipo de tratamiento.
     // General pricing info
     return `💰 *Información de Precios*
 
-Nuestros servicios incluyen:
-• Limpieza dental: desde $50
-• Consulta general: $30
-• Radiografía dental: $25
-• Blanqueamiento: desde $150
-• Ortodoncia: consultar
-
-Los precios pueden variar según el caso específico.
+Los precios de nuestros servicios pueden variar según el caso específico.
 
 Para una cotización personalizada, te recomendamos agendar una consulta de evaluación.
 
@@ -276,9 +269,9 @@ Para una cotización personalizada, te recomendamos agendar una consulta de eval
     // This would typically come from the tenant's configuration
     return `📍 *Ubicación*
 
-Puedes encontrarnos en nuestra clínica dental.
+Puedes encontrarnos en nuestra práctica médica.
 
-Para obtener la dirección exacta y cómo llegar, por favor comunícate con nosotros al teléfono de la clínica o visita nuestra página web.
+Para obtener la dirección exacta y cómo llegar, por favor comunícate con nosotros al teléfono de la práctica o visita nuestra página web.
 
 ¿Necesitas algo más?`;
   }
@@ -320,7 +313,7 @@ También puedes escribir tu consulta directamente y te ayudaré.`;
         } else {
           return `No encontré un registro con ese documento.
 
-¿Es la primera vez que nos visitas? Te recomendamos llamar a la clínica para registrarte.
+¿Es la primera vez que nos visitas? Te recomendamos llamar a la práctica para registrarte.
 
 ¿O prefieres intentar con otro documento?`;
         }
@@ -337,7 +330,7 @@ También puedes escribir tu consulta directamente y te ayudaré.`;
         context.awaitingInput = undefined;
         return `Gracias por tu preferencia.
 
-Para confirmar la disponibilidad exacta y agendar tu cita, por favor contacta directamente a la clínica o espera a que un miembro de nuestro equipo te contacte.
+Para confirmar la disponibilidad exacta y agendar tu cita, por favor contacta directamente a la práctica o espera a que un miembro de nuestro equipo te contacte.
 
 ¿Hay algo más en lo que pueda ayudarte?`;
 
@@ -354,13 +347,13 @@ Escribe el número de tu elección.`;
       case 'modify_action':
         context.awaitingInput = undefined;
         if (message === '1' || message.includes('cancelar')) {
-          return `Para confirmar la cancelación de tu cita, por favor contacta directamente a la clínica.
+          return `Para confirmar la cancelación de tu cita, por favor contacta directamente a la práctica.
 
 Recuerda que las cancelaciones deben hacerse con al menos 24 horas de anticipación.
 
 ¿Hay algo más en lo que pueda ayudarte?`;
         } else {
-          return `Para reprogramar tu cita, por favor contacta directamente a la clínica con tu preferencia de nueva fecha.
+          return `Para reprogramar tu cita, por favor contacta directamente a la práctica con tu preferencia de nueva fecha.
 
 ¿Hay algo más en lo que pueda ayudarte?`;
         }
@@ -377,17 +370,17 @@ Recuerda que las cancelaciones deben hacerse con al menos 24 horas de anticipaci
     }
 
     try {
-      const systemPrompt = `Eres un asistente virtual amable y profesional para una clínica dental llamada DentiCloud.
+      const systemPrompt = `Eres un asistente virtual amable y profesional para una práctica médica llamada MediCloud.
 Tu objetivo es ayudar a los pacientes con:
-- Información sobre servicios dentales
+- Información sobre servicios médicos
 - Agendar, cancelar o reprogramar citas
 - Responder preguntas frecuentes sobre tratamientos
-- Proporcionar información general de la clínica
+- Proporcionar información general de la práctica
 
 Reglas importantes:
 - Sé conciso y amable
 - Usa emojis de forma moderada
-- Si no puedes ayudar con algo específico, sugiere contactar directamente a la clínica
+- Si no puedes ayudar con algo específico, sugiere contactar directamente a la práctica
 - No proporciones diagnósticos médicos
 - No confirmes citas directamente, solo ayuda con el proceso
 ${context.patientName ? `El paciente se llama ${context.patientName}.` : 'El paciente no está identificado aún.'}`;
@@ -413,7 +406,7 @@ ${context.patientName ? `El paciente se llama ${context.patientName}.` : 'El pac
     return `Gracias por tu mensaje.
 
 Para una atención más personalizada, te recomiendo:
-- Llamar directamente a la clínica
+- Llamar directamente a la práctica
 - Escribir "ayuda" para ver las opciones disponibles
 
 ¿Hay algo específico en lo que pueda ayudarte?`;

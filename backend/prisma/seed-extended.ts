@@ -29,7 +29,7 @@ async function main() {
   const patients = [];
   for (const data of patientsData) {
     const password = await bcrypt.hash(data.documentId, 10);
-    
+
     const user = await prisma.user.upsert({
       where: { email: data.email },
       update: {},
@@ -61,21 +61,21 @@ async function main() {
       },
     });
 
-    // Create patient-dentist relation
-    await prisma.patientDentistRelation.upsert({
+    // Create provider-patient relation
+    await prisma.providerPatientRelation.upsert({
       where: {
-        patientId_dentistId: {
+        patientId_providerId: {
           patientId: patient.id,
-          dentistId: dentist.id,
+          providerId: dentist.id,
         },
       },
       update: {},
       create: {
         patientId: patient.id,
-        dentistId: dentist.id,
+        providerId: dentist.id,
         tenantId: tenant.id,
         isActive: true,
-        notes: `Paciente regular desde ${new Date().getFullYear() - 1}`,
+        providerNotes: `Paciente regular desde ${new Date().getFullYear() - 1}`,
       },
     });
 
@@ -103,7 +103,7 @@ async function main() {
     const appointment = await prisma.appointment.create({
       data: {
         patientId: mainPatient.id,
-        dentistId: dentist.id,
+        providerId: dentist.id,
         tenantId: tenant.id,
         appointmentDate: data.date,
         duration: data.duration,
@@ -120,7 +120,7 @@ async function main() {
   const treatmentPlan1 = await prisma.treatmentPlan.create({
     data: {
       patientId: mainPatient.id,
-      dentistId: dentist.id,
+      providerId: dentist.id,
       tenantId: tenant.id,
       title: 'Plan de Tratamiento Integral 2025',
       description: 'Tratamiento completo para restauración dental',
@@ -176,7 +176,7 @@ async function main() {
   const treatmentPlan2 = await prisma.treatmentPlan.create({
     data: {
       patientId: mainPatient.id,
-      dentistId: dentist.id,
+      providerId: dentist.id,
       tenantId: tenant.id,
       title: 'Plan Preventivo 2026',
       description: 'Mantenimiento y prevención',
@@ -214,7 +214,7 @@ async function main() {
   const odontogram1 = await prisma.odontogram.create({
     data: {
       patientId: mainPatient.id,
-      dentistId: dentist.id,
+      providerId: dentist.id,
       tenantId: tenant.id,
       date: new Date('2025-12-01'),
       notes: 'Evaluación inicial - Se detecta caries en molar 36 y necesidad de endodoncia en molar 46',
@@ -247,7 +247,7 @@ async function main() {
   const odontogram2 = await prisma.odontogram.create({
     data: {
       patientId: mainPatient.id,
-      dentistId: dentist.id,
+      providerId: dentist.id,
       tenantId: tenant.id,
       date: new Date('2026-01-08'),
       notes: 'Control post-tratamiento - Molar 36 restaurado con resina, molar 46 pendiente de endodoncia',
@@ -275,7 +275,7 @@ async function main() {
   const invoice1 = await prisma.invoice.create({
     data: {
       patientId: mainPatient.id,
-      dentistId: dentist.id,
+      providerId: dentist.id,
       tenantId: tenant.id,
       invoiceNumber: 'INV-2025-001',
       issueDate: new Date('2025-12-01'),
@@ -303,7 +303,7 @@ async function main() {
   const invoice2 = await prisma.invoice.create({
     data: {
       patientId: mainPatient.id,
-      dentistId: dentist.id,
+      providerId: dentist.id,
       tenantId: tenant.id,
       invoiceNumber: 'INV-2025-002',
       issueDate: new Date('2025-12-10'),
@@ -331,7 +331,7 @@ async function main() {
   const invoice3 = await prisma.invoice.create({
     data: {
       patientId: mainPatient.id,
-      dentistId: dentist.id,
+      providerId: dentist.id,
       tenantId: tenant.id,
       treatmentPlanId: treatmentPlan1.id,
       invoiceNumber: 'INV-2026-001',
@@ -420,7 +420,7 @@ async function main() {
     await prisma.document.create({
       data: {
         patientId: mainPatient.id,
-        dentistId: dentist.id,
+        providerId: dentist.id,
         tenantId: tenant.id,
         type: doc.type,
         title: doc.title,
@@ -440,16 +440,16 @@ async function main() {
   for (let i = 1; i < patients.length; i++) {
     const patient = patients[i];
     const numAppointments = Math.floor(Math.random() * 3) + 1;
-    
+
     for (let j = 0; j < numAppointments; j++) {
       const daysOffset = Math.floor(Math.random() * 60) - 30;
       const appointmentDate = new Date();
       appointmentDate.setDate(appointmentDate.getDate() + daysOffset);
-      
+
       await prisma.appointment.create({
         data: {
           patientId: patient.id,
-          dentistId: dentist.id,
+          providerId: dentist.id,
           tenantId: tenant.id,
           appointmentDate,
           duration: 60,

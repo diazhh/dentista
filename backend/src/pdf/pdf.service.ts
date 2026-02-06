@@ -77,7 +77,7 @@ export class PdfService implements OnModuleInit {
         {
           columns: [
             {
-              text: tenant?.name || 'DentiCloud',
+              text: tenant?.name || 'MediCloud',
               style: 'header',
               width: '*',
             },
@@ -259,7 +259,7 @@ export class PdfService implements OnModuleInit {
         color: '#4B5563',
       },
       footer: (currentPage: number, pageCount: number) => ({
-        text: `Página ${currentPage} de ${pageCount} | Generado por DentiCloud`,
+        text: `Página ${currentPage} de ${pageCount} | Generado por MediCloud`,
         alignment: 'center' as const,
         fontSize: 8,
         color: '#9CA3AF',

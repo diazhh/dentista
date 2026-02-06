@@ -175,7 +175,7 @@ export default function PermissionsPage() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'DENTIST':
+      case 'DENTIST': // Provider role
         return 'bg-purple-100 text-purple-800';
       case 'STAFF_RECEPTIONIST':
         return 'bg-blue-100 text-blue-800';

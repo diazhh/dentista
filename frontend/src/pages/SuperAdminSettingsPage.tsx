@@ -3,8 +3,8 @@ import { Save, Bell, Shield, Database, Globe } from 'lucide-react';
 
 export default function SuperAdminSettingsPage() {
   const [settings, setSettings] = useState({
-    platformName: 'DentiCloud',
-    supportEmail: 'support@denticloud.com',
+    platformName: 'MediCloud',
+    supportEmail: 'support@medicloud.com',
     maxUploadSize: 10,
     sessionTimeout: 24,
     enableEmailNotifications: true,
@@ -40,7 +40,7 @@ export default function SuperAdminSettingsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Configuracion Global</h1>
-          <p className="text-sm sm:text-base text-gray-600">Configuracion de la plataforma DentiCloud</p>
+          <p className="text-sm sm:text-base text-gray-600">Configuracion de la plataforma MediCloud</p>
         </div>
         <button
           onClick={handleSave}

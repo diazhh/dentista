@@ -3,9 +3,9 @@ import { ApiBearerAuth, ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger'
 import { ClinicsService } from './clinics.service';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
-import { CreateOperatoryDto } from './dto/create-operatory.dto';
-import { UpdateOperatoryDto } from './dto/update-operatory.dto';
-import { AssignOperatoryDto } from './dto/assign-operatory.dto';
+import { CreateConsultationRoomDto } from './dto/create-consultation-room.dto';
+import { UpdateConsultationRoomDto } from './dto/update-consultation-room.dto';
+import { AssignRoomDto } from './dto/assign-room.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('clinics')
@@ -52,59 +52,59 @@ export class ClinicsController {
     return this.clinicsService.removeClinic(id);
   }
 
-  // Operatories endpoints
-  @Post('operatories')
-  @ApiOperation({ summary: 'Create a new operatory (Super Admin only)' })
-  createOperatory(@Body() createOperatoryDto: CreateOperatoryDto) {
-    return this.clinicsService.createOperatory(createOperatoryDto);
+  // Consultation Rooms endpoints
+  @Post('rooms')
+  @ApiOperation({ summary: 'Create a new consultation room (Super Admin only)' })
+  createConsultationRoom(@Body() createConsultationRoomDto: CreateConsultationRoomDto) {
+    return this.clinicsService.createConsultationRoom(createConsultationRoomDto);
   }
 
-  @Get('operatories/all')
-  @ApiOperation({ summary: 'Get all operatories' })
+  @Get('rooms/all')
+  @ApiOperation({ summary: 'Get all consultation rooms' })
   @ApiQuery({ name: 'clinicId', required: false, description: 'Filter by clinic ID' })
-  findAllOperatories(@Query('clinicId') clinicId?: string) {
-    return this.clinicsService.findAllOperatories(clinicId);
+  findAllConsultationRooms(@Query('clinicId') clinicId?: string) {
+    return this.clinicsService.findAllConsultationRooms(clinicId);
   }
 
-  @Get('operatories/:id')
-  @ApiOperation({ summary: 'Get operatory by ID' })
-  findOneOperatory(@Param('id') id: string) {
-    return this.clinicsService.findOneOperatory(id);
+  @Get('rooms/:id')
+  @ApiOperation({ summary: 'Get consultation room by ID' })
+  findOneConsultationRoom(@Param('id') id: string) {
+    return this.clinicsService.findOneConsultationRoom(id);
   }
 
-  @Patch('operatories/:id')
-  @ApiOperation({ summary: 'Update operatory (Super Admin only)' })
-  updateOperatory(@Param('id') id: string, @Body() updateOperatoryDto: UpdateOperatoryDto) {
-    return this.clinicsService.updateOperatory(id, updateOperatoryDto);
+  @Patch('rooms/:id')
+  @ApiOperation({ summary: 'Update consultation room (Super Admin only)' })
+  updateConsultationRoom(@Param('id') id: string, @Body() updateConsultationRoomDto: UpdateConsultationRoomDto) {
+    return this.clinicsService.updateConsultationRoom(id, updateConsultationRoomDto);
   }
 
-  @Delete('operatories/:id')
-  @ApiOperation({ summary: 'Delete operatory (Super Admin only)' })
-  removeOperatory(@Param('id') id: string) {
-    return this.clinicsService.removeOperatory(id);
+  @Delete('rooms/:id')
+  @ApiOperation({ summary: 'Delete consultation room (Super Admin only)' })
+  removeConsultationRoom(@Param('id') id: string) {
+    return this.clinicsService.removeConsultationRoom(id);
   }
 
-  // Operatory Assignments endpoints
-  @Post('operatories/assignments')
-  @ApiOperation({ summary: 'Assign operatory to dentist (Super Admin only)' })
-  assignOperatory(@Body() assignOperatoryDto: AssignOperatoryDto) {
-    return this.clinicsService.assignOperatory(assignOperatoryDto);
+  // Room Assignments endpoints
+  @Post('rooms/assignments')
+  @ApiOperation({ summary: 'Assign consultation room to provider (Super Admin only)' })
+  assignRoom(@Body() assignRoomDto: AssignRoomDto) {
+    return this.clinicsService.assignRoom(assignRoomDto);
   }
 
-  @Get('operatories/assignments/all')
-  @ApiOperation({ summary: 'Get operatory assignments' })
-  @ApiQuery({ name: 'operatoryId', required: false, description: 'Filter by operatory ID' })
-  @ApiQuery({ name: 'dentistId', required: false, description: 'Filter by dentist ID' })
-  findOperatoryAssignments(
-    @Query('operatoryId') operatoryId?: string,
-    @Query('dentistId') dentistId?: string,
+  @Get('rooms/assignments/all')
+  @ApiOperation({ summary: 'Get room assignments' })
+  @ApiQuery({ name: 'roomId', required: false, description: 'Filter by room ID' })
+  @ApiQuery({ name: 'providerId', required: false, description: 'Filter by provider ID' })
+  findRoomAssignments(
+    @Query('roomId') roomId?: string,
+    @Query('providerId') providerId?: string,
   ) {
-    return this.clinicsService.findOperatoryAssignments(operatoryId, dentistId);
+    return this.clinicsService.findRoomAssignments(roomId, providerId);
   }
 
-  @Delete('operatories/assignments/:id')
-  @ApiOperation({ summary: 'Remove operatory assignment (Super Admin only)' })
-  removeOperatoryAssignment(@Param('id') id: string) {
-    return this.clinicsService.removeOperatoryAssignment(id);
+  @Delete('rooms/assignments/:id')
+  @ApiOperation({ summary: 'Remove room assignment (Super Admin only)' })
+  removeRoomAssignment(@Param('id') id: string) {
+    return this.clinicsService.removeRoomAssignment(id);
   }
 }

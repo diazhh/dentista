@@ -269,8 +269,8 @@ export default function CalendarSyncPage() {
                   className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm sm:text-base"
                 >
                   <option value="both">Sincronización bidireccional</option>
-                  <option value="to_external">Solo de DentiCloud a externo</option>
-                  <option value="from_external">Solo de externo a DentiCloud</option>
+                  <option value="to_external">Solo de MediCloud a externo</option>
+                  <option value="from_external">Solo de externo a MediCloud</option>
                 </select>
               </div>
             </div>

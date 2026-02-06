@@ -25,7 +25,7 @@ export default function PatientDocuments() {
                     <div className="p-6 sm:p-8 text-center bg-gray-50">
                         <FileText className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-3" />
                         <h3 className="text-base sm:text-lg font-medium text-gray-900">No hay documentos</h3>
-                        <p className="text-sm sm:text-base text-gray-500">Tu dentista aun no ha compartido documentos contigo.</p>
+                        <p className="text-sm sm:text-base text-gray-500">Tu profesional aun no ha compartido documentos contigo.</p>
                     </div>
                 ) : (
                     <>

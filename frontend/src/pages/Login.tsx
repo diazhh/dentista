@@ -24,7 +24,7 @@ export default function Login() {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       // Navigate to dashboard directly instead of relying on RootRedirect
-      const storedUser = JSON.parse(localStorage.getItem('denticloud_user') || '{}');
+      const storedUser = JSON.parse(localStorage.getItem('medicloud_user') || '{}');
 
       if (storedUser.role === 'SUPER_ADMIN') {
         navigate('/superadmin', { replace: true });
@@ -50,7 +50,7 @@ export default function Login() {
       <div className="max-w-sm sm:max-w-md w-full space-y-6 sm:space-y-8">
         <div>
           <h2 className="mt-4 sm:mt-6 text-center text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900">
-            DentiCloud Admin
+            MediCloud Admin
           </h2>
           <p className="mt-2 text-center text-xs sm:text-sm text-gray-600">
             Inicia sesión en tu cuenta
@@ -153,7 +153,7 @@ export default function Login() {
 
         <div className="text-center text-xs sm:text-sm text-gray-600">
           <p>Credenciales de prueba:</p>
-          <p className="font-mono text-[10px] sm:text-xs mt-1">admin@dentista.com / Admin123!</p>
+          <p className="font-mono text-[10px] sm:text-xs mt-1">admin@medicloud.com / Admin123!</p>
         </div>
       </div>
     </div>

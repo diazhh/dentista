@@ -85,7 +85,7 @@ export default function PatientAppointments() {
                                             </div>
                                             <div className="flex items-center gap-1.5">
                                                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                <span className="truncate">{apt.operatory?.clinic?.name || apt.tenant?.name || 'Consultorio Principal'}</span>
+                                                <span className="truncate">{apt.room?.clinic?.name || apt.tenant?.name || 'Consultorio Principal'}</span>
                                             </div>
                                         </div>
                                     </div>

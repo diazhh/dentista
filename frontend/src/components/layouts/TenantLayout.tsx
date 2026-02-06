@@ -6,14 +6,11 @@ import {
   LayoutDashboard,
   Calendar,
   Users,
-  DollarSign,
-  FolderOpen,
-  Smile,
+  BarChart3,
   Settings,
   LogOut,
   Menu,
   X,
-  Stethoscope,
   MessageSquare,
   Building2,
   UserPlus,
@@ -74,30 +71,6 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
       description: 'Gestión de pacientes',
     },
     {
-      name: 'Odontogramas',
-      icon: Smile,
-      path: '/odontograms',
-      description: 'Registros dentales',
-    },
-    {
-      name: 'Tratamientos',
-      icon: Stethoscope,
-      path: '/treatment-plans',
-      description: 'Planes de tratamiento',
-    },
-    {
-      name: 'Facturas',
-      icon: DollarSign,
-      path: '/invoices',
-      description: 'Facturación y pagos',
-    },
-    {
-      name: 'Documentos',
-      icon: FolderOpen,
-      path: '/documents',
-      description: 'Archivos y documentos',
-    },
-    {
       name: 'Clínicas',
       icon: Building2,
       path: '/clinics',
@@ -108,6 +81,12 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
       icon: UserPlus,
       path: '/staff',
       description: 'Personal y colaboradores',
+    },
+    {
+      name: 'Reportes',
+      icon: BarChart3,
+      path: '/reports',
+      description: 'Reportes y analíticas',
     },
     {
       name: 'WhatsApp',
@@ -155,8 +134,8 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
         <div className="p-3 sm:p-4 flex items-center justify-between border-b border-blue-700">
           {(sidebarOpen || !isDesktop) && (
             <div>
-              <h1 className="text-lg sm:text-xl font-bold">DentiCloud</h1>
-              <p className="text-xs text-blue-300">Panel del Dentista</p>
+              <h1 className="text-lg sm:text-xl font-bold">MediCloud</h1>
+              <p className="text-xs text-blue-300">Panel Profesional</p>
             </div>
           )}
           <button
@@ -214,7 +193,7 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs sm:text-sm font-medium truncate">{user?.email}</p>
-                    <p className="text-xs text-blue-300">Dentista</p>
+                    <p className="text-xs text-blue-300">Profesional</p>
                   </div>
                 </div>
               </div>
@@ -250,7 +229,7 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 hidden sm:block truncate">
                   {menuItems.find((item) => isActive(item.path))?.description ||
-                    'Gestión de tu práctica dental'}
+                    'Gestión de tu práctica'}
                 </p>
               </div>
               <div className="flex items-center gap-2 sm:gap-4">
@@ -259,7 +238,7 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
                 </div>
                 <div className="text-right hidden md:block">
                   <p className="text-sm font-medium text-gray-900 truncate max-w-32 lg:max-w-none">{user?.email}</p>
-                  <p className="text-xs text-gray-500">Dentista</p>
+                  <p className="text-xs text-gray-500">Profesional</p>
                 </div>
               </div>
             </div>

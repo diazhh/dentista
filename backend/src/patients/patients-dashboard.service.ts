@@ -16,11 +16,11 @@ import {
 export class PatientsDashboardService {
   constructor(private prisma: PrismaService) {}
 
-  async validatePatientAccess(dentistId: string, tenantId: string, patientId: string): Promise<void> {
-    const relation = await this.prisma.patientDentistRelation.findFirst({
+  async validatePatientAccess(providerId: string, tenantId: string, patientId: string): Promise<void> {
+    const relation = await this.prisma.providerPatientRelation.findFirst({
       where: {
         patientId,
-        dentistId,
+        providerId,
         tenantId,
         isActive: true,
       },
@@ -33,16 +33,16 @@ export class PatientsDashboardService {
 
   async getDashboardSummary(
     patientId: string,
-    dentistId: string,
+    providerId: string,
     tenantId: string,
   ): Promise<DashboardSummaryDto> {
-    await this.validatePatientAccess(dentistId, tenantId, patientId);
+    await this.validatePatientAccess(providerId, tenantId, patientId);
 
     const [metrics, timeline, alerts, quickStats] = await Promise.all([
-      this.getMetrics(patientId, dentistId),
-      this.getRecentTimeline(patientId, dentistId),
-      this.getAlerts(patientId, dentistId),
-      this.getQuickStats(patientId, dentistId),
+      this.getMetrics(patientId, providerId),
+      this.getRecentTimeline(patientId, providerId),
+      this.getAlerts(patientId, providerId),
+      this.getQuickStats(patientId, providerId),
     ]);
 
     return {
@@ -55,7 +55,7 @@ export class PatientsDashboardService {
 
   private async getMetrics(
     patientId: string,
-    dentistId: string,
+    providerId: string,
   ): Promise<DashboardMetricsDto> {
     const now = new Date();
 
@@ -63,7 +63,7 @@ export class PatientsDashboardService {
     const nextAppointment = await this.prisma.appointment.findFirst({
       where: {
         patientId,
-        dentistId,
+        providerId,
         appointmentDate: { gte: now },
         status: 'SCHEDULED',
       },
@@ -74,7 +74,7 @@ export class PatientsDashboardService {
     const activeTreatments = await this.prisma.treatmentPlan.count({
       where: {
         patientId,
-        dentistId,
+        providerId,
         status: { in: ['PROPOSED', 'ACCEPTED', 'IN_PROGRESS'] },
       },
     });
@@ -83,7 +83,7 @@ export class PatientsDashboardService {
     const invoices = await this.prisma.invoice.findMany({
       where: {
         patientId,
-        dentistId,
+        providerId,
         status: { in: ['SENT', 'OVERDUE'] },
       },
       select: { balance: true },
@@ -94,7 +94,7 @@ export class PatientsDashboardService {
     const lastVisit = await this.prisma.appointment.findFirst({
       where: {
         patientId,
-        dentistId,
+        providerId,
         status: 'COMPLETED',
         appointmentDate: { lt: now },
       },
@@ -120,7 +120,7 @@ export class PatientsDashboardService {
 
   private async getRecentTimeline(
     patientId: string,
-    dentistId: string,
+    providerId: string,
   ): Promise<TimelineItemDto[]> {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -131,7 +131,7 @@ export class PatientsDashboardService {
     const appointments = await this.prisma.appointment.findMany({
       where: {
         patientId,
-        dentistId,
+        providerId,
         appointmentDate: { gte: thirtyDaysAgo },
         status: 'COMPLETED',
       },
@@ -156,7 +156,7 @@ export class PatientsDashboardService {
       where: {
         invoice: {
           patientId,
-          dentistId,
+          providerId,
         },
         createdAt: { gte: thirtyDaysAgo },
       },
@@ -181,7 +181,7 @@ export class PatientsDashboardService {
     const documents = await this.prisma.document.findMany({
       where: {
         patientId,
-        dentistId,
+        providerId,
         createdAt: { gte: thirtyDaysAgo },
       },
       orderBy: { createdAt: 'desc' },
@@ -204,7 +204,7 @@ export class PatientsDashboardService {
     return timeline.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 
-  private async getAlerts(patientId: string, dentistId: string): Promise<AlertDto[]> {
+  private async getAlerts(patientId: string, providerId: string): Promise<AlertDto[]> {
     const alerts: AlertDto[] = [];
     const now = new Date();
 
@@ -212,7 +212,7 @@ export class PatientsDashboardService {
     const overdueInvoices = await this.prisma.invoice.count({
       where: {
         patientId,
-        dentistId,
+        providerId,
         status: 'OVERDUE',
       },
     });
@@ -231,7 +231,7 @@ export class PatientsDashboardService {
     const upcomingAppointments = await this.prisma.appointment.findMany({
       where: {
         patientId,
-        dentistId,
+        providerId,
         appointmentDate: {
           gte: now,
           lte: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // Next 7 days
@@ -270,7 +270,7 @@ export class PatientsDashboardService {
     const pendingTreatments = await this.prisma.treatmentPlan.count({
       where: {
         patientId,
-        dentistId,
+        providerId,
         status: { in: ['PROPOSED', 'ACCEPTED'] },
       },
     });
@@ -288,16 +288,16 @@ export class PatientsDashboardService {
     return alerts;
   }
 
-  private async getQuickStats(patientId: string, dentistId: string) {
+  private async getQuickStats(patientId: string, providerId: string) {
     const [totalAppointments, completedTreatments, payments, documentsCount] =
       await Promise.all([
         this.prisma.appointment.count({
-          where: { patientId, dentistId },
+          where: { patientId, providerId },
         }),
         this.prisma.treatmentPlan.count({
           where: {
             patientId,
-            dentistId,
+            providerId,
             status: 'COMPLETED',
           },
         }),
@@ -305,13 +305,13 @@ export class PatientsDashboardService {
           where: {
             invoice: {
               patientId,
-              dentistId,
+              providerId,
             },
           },
           select: { amount: true },
         }),
         this.prisma.document.count({
-          where: { patientId, dentistId },
+          where: { patientId, providerId },
         }),
       ]);
 
@@ -328,15 +328,15 @@ export class PatientsDashboardService {
   async getAppointmentDetail(
     patientId: string,
     appointmentId: string,
-    dentistId: string,
+    providerId: string,
     tenantId: string,
   ): Promise<AppointmentDetailDto> {
-    await this.validatePatientAccess(dentistId, tenantId, patientId);
+    await this.validatePatientAccess(providerId, tenantId, patientId);
 
     const appointment = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: {
-        operatory: {
+        room: {
           include: {
             clinic: true,
           },
@@ -353,9 +353,9 @@ export class PatientsDashboardService {
       throw new NotFoundException('Appointment not found');
     }
 
-    // Get dentist info
-    const dentist = await this.prisma.user.findUnique({
-      where: { id: dentistId },
+    // Get provider info
+    const provider = await this.prisma.user.findUnique({
+      where: { id: providerId },
       select: { id: true, name: true },
     });
 
@@ -363,7 +363,7 @@ export class PatientsDashboardService {
     const invoice = await this.prisma.invoice.findFirst({
       where: {
         patientId,
-        dentistId,
+        providerId,
         // Find invoice around appointment date
         createdAt: {
           gte: new Date(appointment.appointmentDate.getTime() - 7 * 24 * 60 * 60 * 1000),
@@ -380,7 +380,7 @@ export class PatientsDashboardService {
     const documents = await this.prisma.document.findMany({
       where: {
         patientId,
-        dentistId,
+        providerId,
         createdAt: {
           gte: new Date(appointment.appointmentDate.getTime() - 1 * 24 * 60 * 60 * 1000),
           lte: new Date(appointment.appointmentDate.getTime() + 1 * 24 * 60 * 60 * 1000),
@@ -392,7 +392,7 @@ export class PatientsDashboardService {
     const treatmentPlan = await this.prisma.treatmentPlan.findFirst({
       where: {
         patientId,
-        dentistId,
+        providerId,
         status: { in: ['IN_PROGRESS', 'COMPLETED'] },
       },
       orderBy: { updatedAt: 'desc' },
@@ -402,7 +402,7 @@ export class PatientsDashboardService {
     const odontogram = await this.prisma.odontogram.findFirst({
       where: {
         patientId,
-        dentistId,
+        providerId,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -434,21 +434,21 @@ export class PatientsDashboardService {
         duration: appointment.duration,
         status: appointment.status,
         type: appointment.procedureType || 'Consulta',
-        operatory: appointment.operatory
+        operatory: appointment.room
           ? {
-              id: appointment.operatory.id,
-              name: appointment.operatory.name,
-              clinic: appointment.operatory.clinic
+              id: appointment.room.id,
+              name: appointment.room.name,
+              clinic: appointment.room.clinic
                 ? {
-                    name: appointment.operatory.clinic.name,
-                    address: JSON.stringify(appointment.operatory.clinic.address),
+                    name: appointment.room.clinic.name,
+                    address: JSON.stringify(appointment.room.clinic.address),
                   }
                 : undefined,
             }
           : undefined,
-        dentist: {
-          id: dentist!.id,
-          name: dentist!.name || 'Doctor',
+        provider: {
+          id: provider!.id,
+          name: provider!.name || 'Doctor',
         },
       },
       procedures: invoice?.items.map((item) => ({

@@ -27,6 +27,12 @@ import { ChatbotModule } from './chatbot/chatbot.module';
 import { ReportsModule } from './reports/reports.module';
 import { ServicesModule } from './services/services.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { MedicalExamsModule } from './medical-exams/medical-exams.module';
+import { ConsentsModule } from './consents/consents.module';
+import { ClinicAdminModule } from './clinic-admin/clinic-admin.module';
+import { SchedulingModule } from './scheduling/scheduling.module';
+import { StaffManagementModule } from './staff-management/staff-management.module';
+import { SharedDocumentsModule } from './shared-documents/shared-documents.module';
 
 @Module({
   imports: [
@@ -65,6 +71,12 @@ import { SubscriptionModule } from './subscription/subscription.module';
     ReportsModule,
     ServicesModule,
     SubscriptionModule,
+    MedicalExamsModule,
+    ConsentsModule,
+    ClinicAdminModule,
+    SchedulingModule,
+    StaffManagementModule,
+    SharedDocumentsModule,
   ],
 })
 export class AppModule { }

@@ -24,7 +24,7 @@ const LandingPage = () => {
                             Tu Sonrisa Perfecta Comienza Aqui
                         </h1>
                         <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-blue-100 mb-6 sm:mb-8 md:mb-10 font-light px-2 sm:px-0">
-                            Encuentra dentistas calificados, compara servicios y agenda citas al instante. Sin llamadas, sin complicaciones.
+                            Encuentra profesionales calificados, compara servicios y agenda citas al instante. Sin llamadas, sin complicaciones.
                         </p>
 
                         <form onSubmit={handleSearch} className="max-w-xl mx-auto relative flex items-center px-2 sm:px-0">
@@ -56,8 +56,8 @@ const LandingPage = () => {
             <div className="py-12 sm:py-16 md:py-24 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                     <div className="text-center mb-8 sm:mb-12 md:mb-16">
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Como funciona Dentista.App</h2>
-                        <p className="mt-2 sm:mt-4 text-sm sm:text-base text-gray-600">Pasos simples para obtener el cuidado dental que necesitas.</p>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Como funciona MediCloud.App</h2>
+                        <p className="mt-2 sm:mt-4 text-sm sm:text-base text-gray-600">Pasos simples para obtener la atencion medica que necesitas.</p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-12">
@@ -65,7 +65,7 @@ const LandingPage = () => {
                             <div className="bg-blue-100 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 text-blue-600">
                                 <Search className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
                             </div>
-                            <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3">1. Encuentra un Dentista</h3>
+                            <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3">1. Encuentra un Profesional</h3>
                             <p className="text-sm sm:text-base text-gray-600">Busca por ubicacion, especialidad o seguro. Lee resenas y consulta perfiles de clinicas.</p>
                         </div>
 
@@ -91,9 +91,9 @@ const LandingPage = () => {
             {/* CTA Section */}
             <div className="bg-blue-600 py-10 sm:py-12 md:py-16">
                 <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 text-center text-white">
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Eres un Profesional Dental?</h2>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Eres un Profesional de Salud?</h2>
                     <p className="text-sm sm:text-base text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto px-2 sm:px-0">
-                        Unete a Dentista.App para optimizar tu consultorio, gestionar citas y aumentar tu base de pacientes.
+                        Unete a MediCloud.App para optimizar tu consultorio, gestionar citas y aumentar tu base de pacientes.
                     </p>
                     <Link
                         to="/login"

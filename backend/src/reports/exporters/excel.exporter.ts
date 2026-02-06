@@ -35,7 +35,7 @@ export class ExcelExporter {
     } = options;
 
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'DentiCloud';
+    workbook.creator = 'MediCloud';
     workbook.created = new Date();
 
     const worksheet = workbook.addWorksheet(sheetName);

@@ -99,7 +99,7 @@ export default function SuperAdminDashboard() {
       <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-lg shadow-lg p-4 sm:p-6 text-white">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">Bienvenido al Panel de Super Admin</h1>
         <p className="text-indigo-100 text-sm sm:text-base">
-          Vista general de la plataforma DentiCloud
+          Vista general de la plataforma MediCloud
         </p>
       </div>
 

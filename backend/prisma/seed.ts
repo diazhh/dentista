@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, SubscriptionTier, SubscriptionStatus, Gender } from '@prisma/client';
+import { PrismaClient, UserRole, MedicalSpecialty, SubscriptionTier, SubscriptionStatus, Gender } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -37,13 +37,13 @@ async function main() {
       name: 'Dr. John Smith',
       passwordHash: dentistPassword,
       phone: '+1234567891',
-      role: UserRole.DENTIST,
+      role: UserRole.PROVIDER,
       licenseNumber: 'DDS-12345',
       npiNumber: '1234567890',
-      specialization: 'General Dentistry',
+      specialties: [MedicalSpecialty.GENERAL_DENTISTRY],
     },
   });
-  console.log('✅ Created Dentist:', dentistUser.email);
+  console.log('✅ Created Provider:', dentistUser.email);
 
   // Create Tenant for Dentist
   const tenant = await prisma.tenant.upsert({
@@ -99,24 +99,24 @@ async function main() {
   });
   console.log('✅ Created Patient Profile:', patient.firstName, patient.lastName);
 
-  // Create Patient-Dentist Relation
-  const relation = await prisma.patientDentistRelation.upsert({
+  // Create Provider-Patient Relation
+  const relation = await prisma.providerPatientRelation.upsert({
     where: {
-      patientId_dentistId: {
+      patientId_providerId: {
         patientId: patient.id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
       },
     },
     update: {},
     create: {
       patientId: patient.id,
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       isActive: true,
-      notes: 'Regular patient since 2024',
+      providerNotes: 'Regular patient since 2024',
     },
   });
-  console.log('✅ Created Patient-Dentist Relation');
+  console.log('✅ Created Provider-Patient Relation');
 
   // Create Clinic
   const clinic = await prisma.clinic.upsert({
@@ -139,11 +139,11 @@ async function main() {
   });
   console.log('✅ Created Clinic:', clinic.name);
 
-  // Create Operatory
-  const operatory = await prisma.operatory.create({
+  // Create Consultation Room
+  const room = await prisma.consultationRoom.create({
     data: {
       clinicId: clinic.id,
-      name: 'Operatory 1',
+      name: 'Room 1',
       description: 'Main treatment room with digital X-ray',
       equipment: {
         chair: 'Adec 500',
@@ -152,13 +152,13 @@ async function main() {
       },
     },
   });
-  console.log('✅ Created Operatory:', operatory.name);
+  console.log('✅ Created Consultation Room:', room.name);
 
-  // Create Operatory Assignment
-  const assignment = await prisma.operatoryAssignment.create({
+  // Create Room Assignment
+  const assignment = await prisma.roomAssignment.create({
     data: {
-      operatoryId: operatory.id,
-      dentistId: dentistUser.id,
+      roomId: room.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       schedule: {
         monday: { start: '09:00', end: '17:00' },
@@ -170,7 +170,7 @@ async function main() {
       startDate: new Date(),
     },
   });
-  console.log('✅ Created Operatory Assignment');
+  console.log('✅ Created Room Assignment');
 
   // Create Second Dentist User
   const dentist2User = await prisma.user.upsert({
@@ -181,10 +181,10 @@ async function main() {
       name: 'Dr. Maria Garcia',
       passwordHash: dentist2Password,
       phone: '+1234567894',
-      role: UserRole.DENTIST,
+      role: UserRole.PROVIDER,
       licenseNumber: 'DDS-67890',
       npiNumber: '0987654321',
-      specialization: 'Orthodontics',
+      specialties: [MedicalSpecialty.ORTHODONTICS],
     },
   });
   console.log('✅ Created Second Dentist:', dentist2User.email);
@@ -544,10 +544,10 @@ async function main() {
       name: 'Dr. Robert Chen',
       passwordHash: dentist3Password,
       phone: '+1234567897',
-      role: UserRole.DENTIST,
+      role: UserRole.PROVIDER,
       licenseNumber: 'DDS-11111',
       npiNumber: '1111111111',
-      specialization: 'Cosmetic Dentistry',
+      specialties: [MedicalSpecialty.GENERAL_DENTISTRY],
     },
   });
   console.log('✅ Created Dentist 3:', dentist3User.email);
@@ -592,7 +592,7 @@ async function main() {
     create: {
       userId: dentistUser.id,
       tenantId: tenant.id,
-      role: UserRole.DENTIST,
+      role: UserRole.PROVIDER,
       isActive: true,
     },
   });
@@ -626,7 +626,7 @@ async function main() {
     create: {
       userId: dentist2User.id,
       tenantId: tenant2.id,
-      role: UserRole.DENTIST,
+      role: UserRole.PROVIDER,
       isActive: true,
     },
   });
@@ -643,7 +643,7 @@ async function main() {
     create: {
       userId: dentist3User.id,
       tenantId: tenant3.id,
-      role: UserRole.DENTIST,
+      role: UserRole.PROVIDER,
       isActive: true,
     },
   });

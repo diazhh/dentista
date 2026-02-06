@@ -22,7 +22,7 @@ export class EmailService {
   async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
     try {
       const info = await this.transporter.sendMail({
-        from: this.configService.get('SMTP_FROM', '"DentiCloud" <noreply@denticloud.com>'),
+        from: this.configService.get('SMTP_FROM', '"MediCloud" <noreply@medicloud.com>'),
         to,
         subject,
         html,
@@ -40,10 +40,10 @@ export class EmailService {
     to: string,
     patientName: string,
     appointmentDate: Date,
-    dentistName: string,
+    providerName: string,
     procedureType: string,
   ): Promise<boolean> {
-    const subject = 'Recordatorio de Cita - DentiCloud';
+    const subject = 'Recordatorio de Cita - MediCloud';
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2563eb;">Recordatorio de Cita</h2>
@@ -54,7 +54,7 @@ export class EmailService {
             dateStyle: 'full', 
             timeStyle: 'short' 
           })}</p>
-          <p><strong>Doctor:</strong> ${dentistName}</p>
+          <p><strong>Profesional:</strong> ${providerName}</p>
           <p><strong>Procedimiento:</strong> ${procedureType}</p>
         </div>
         <p>Si necesitas cancelar o reprogramar tu cita, por favor contáctanos con al menos 24 horas de anticipación.</p>
@@ -71,10 +71,10 @@ export class EmailService {
     to: string,
     patientName: string,
     appointmentDate: Date,
-    dentistName: string,
+    providerName: string,
     procedureType: string,
   ): Promise<boolean> {
-    const subject = 'Confirmación de Cita - DentiCloud';
+    const subject = 'Confirmación de Cita - MediCloud';
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #10b981;">¡Cita Confirmada!</h2>
@@ -85,7 +85,7 @@ export class EmailService {
             dateStyle: 'full', 
             timeStyle: 'short' 
           })}</p>
-          <p><strong>Doctor:</strong> ${dentistName}</p>
+          <p><strong>Profesional:</strong> ${providerName}</p>
           <p><strong>Procedimiento:</strong> ${procedureType}</p>
         </div>
         <p>Te enviaremos un recordatorio antes de tu cita.</p>
@@ -103,7 +103,7 @@ export class EmailService {
     patientName: string,
     message: string,
   ): Promise<boolean> {
-    const subject = 'Actualización de Lista de Espera - DentiCloud';
+    const subject = 'Actualización de Lista de Espera - MediCloud';
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #f59e0b;">Actualización de Lista de Espera</h2>

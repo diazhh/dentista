@@ -13,14 +13,14 @@ export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new dental service' })
+  @ApiOperation({ summary: 'Create a new medical service' })
   create(@Body() createServiceDto: CreateServiceDto, @Request() req) {
     const tenantId = req.user.tenantId || req.user.userId;
     return this.servicesService.create(createServiceDto, tenantId);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all dental services' })
+  @ApiOperation({ summary: 'Get all medical services' })
   @ApiQuery({ name: 'category', required: false, description: 'Filter by category' })
   @ApiQuery({ name: 'includeInactive', required: false, description: 'Include inactive services' })
   findAll(
@@ -55,7 +55,7 @@ export class ServicesController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a dental service' })
+  @ApiOperation({ summary: 'Update a medical service' })
   update(
     @Param('id') id: string,
     @Body() updateServiceDto: UpdateServiceDto,
@@ -66,14 +66,14 @@ export class ServicesController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete (deactivate) a dental service' })
+  @ApiOperation({ summary: 'Delete (deactivate) a medical service' })
   remove(@Param('id') id: string, @Request() req) {
     const tenantId = req.user.tenantId || req.user.userId;
     return this.servicesService.remove(id, tenantId);
   }
 
   @Post('seed')
-  @ApiOperation({ summary: 'Seed default dental services for the tenant' })
+  @ApiOperation({ summary: 'Seed default medical services for the tenant' })
   seedDefaultServices(@Request() req) {
     const tenantId = req.user.tenantId || req.user.userId;
     return this.servicesService.seedDefaultServices(tenantId);

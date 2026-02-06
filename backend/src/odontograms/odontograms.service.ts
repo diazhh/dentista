@@ -7,23 +7,23 @@ import { UpdateOdontogramDto } from './dto/update-odontogram.dto';
 export class OdontogramsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createOdontogramDto: CreateOdontogramDto, dentistId: string, tenantId: string) {
-    const relation = await this.prisma.patientDentistRelation.findFirst({
+  async create(createOdontogramDto: CreateOdontogramDto, providerId: string, tenantId: string) {
+    const relation = await this.prisma.providerPatientRelation.findFirst({
       where: {
         patientId: createOdontogramDto.patientId,
-        dentistId,
+        providerId: providerId,
         tenantId,
       },
     });
 
     if (!relation) {
-      throw new ForbiddenException('Patient not assigned to this dentist');
+      throw new ForbiddenException('Patient not assigned to this provider');
     }
 
     const odontogram = await this.prisma.odontogram.create({
       data: {
         patientId: createOdontogramDto.patientId,
-        dentistId,
+        providerId: providerId,
         tenantId,
         notes: createOdontogramDto.notes,
         teeth: createOdontogramDto.teeth
@@ -55,7 +55,7 @@ export class OdontogramsService {
     return odontogram;
   }
 
-  async findAll(dentistId: string, tenantId: string, patientId?: string) {
+  async findAll(providerId: string, tenantId: string, patientId?: string) {
     const where: any = { tenantId };
 
     if (patientId) {
@@ -80,7 +80,7 @@ export class OdontogramsService {
     });
   }
 
-  async findOne(id: string, dentistId: string, tenantId: string) {
+  async findOne(id: string, providerId: string, tenantId: string) {
     const odontogram = await this.prisma.odontogram.findFirst({
       where: { id, tenantId },
       include: {
@@ -108,7 +108,7 @@ export class OdontogramsService {
   async update(
     id: string,
     updateOdontogramDto: UpdateOdontogramDto,
-    dentistId: string,
+    providerId: string,
     tenantId: string,
   ) {
     const odontogram = await this.prisma.odontogram.findFirst({
@@ -156,7 +156,7 @@ export class OdontogramsService {
     });
   }
 
-  async remove(id: string, dentistId: string, tenantId: string) {
+  async remove(id: string, providerId: string, tenantId: string) {
     const odontogram = await this.prisma.odontogram.findFirst({
       where: { id, tenantId },
     });
@@ -170,7 +170,7 @@ export class OdontogramsService {
     return { message: 'Odontogram deleted successfully' };
   }
 
-  async getLatestByPatient(patientId: string, dentistId: string, tenantId: string) {
+  async getLatestByPatient(patientId: string, providerId: string, tenantId: string) {
     const odontogram = await this.prisma.odontogram.findFirst({
       where: { patientId, tenantId },
       include: {

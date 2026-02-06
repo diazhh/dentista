@@ -108,8 +108,8 @@ export class ChatbotConfigService {
         isEnabled: true,
         welcomeMessage: defaultWelcome,
         fallbackMessage:
-          'Gracias por tu mensaje. Para una atención más personalizada, te recomiendo contactar directamente a la clínica o escribir "ayuda" para ver las opciones disponibles.',
-        clinicName: tenant?.name || null,
+          'Gracias por tu mensaje. Para una atención más personalizada, te recomiendo contactar directamente a la práctica o escribir "ayuda" para ver las opciones disponibles.',
+        practiceName: tenant?.name || null,
         aiModel: 'gpt-3.5-turbo',
         aiTemperature: 0.7,
         maxTokens: 300,
@@ -147,38 +147,38 @@ export class ChatbotConfigService {
   async getSystemPrompt(tenantId: string, patientName?: string): Promise<string> {
     const config = await this.getConfig(tenantId);
 
-    const defaultPrompt = `Eres un asistente virtual amable y profesional para una clínica dental.
+    const defaultPrompt = `Eres un asistente virtual amable y profesional para una práctica médica.
 Tu objetivo es ayudar a los pacientes con:
-- Información sobre servicios dentales
+- Información sobre servicios médicos
 - Agendar, cancelar o reprogramar citas
 - Responder preguntas frecuentes sobre tratamientos
-- Proporcionar información general de la clínica
+- Proporcionar información general de la práctica
 
 Reglas importantes:
 - Sé conciso y amable
 - Usa emojis de forma moderada
-- Si no puedes ayudar con algo específico, sugiere contactar directamente a la clínica
+- Si no puedes ayudar con algo específico, sugiere contactar directamente a la práctica
 - No proporciones diagnósticos médicos
 - No confirmes citas directamente, solo ayuda con el proceso`;
 
     let prompt = config.systemPrompt || defaultPrompt;
 
-    // Add clinic-specific info
-    if (config.clinicName) {
-      prompt += `\n\nInformación de la clínica:
-- Nombre: ${config.clinicName}`;
+    // Add practice-specific info
+    if (config.practiceName) {
+      prompt += `\n\nInformación de la práctica:
+- Nombre: ${config.practiceName}`;
     }
 
-    if (config.clinicAddress) {
-      prompt += `\n- Dirección: ${config.clinicAddress}`;
+    if (config.practiceAddress) {
+      prompt += `\n- Dirección: ${config.practiceAddress}`;
     }
 
-    if (config.clinicPhone) {
-      prompt += `\n- Teléfono: ${config.clinicPhone}`;
+    if (config.practicePhone) {
+      prompt += `\n- Teléfono: ${config.practicePhone}`;
     }
 
-    if (config.clinicWebsite) {
-      prompt += `\n- Web: ${config.clinicWebsite}`;
+    if (config.practiceWebsite) {
+      prompt += `\n- Web: ${config.practiceWebsite}`;
     }
 
     // Add operating hours

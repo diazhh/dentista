@@ -35,7 +35,7 @@ interface Tenant {
   _count: {
     appointments: number;
     memberships: number;
-    patientDentistRelations: number;
+    patientProviderRelations: number;
   };
 }
 
@@ -422,7 +422,7 @@ export default function TenantDetailPage() {
               </div>
               <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
                 <p className="text-xs sm:text-sm text-gray-600">Pacientes</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{tenant._count.patientDentistRelations}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{tenant._count.patientProviderRelations}</p>
               </div>
             </div>
           </div>
@@ -495,7 +495,7 @@ export default function TenantDetailPage() {
                             onChange={(e) => setEditRoleForm(e.target.value)}
                             className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                           >
-                            <option value="DENTIST">DENTIST</option>
+                            <option value="DENTIST">PROVIDER</option>
                             <option value="STAFF_RECEPTIONIST">RECEPTIONIST</option>
                             <option value="STAFF_BILLING">BILLING</option>
                             <option value="STAFF_ASSISTANT">ASSISTANT</option>
@@ -544,7 +544,7 @@ export default function TenantDetailPage() {
                             onChange={(e) => setEditRoleForm(e.target.value)}
                             className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                           >
-                            <option value="DENTIST">DENTIST</option>
+                            <option value="DENTIST">PROVIDER</option>
                             <option value="STAFF_RECEPTIONIST">STAFF_RECEPTIONIST</option>
                             <option value="STAFF_BILLING">STAFF_BILLING</option>
                             <option value="STAFF_ASSISTANT">STAFF_ASSISTANT</option>
@@ -652,7 +652,7 @@ export default function TenantDetailPage() {
                       onChange={(e) => setAddUserForm({ ...addUserForm, role: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
                     >
-                      <option value="DENTIST">Dentista</option>
+                      <option value="DENTIST">Profesional</option>
                       <option value="STAFF_RECEPTIONIST">Recepcionista</option>
                       <option value="STAFF_BILLING">Facturacion</option>
                       <option value="STAFF_ASSISTANT">Asistente</option>

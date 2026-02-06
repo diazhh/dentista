@@ -8,10 +8,10 @@ export class CreateRecurringAppointmentDto {
   @IsNotEmpty()
   patientId: string;
 
-  @ApiProperty({ description: 'Operatory ID (optional)' })
+  @ApiProperty({ description: 'Room ID (optional)' })
   @IsString()
   @IsOptional()
-  operatoryId?: string;
+  roomId?: string;
 
   @ApiProperty({ enum: RecurrenceFrequency, description: 'Recurrence frequency' })
   @IsEnum(RecurrenceFrequency)

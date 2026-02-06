@@ -15,19 +15,19 @@ export class CreateChatbotConfigDto {
 
   @IsString()
   @IsOptional()
-  clinicName?: string;
+  practiceName?: string;
 
   @IsString()
   @IsOptional()
-  clinicAddress?: string;
+  practiceAddress?: string;
 
   @IsString()
   @IsOptional()
-  clinicPhone?: string;
+  practicePhone?: string;
 
   @IsString()
   @IsOptional()
-  clinicWebsite?: string;
+  practiceWebsite?: string;
 
   @IsOptional()
   operatingHours?: Record<string, { open: string; close: string }>;

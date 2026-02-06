@@ -425,7 +425,7 @@ export default function SuperAdminEmailConfigPage() {
                     type="email"
                     value={formData.fromEmail}
                     onChange={(e) => setFormData({ ...formData, fromEmail: e.target.value })}
-                    placeholder="noreply@denticloud.com"
+                    placeholder="noreply@medicloud.com"
                     className="w-full px-3 py-2 border rounded-lg text-sm sm:text-base"
                   />
                 </div>
@@ -437,7 +437,7 @@ export default function SuperAdminEmailConfigPage() {
                     type="text"
                     value={formData.fromName}
                     onChange={(e) => setFormData({ ...formData, fromName: e.target.value })}
-                    placeholder="DentiCloud"
+                    placeholder="MediCloud"
                     className="w-full px-3 py-2 border rounded-lg text-sm sm:text-base"
                   />
                 </div>
@@ -451,7 +451,7 @@ export default function SuperAdminEmailConfigPage() {
                   type="email"
                   value={formData.replyToEmail}
                   onChange={(e) => setFormData({ ...formData, replyToEmail: e.target.value })}
-                  placeholder="soporte@denticloud.com"
+                  placeholder="soporte@medicloud.com"
                   className="w-full px-3 py-2 border rounded-lg text-sm sm:text-base"
                 />
               </div>

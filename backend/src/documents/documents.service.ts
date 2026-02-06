@@ -13,7 +13,7 @@ export class DocumentsService {
   async upload(
     file: Express.Multer.File,
     createDocumentDto: CreateDocumentDto,
-    dentistId: string,
+    providerId: string,
     tenantId: string,
   ) {
     // Create uploads directory if it doesn't exist
@@ -36,7 +36,7 @@ export class DocumentsService {
     const document = await this.prisma.document.create({
       data: {
         patientId: createDocumentDto.patientId,
-        dentistId,
+        providerId: providerId,
         tenantId,
         type: createDocumentDto.type,
         title: createDocumentDto.title,
@@ -45,7 +45,7 @@ export class DocumentsService {
         fileName: file.originalname,
         fileSize: file.size,
         mimeType: file.mimetype,
-        uploadedBy: dentistId,
+        uploadedBy: providerId,
         tags: createDocumentDto.tags || [],
       },
       include: {
@@ -63,7 +63,7 @@ export class DocumentsService {
   }
 
   async findAll(
-    dentistId: string,
+    providerId: string,
     tenantId: string,
     patientId?: string,
     type?: string,
@@ -93,7 +93,7 @@ export class DocumentsService {
     });
   }
 
-  async findOne(id: string, dentistId: string, tenantId: string) {
+  async findOne(id: string, providerId: string, tenantId: string) {
     const document = await this.prisma.document.findFirst({
       where: { id, tenantId },
       include: {
@@ -117,7 +117,7 @@ export class DocumentsService {
   async update(
     id: string,
     updateDocumentDto: UpdateDocumentDto,
-    dentistId: string,
+    providerId: string,
     tenantId: string,
   ) {
     const document = await this.prisma.document.findFirst({
@@ -143,7 +143,7 @@ export class DocumentsService {
     });
   }
 
-  async remove(id: string, dentistId: string, tenantId: string) {
+  async remove(id: string, providerId: string, tenantId: string) {
     const document = await this.prisma.document.findFirst({
       where: { id, tenantId },
     });

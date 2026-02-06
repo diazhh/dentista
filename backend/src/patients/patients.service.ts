@@ -1,18 +1,22 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Patient } from '@prisma/client';
+import { Patient, DataAccessLevel } from '@prisma/client';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { SearchPatientDto } from './dto/search-patient.dto';
 import { TransferPatientDto } from './dto/transfer-patient.dto';
+import { ConsentsService } from '../consents/consents.service';
 import { Parser } from 'json2csv';
 import { Readable } from 'stream';
 
 @Injectable()
 export class PatientsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private consentsService: ConsentsService,
+  ) {}
 
-  async create(dentistId: string, tenantId: string, createPatientDto: CreatePatientDto): Promise<Patient> {
+  async create(providerId: string, tenantId: string, createPatientDto: CreatePatientDto): Promise<Patient> {
     const { userId, email, emergencyContactName, emergencyContactPhone, ...patientData } = createPatientDto;
 
     let finalUserId = userId;
@@ -54,10 +58,10 @@ export class PatientsService {
       },
     });
 
-    await this.prisma.patientDentistRelation.create({
+    await this.prisma.providerPatientRelation.create({
       data: {
         patientId: patient.id,
-        dentistId: dentistId,
+        providerId: providerId,
         tenantId: tenantId,
         isActive: true,
       },
@@ -66,12 +70,12 @@ export class PatientsService {
     return patient;
   }
 
-  async findAllForDentist(dentistId: string, tenantId: string): Promise<Patient[]> {
+  async findAllForProvider(providerId: string, tenantId: string): Promise<Patient[]> {
     return this.prisma.patient.findMany({
       where: {
-        patientDentistRelations: {
+        providerPatientRelations: {
           some: {
-            dentistId: dentistId,
+            providerId: providerId,
             tenantId: tenantId,
             isActive: true,
           },
@@ -88,13 +92,14 @@ export class PatientsService {
     });
   }
 
-  async findOne(id: string, dentistId: string, tenantId: string): Promise<Patient> {
+  async findOne(id: string, providerId: string, tenantId: string): Promise<any> {
+    // Fetch the full patient with all relations
     const patient = await this.prisma.patient.findFirst({
       where: {
         id,
-        patientDentistRelations: {
+        providerPatientRelations: {
           some: {
-            dentistId: dentistId,
+            providerId: providerId,
             tenantId: tenantId,
             isActive: true,
           },
@@ -107,7 +112,7 @@ export class PatientsService {
             phone: true,
           },
         },
-        patientDentistRelations: {
+        providerPatientRelations: {
           where: { isActive: true },
           include: {
             tenant: {
@@ -117,6 +122,8 @@ export class PatientsService {
             },
           },
         },
+        documents: true,
+        medicalExams: true,
       },
     });
 
@@ -124,11 +131,121 @@ export class PatientsService {
       throw new NotFoundException('Patient not found');
     }
 
-    return patient;
+    // Check consent access level for this provider
+    const access = await this.consentsService.checkProviderAccess(providerId, id);
+
+    // Get the provider's own local data from the relation
+    const providerRelation = patient.providerPatientRelations.find(
+      (r) => r.providerId === providerId,
+    );
+
+    // Filter patient data based on access level
+    return this.filterPatientByAccess(patient, access.dataAccessLevel, providerRelation);
   }
 
-  async update(id: string, dentistId: string, tenantId: string, updatePatientDto: UpdatePatientDto): Promise<Patient> {
-    await this.findOne(id, dentistId, tenantId);
+  /**
+   * Filters patient data based on the consent data access level.
+   * Provider always sees their own local notes/allergies/medications from the relation.
+   */
+  private filterPatientByAccess(
+    patient: any,
+    accessLevel: DataAccessLevel,
+    providerRelation: any,
+  ): any {
+    // Base data that all access levels can see
+    const base: any = {
+      id: patient.id,
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      phone: patient.phone,
+      dateOfBirth: patient.dateOfBirth,
+      gender: patient.gender,
+      // Provider always sees their own local data from the relation
+      providerLocalData: providerRelation
+        ? {
+            providerNotes: providerRelation.providerNotes,
+            localMedicalHistory: providerRelation.localMedicalHistory,
+            localAllergies: providerRelation.localAllergies,
+            localMedications: providerRelation.localMedications,
+          }
+        : null,
+      providerPatientRelations: patient.providerPatientRelations,
+      user: patient.user,
+      accessLevel,
+    };
+
+    if (accessLevel === DataAccessLevel.MINIMAL) {
+      // MINIMAL: only basic identification + provider's own local data
+      return base;
+    }
+
+    if (accessLevel === DataAccessLevel.SCHEDULING_ONLY) {
+      // SCHEDULING_ONLY: basic info for scheduling purposes
+      return {
+        ...base,
+        email: patient.email,
+        emergencyContactName: patient.emergencyContactName,
+        emergencyContactPhone: patient.emergencyContactPhone,
+      };
+    }
+
+    if (accessLevel === DataAccessLevel.CLINICAL_ONLY) {
+      // CLINICAL_ONLY: add medical history, allergies, medications (no documents/exams)
+      return {
+        ...base,
+        email: patient.email,
+        documentType: patient.documentType,
+        documentId: patient.documentId,
+        address: patient.address,
+        bloodType: patient.bloodType,
+        medicalHistory: patient.medicalHistory,
+        allergies: patient.allergies,
+        medications: patient.medications,
+        chronicConditions: patient.chronicConditions,
+        emergencyContactName: patient.emergencyContactName,
+        emergencyContactPhone: patient.emergencyContactPhone,
+        emergencyContactRelation: patient.emergencyContactRelation,
+      };
+    }
+
+    if (accessLevel === DataAccessLevel.DOCUMENTS_SHARED) {
+      // DOCUMENTS_SHARED: basic info + documents only
+      return {
+        ...base,
+        email: patient.email,
+        documentType: patient.documentType,
+        documentId: patient.documentId,
+        documents: patient.documents,
+        medicalExams: patient.medicalExams,
+      };
+    }
+
+    // FULL: return everything
+    return {
+      ...base,
+      email: patient.email,
+      documentType: patient.documentType,
+      documentId: patient.documentId,
+      address: patient.address,
+      bloodType: patient.bloodType,
+      medicalHistory: patient.medicalHistory,
+      allergies: patient.allergies,
+      medications: patient.medications,
+      chronicConditions: patient.chronicConditions,
+      emergencyContactName: patient.emergencyContactName,
+      emergencyContactPhone: patient.emergencyContactPhone,
+      emergencyContactRelation: patient.emergencyContactRelation,
+      defaultDataAccess: patient.defaultDataAccess,
+      portalEnabled: patient.portalEnabled,
+      documents: patient.documents,
+      medicalExams: patient.medicalExams,
+      createdAt: patient.createdAt,
+      updatedAt: patient.updatedAt,
+    };
+  }
+
+  async update(id: string, providerId: string, tenantId: string, updatePatientDto: UpdatePatientDto): Promise<Patient> {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.patient.update({
       where: { id },
@@ -136,13 +253,13 @@ export class PatientsService {
     });
   }
 
-  async remove(id: string, dentistId: string, tenantId: string): Promise<void> {
-    await this.findOne(id, dentistId, tenantId);
+  async remove(id: string, providerId: string, tenantId: string): Promise<void> {
+    await this.findOne(id, providerId, tenantId);
 
-    await this.prisma.patientDentistRelation.updateMany({
+    await this.prisma.providerPatientRelation.updateMany({
       where: {
         patientId: id,
-        dentistId: dentistId,
+        providerId: providerId,
       },
       data: {
         isActive: false,
@@ -151,11 +268,11 @@ export class PatientsService {
     });
   }
 
-  async search(dentistId: string, tenantId: string, searchDto: SearchPatientDto): Promise<Patient[]> {
+  async search(providerId: string, tenantId: string, searchDto: SearchPatientDto): Promise<Patient[]> {
     const whereConditions: any = {
-      patientDentistRelations: {
+      providerPatientRelations: {
         some: {
-          dentistId: dentistId,
+          providerId: providerId,
           tenantId: tenantId,
           isActive: true,
         },
@@ -203,33 +320,33 @@ export class PatientsService {
     });
   }
 
-  async transfer(patientId: string, currentDentistId: string, tenantId: string, transferDto: TransferPatientDto): Promise<void> {
-    const patient = await this.findOne(patientId, currentDentistId, tenantId);
+  async transfer(patientId: string, currentProviderId: string, tenantId: string, transferDto: TransferPatientDto): Promise<void> {
+    const patient = await this.findOne(patientId, currentProviderId, tenantId);
 
-    const newDentist = await this.prisma.user.findUnique({
-      where: { id: transferDto.newDentistId },
+    const newProvider = await this.prisma.user.findUnique({
+      where: { id: transferDto.newProviderId },
     });
 
-    if (!newDentist) {
-      throw new NotFoundException('New dentist not found');
+    if (!newProvider) {
+      throw new NotFoundException('New provider not found');
     }
 
-    const existingRelation = await this.prisma.patientDentistRelation.findFirst({
+    const existingRelation = await this.prisma.providerPatientRelation.findFirst({
       where: {
         patientId: patientId,
-        dentistId: transferDto.newDentistId,
+        providerId: transferDto.newProviderId,
         isActive: true,
       },
     });
 
     if (existingRelation) {
-      throw new BadRequestException('Patient already assigned to this dentist');
+      throw new BadRequestException('Patient already assigned to this provider');
     }
 
-    await this.prisma.patientDentistRelation.updateMany({
+    await this.prisma.providerPatientRelation.updateMany({
       where: {
         patientId: patientId,
-        dentistId: currentDentistId,
+        providerId: currentProviderId,
       },
       data: {
         isActive: false,
@@ -237,18 +354,18 @@ export class PatientsService {
       },
     });
 
-    await this.prisma.patientDentistRelation.create({
+    await this.prisma.providerPatientRelation.create({
       data: {
         patientId: patientId,
-        dentistId: transferDto.newDentistId,
+        providerId: transferDto.newProviderId,
         tenantId: tenantId,
         isActive: true,
       },
     });
   }
 
-  async exportToCSV(dentistId: string, tenantId: string): Promise<string> {
-    const patients = await this.findAllForDentist(dentistId, tenantId);
+  async exportToCSV(providerId: string, tenantId: string): Promise<string> {
+    const patients = await this.findAllForProvider(providerId, tenantId);
 
     const data = patients.map(patient => ({
       documentId: patient.documentId,
@@ -269,7 +386,7 @@ export class PatientsService {
     return parser.parse(data);
   }
 
-  async importFromCSV(dentistId: string, tenantId: string, csvData: any[]): Promise<{ success: number; errors: string[] }> {
+  async importFromCSV(providerId: string, tenantId: string, csvData: any[]): Promise<{ success: number; errors: string[] }> {
     let success = 0;
     const errors: string[] = [];
 
@@ -302,19 +419,19 @@ export class PatientsService {
         });
 
         if (existingPatient) {
-          const hasRelation = await this.prisma.patientDentistRelation.findFirst({
+          const hasRelation = await this.prisma.providerPatientRelation.findFirst({
             where: {
               patientId: existingPatient.id,
-              dentistId: dentistId,
+              providerId: providerId,
               isActive: true,
             },
           });
 
           if (!hasRelation) {
-            await this.prisma.patientDentistRelation.create({
+            await this.prisma.providerPatientRelation.create({
               data: {
                 patientId: existingPatient.id,
-                dentistId: dentistId,
+                providerId: providerId,
                 tenantId: tenantId,
                 isActive: true,
               },
@@ -338,10 +455,10 @@ export class PatientsService {
           },
         });
 
-        await this.prisma.patientDentistRelation.create({
+        await this.prisma.providerPatientRelation.create({
           data: {
             patientId: patient.id,
-            dentistId: dentistId,
+            providerId: providerId,
             tenantId: tenantId,
             isActive: true,
           },

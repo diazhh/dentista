@@ -29,10 +29,10 @@ export class PatientsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all patients for current dentist' })
+  @ApiOperation({ summary: 'Get all patients for current provider' })
   @ApiResponse({ status: 200, description: 'List of patients' })
   findAll(@Request() req) {
-    return this.patientsService.findAllForDentist(req.user.userId, req.user.tenantId);
+    return this.patientsService.findAllForProvider(req.user.userId, req.user.tenantId);
   }
 
   @Get(':id')
@@ -71,10 +71,10 @@ export class PatientsController {
   }
 
   @Post(':id/transfer')
-  @ApiOperation({ summary: 'Transfer patient to another dentist' })
+  @ApiOperation({ summary: 'Transfer patient to another provider' })
   @ApiResponse({ status: 200, description: 'Patient successfully transferred' })
-  @ApiResponse({ status: 404, description: 'Patient or new dentist not found' })
-  @ApiResponse({ status: 400, description: 'Patient already assigned to this dentist' })
+  @ApiResponse({ status: 404, description: 'Patient or new provider not found' })
+  @ApiResponse({ status: 400, description: 'Patient already assigned to this provider' })
   transfer(@Request() req, @Param('id') id: string, @Body() transferDto: TransferPatientDto) {
     return this.patientsService.transfer(id, req.user.userId, req.user.tenantId, transferDto);
   }

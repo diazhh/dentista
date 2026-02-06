@@ -4,7 +4,7 @@ import { clinicsAPI } from '../services/api';
 import { useAbility } from '../casl/AbilityContext';
 import { Action } from '../casl/AbilityContext';
 
-interface Operatory {
+interface ConsultationRoom {
   id: string;
   name: string;
   description?: string;
@@ -26,7 +26,7 @@ interface Clinic {
   phone?: string;
   email?: string;
   isActive: boolean;
-  operatories: Operatory[];
+  rooms: ConsultationRoom[];
   createdAt: string;
 }
 
@@ -37,7 +37,7 @@ export default function ClinicsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedClinic, setExpandedClinic] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showOperatoryModal, setShowOperatoryModal] = useState(false);
+  const [showRoomModal, setShowRoomModal] = useState(false);
   const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -49,7 +49,7 @@ export default function ClinicsListPage() {
     phone: '',
     email: '',
   });
-  const [operatoryForm, setOperatoryForm] = useState({
+  const [roomForm, setRoomForm] = useState({
     name: '',
     description: '',
   });
@@ -116,34 +116,34 @@ export default function ClinicsListPage() {
     }
   };
 
-  const handleCreateOperatory = async (e: React.FormEvent) => {
+  const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedClinicId) return;
 
     try {
-      await clinicsAPI.createOperatory({
+      await clinicsAPI.createRoom({
         clinicId: selectedClinicId,
-        name: operatoryForm.name,
-        description: operatoryForm.description || undefined,
+        name: roomForm.name,
+        description: roomForm.description || undefined,
       });
-      setShowOperatoryModal(false);
-      setOperatoryForm({ name: '', description: '' });
+      setShowRoomModal(false);
+      setRoomForm({ name: '', description: '' });
       setSelectedClinicId(null);
       fetchClinics();
     } catch (error) {
-      console.error('Error creating operatory:', error);
+      console.error('Error creating consultation room:', error);
       alert('Error al crear el consultorio');
     }
   };
 
-  const handleDeleteOperatory = async (id: string) => {
+  const handleDeleteRoom = async (id: string) => {
     if (!confirm('Esta seguro de que desea desactivar este consultorio?')) return;
 
     try {
-      await clinicsAPI.deleteOperatory(id);
+      await clinicsAPI.deleteRoom(id);
       fetchClinics();
     } catch (error) {
-      console.error('Error deleting operatory:', error);
+      console.error('Error deleting consultation room:', error);
       alert('Error al desactivar el consultorio');
     }
   };
@@ -269,13 +269,13 @@ export default function ClinicsListPage() {
                     ) : (
                       <>
                         <ChevronDown className="w-4 h-4" />
-                        Ver consultorios ({clinic.operatories.length})
+                        Ver consultorios ({clinic.rooms.length})
                       </>
                     )}
                   </button>
                 </div>
 
-                {/* Operatories */}
+                {/* Consultation Rooms */}
                 {expandedClinic === clinic.id && (
                   <div className="border-t border-gray-200 bg-gray-50 p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -284,7 +284,7 @@ export default function ClinicsListPage() {
                         <button
                           onClick={() => {
                             setSelectedClinicId(clinic.id);
-                            setShowOperatoryModal(true);
+                            setShowRoomModal(true);
                           }}
                           className="flex items-center justify-center gap-1 px-3 py-1 text-xs sm:text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
@@ -294,27 +294,27 @@ export default function ClinicsListPage() {
                       )}
                     </div>
 
-                    {clinic.operatories.length === 0 ? (
+                    {clinic.rooms.length === 0 ? (
                       <p className="text-xs sm:text-sm text-gray-500">No hay consultorios registrados</p>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {clinic.operatories.map((operatory) => (
+                        {clinic.rooms.map((room) => (
                           <div
-                            key={operatory.id}
+                            key={room.id}
                             className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4"
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1 min-w-0">
-                                <h5 className="font-medium text-gray-900 text-sm sm:text-base">{operatory.name}</h5>
-                                {operatory.description && (
+                                <h5 className="font-medium text-gray-900 text-sm sm:text-base">{room.name}</h5>
+                                {room.description && (
                                   <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                    {operatory.description}
+                                    {room.description}
                                   </p>
                                 )}
                               </div>
                               {ability.can(Action.Delete, 'Operatory') && (
                                 <button
-                                  onClick={() => handleDeleteOperatory(operatory.id)}
+                                  onClick={() => handleDeleteRoom(room.id)}
                                   className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -470,21 +470,21 @@ export default function ClinicsListPage() {
         </div>
       )}
 
-      {/* Create Operatory Modal */}
-      {showOperatoryModal && (
+      {/* Create Consultation Room Modal */}
+      {showRoomModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-md">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Nuevo Consultorio</h2>
-            <form onSubmit={handleCreateOperatory} className="space-y-4">
+            <form onSubmit={handleCreateRoom} className="space-y-4">
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Nombre *
                 </label>
                 <input
                   type="text"
-                  value={operatoryForm.name}
+                  value={roomForm.name}
                   onChange={(e) =>
-                    setOperatoryForm({ ...operatoryForm, name: e.target.value })
+                    setRoomForm({ ...roomForm, name: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="Ej: Consultorio 1"
@@ -497,9 +497,9 @@ export default function ClinicsListPage() {
                   Descripcion
                 </label>
                 <textarea
-                  value={operatoryForm.description}
+                  value={roomForm.description}
                   onChange={(e) =>
-                    setOperatoryForm({ ...operatoryForm, description: e.target.value })
+                    setRoomForm({ ...roomForm, description: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   rows={3}
@@ -511,7 +511,7 @@ export default function ClinicsListPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    setShowOperatoryModal(false);
+                    setShowRoomModal(false);
                     setSelectedClinicId(null);
                   }}
                   className="px-3 sm:px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm sm:text-base"

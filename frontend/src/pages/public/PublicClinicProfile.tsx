@@ -2,7 +2,11 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { publicAPI } from '../../services/api';
-import { MapPin, Phone, Star, Clock, Calendar } from 'lucide-react';
+import { MapPin, Phone, Clock, Calendar, Stethoscope } from 'lucide-react';
+
+/** Helper: format MedicalSpecialty enum value to readable label */
+const formatSpecialty = (value: string) =>
+    value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 const PublicClinicProfile = () => {
     const { slug } = useParams<{ slug: string }>();
@@ -69,14 +73,14 @@ const PublicClinicProfile = () => {
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
 
-                    {/* Left Column: Details & Dentists */}
+                    {/* Left Column: Details & Providers */}
                     <div className="lg:col-span-2 space-y-4 sm:space-y-6 md:space-y-8">
 
                         {/* About Section */}
                         <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About the Clinic</h2>
                             <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                                {clinic.description || `Welcome to ${clinic.name}. We provide top-quality dental care with a focus on patient comfort and health. Our experienced team uses the latest technology to ensure the best results for your smile.`}
+                                {clinic.description || `Welcome to ${clinic.name}. We provide top-quality healthcare with a focus on patient comfort and health. Our experienced team uses the latest technology to ensure the best results.`}
                             </p>
 
                             <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -98,24 +102,45 @@ const PublicClinicProfile = () => {
                             </div>
                         </section>
 
-                        {/* Dentists Section */}
+                        {/* Providers Section */}
                         <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-                            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Our Specialists</h2>
+                            <div className="flex items-center gap-2 mb-4 sm:mb-6">
+                                <Stethoscope className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Our Specialists</h2>
+                            </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
-                                {clinic.users?.map((dentist: any) => (
-                                    <div key={dentist.id} className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
-                                        <div className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-base sm:text-lg md:text-xl flex-shrink-0">
-                                            {dentist.name.charAt(0)}
+                                {clinic.memberships?.map((membership: any) => {
+                                    const provider = membership.user;
+                                    return (
+                                        <div key={provider.id} className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                                            <div className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-base sm:text-lg md:text-xl flex-shrink-0">
+                                                {provider.name.charAt(0)}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate">{provider.name}</h3>
+                                                {provider.specialties && provider.specialties.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-1 mt-1 mb-1">
+                                                        {provider.specialties.map((spec: string) => (
+                                                            <span
+                                                                key={spec}
+                                                                className="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium"
+                                                            >
+                                                                {formatSpecialty(spec)}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-xs sm:text-sm text-blue-600 mb-0.5 sm:mb-1">General Practitioner</p>
+                                                )}
+                                                {provider.bio && (
+                                                    <p className="text-xs text-gray-500 line-clamp-2 mt-1">{provider.bio}</p>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="min-w-0">
-                                            <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate">{dentist.name}</h3>
-                                            <p className="text-xs sm:text-sm text-blue-600 mb-0.5 sm:mb-1">{dentist.specialization || 'General Dentist'}</p>
-                                            {dentist.bio && <p className="text-xs text-gray-500 line-clamp-2">{dentist.bio}</p>}
-                                        </div>
-                                    </div>
-                                ))}
-                                {(!clinic.users || clinic.users.length === 0) && (
-                                    <p className="text-sm sm:text-base text-gray-500 italic">No dentists listed currently.</p>
+                                    );
+                                })}
+                                {(!clinic.memberships || clinic.memberships.length === 0) && (
+                                    <p className="text-sm sm:text-base text-gray-500 italic col-span-full">No providers listed currently.</p>
                                 )}
                             </div>
                         </section>

@@ -77,7 +77,7 @@ export class AdminService {
             phone: true,
             licenseNumber: true,
             npiNumber: true,
-            specialization: true,
+            specialties: true,
           },
         },
         memberships: {
@@ -96,7 +96,7 @@ export class AdminService {
           select: {
             appointments: true,
             memberships: true,
-            patientDentistRelations: true,
+            providerPatientRelations: true,
           },
         },
       },
@@ -532,7 +532,7 @@ export class AdminService {
           email: data.email,
           name: data.name || data.email.split('@')[0],
           passwordHash: hashedPassword,
-          role: 'DENTIST', // Default role for new users
+          role: 'PROVIDER', // Default role for new users
         },
       });
     } else {

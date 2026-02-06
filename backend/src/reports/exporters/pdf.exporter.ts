@@ -127,7 +127,7 @@ export class PdfExporter {
 
     // Footer
     content.push({
-      text: '\n\nDentiCloud - Dental Practice Management',
+      text: '\n\nMediCloud - Healthcare Practice Management',
       style: 'footer',
       alignment: 'center',
       margin: [0, 20, 0, 0],

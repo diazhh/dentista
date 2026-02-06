@@ -45,17 +45,12 @@ import AppointmentDetailPage from './pages/AppointmentDetailPage';
 import PatientsListPage from './pages/PatientsListPage';
 import NewPatientPage from './pages/NewPatientPage';
 import PatientDetailPage from './pages/PatientDetailPage';
-import TreatmentPlansListPage from './pages/TreatmentPlansListPage';
-import NewTreatmentPlanPage from './pages/NewTreatmentPlanPage';
+import PatientDashboardPage from './pages/PatientDashboardPage';
 import TreatmentPlanDetailPage from './pages/TreatmentPlanDetailPage';
 import InvoicesListPage from './pages/InvoicesListPage';
-import NewInvoicePage from './pages/NewInvoicePage';
 import InvoiceDetailPage from './pages/InvoiceDetailPage';
-import DocumentsListPage from './pages/DocumentsListPage';
-import OdontogramsListPage from './pages/OdontogramsListPage';
-import NewOdontogramPage from './pages/NewOdontogramPage';
 import OdontogramDetailPage from './pages/OdontogramDetailPage';
-import PatientDashboardPage from './pages/PatientDashboardPage';
+import ReportsPage from './pages/ReportsPage';
 import WhatsappSettingsPage from './pages/WhatsappSettingsPage';
 import ClinicsListPage from './pages/ClinicsListPage';
 import StaffListPage from './pages/StaffListPage';
@@ -358,27 +353,9 @@ function AppContent() {
           }
         />
 
-        {/* Treatment Plan Routes */}
-        <Route
-          path="/treatment-plans"
-          element={
-            <TenantRoute>
-              <TenantLayout>
-                <TreatmentPlansListPage />
-              </TenantLayout>
-            </TenantRoute>
-          }
-        />
-        <Route
-          path="/treatment-plans/new"
-          element={
-            <TenantRoute>
-              <TenantLayout>
-                <NewTreatmentPlanPage />
-              </TenantLayout>
-            </TenantRoute>
-          }
-        />
+        {/* Treatment Plan Routes - list/new deprecated, detail kept */}
+        <Route path="/treatment-plans" element={<Navigate to="/patients" replace />} />
+        <Route path="/treatment-plans/new" element={<Navigate to="/patients" replace />} />
         <Route
           path="/treatment-plans/:id"
           element={
@@ -390,7 +367,7 @@ function AppContent() {
           }
         />
 
-        {/* Invoice Routes */}
+        {/* Invoice Routes - global list kept for reports, new deprecated */}
         <Route
           path="/invoices"
           element={
@@ -401,16 +378,7 @@ function AppContent() {
             </TenantRoute>
           }
         />
-        <Route
-          path="/invoices/new"
-          element={
-            <TenantRoute>
-              <TenantLayout>
-                <NewInvoicePage />
-              </TenantLayout>
-            </TenantRoute>
-          }
-        />
+        <Route path="/invoices/new" element={<Navigate to="/patients" replace />} />
         <Route
           path="/invoices/:id"
           element={
@@ -422,43 +390,28 @@ function AppContent() {
           }
         />
 
-        {/* Documents & Odontograms */}
-        <Route
-          path="/documents"
-          element={
-            <TenantRoute>
-              <TenantLayout>
-                <DocumentsListPage />
-              </TenantLayout>
-            </TenantRoute>
-          }
-        />
-        <Route
-          path="/odontograms"
-          element={
-            <TenantRoute>
-              <TenantLayout>
-                <OdontogramsListPage />
-              </TenantLayout>
-            </TenantRoute>
-          }
-        />
-        <Route
-          path="/odontograms/new"
-          element={
-            <TenantRoute>
-              <TenantLayout>
-                <NewOdontogramPage />
-              </TenantLayout>
-            </TenantRoute>
-          }
-        />
+        {/* Documents & Odontograms - list/new deprecated, detail kept */}
+        <Route path="/documents" element={<Navigate to="/patients" replace />} />
+        <Route path="/odontograms" element={<Navigate to="/patients" replace />} />
+        <Route path="/odontograms/new" element={<Navigate to="/patients" replace />} />
         <Route
           path="/odontograms/:id"
           element={
             <TenantRoute>
               <TenantLayout>
                 <OdontogramDetailPage />
+              </TenantLayout>
+            </TenantRoute>
+          }
+        />
+
+        {/* Reports */}
+        <Route
+          path="/reports"
+          element={
+            <TenantRoute>
+              <TenantLayout>
+                <ReportsPage />
               </TenantLayout>
             </TenantRoute>
           }

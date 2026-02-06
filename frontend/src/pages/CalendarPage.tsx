@@ -11,7 +11,7 @@ import axios from 'axios';
 interface Appointment {
   id: string;
   patientId: string;
-  dentistId: string;
+  providerId: string;
   clinicId: string;
   startTime: string;
   endTime: string;

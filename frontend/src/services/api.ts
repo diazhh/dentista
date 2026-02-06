@@ -11,13 +11,20 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and tenant context
 api.interceptors.request.use(
   (config) => {
     const token = storage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Send X-Tenant-Id header for multi-tenant staff support
+    const selectedTenantId = storage.getItem('selectedTenantId');
+    if (selectedTenantId) {
+      config.headers['X-Tenant-Id'] = selectedTenantId;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -104,12 +111,15 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API
+// Public API
 export const publicAPI = {
   getClinics: (params?: { city?: string; specialty?: string; q?: string }) =>
     api.get('/public/clinics', { params }),
   getClinicBySlug: (slug: string) => api.get(`/public/clinics/${slug}`),
-  getDentists: () => api.get('/public/dentists'),
+  getProviders: (params?: { specialty?: string }) =>
+    api.get('/public/providers', { params }),
+  getSpecialties: () =>
+    api.get<{ value: string; label: string }[]>('/public/specialties'),
 };
 
 export const authAPI = {
@@ -279,50 +289,72 @@ export const clinicsAPI = {
     const response = await api.delete(`/clinics/${id}`);
     return response.data;
   },
-  // Operatories
-  getOperatories: async (clinicId?: string) => {
-    const url = clinicId ? `/clinics/operatories/all?clinicId=${clinicId}` : '/clinics/operatories/all';
+  // Consultation Rooms
+  getRooms: async (clinicId?: string) => {
+    const url = clinicId ? `/clinics/rooms/all?clinicId=${clinicId}` : '/clinics/rooms/all';
     const response = await api.get(url);
     return response.data;
   },
-  createOperatory: async (data: { clinicId: string; name: string; description?: string }) => {
-    const response = await api.post('/clinics/operatories', data);
+  createRoom: async (data: { clinicId: string; name: string; description?: string }) => {
+    const response = await api.post('/clinics/rooms', data);
     return response.data;
   },
-  updateOperatory: async (id: string, data: Partial<{ name: string; description?: string; isActive?: boolean }>) => {
-    const response = await api.patch(`/clinics/operatories/${id}`, data);
+  updateRoom: async (id: string, data: Partial<{ name: string; description?: string; isActive?: boolean }>) => {
+    const response = await api.patch(`/clinics/rooms/${id}`, data);
     return response.data;
   },
-  deleteOperatory: async (id: string) => {
-    const response = await api.delete(`/clinics/operatories/${id}`);
+  deleteRoom: async (id: string) => {
+    const response = await api.delete(`/clinics/rooms/${id}`);
     return response.data;
   },
 };
 
-// Staff/Tenant Membership API
+// Staff Management API (Phase 1.6)
+export interface StaffPermissions {
+  patients?: { view: boolean; create: boolean; edit: boolean; delete: boolean };
+  appointments?: { view: boolean; create: boolean; edit: boolean; cancel: boolean };
+  billing?: { view: boolean; create: boolean };
+  clinical?: { viewNotes: boolean; viewDocuments: boolean };
+}
+
 export const staffAPI = {
+  // New staff-management endpoints
   getAll: async () => {
-    const response = await api.get('/tenant-membership/staff');
+    const response = await api.get('/staff');
     return response.data;
   },
-  invite: async (data: { email: string; name: string; role: string; permissions?: string[] }) => {
-    const response = await api.post('/tenant-membership/invite', data);
+  invite: async (data: { email: string; name: string; role: string; permissions?: StaffPermissions }) => {
+    const response = await api.post('/staff/invite', data);
+    return response.data;
+  },
+  updateRole: async (membershipId: string, role: string) => {
+    const response = await api.put(`/staff/${membershipId}/role`, { role });
+    return response.data;
+  },
+  updatePermissions: async (membershipId: string, permissions: StaffPermissions) => {
+    const response = await api.put(`/staff/${membershipId}/permissions`, permissions);
+    return response.data;
+  },
+  remove: async (membershipId: string) => {
+    const response = await api.delete(`/staff/${membershipId}`);
+    return response.data;
+  },
+  getMyTenants: async () => {
+    const response = await api.get('/staff/my-tenants');
+    return response.data;
+  },
+
+  // Legacy tenant-membership endpoints (still needed for accept/reject invitations)
+  getMyWorkspaces: async () => {
+    const response = await api.get('/staff/my-tenants');
     return response.data;
   },
   getById: async (id: string) => {
     const response = await api.get(`/tenant-membership/${id}`);
     return response.data;
   },
-  update: async (id: string, data: Partial<{ role: string; permissions?: string[]; status?: string }>) => {
+  update: async (id: string, data: Partial<{ role: string; permissions?: StaffPermissions; status?: string }>) => {
     const response = await api.patch(`/tenant-membership/${id}`, data);
-    return response.data;
-  },
-  remove: async (id: string) => {
-    const response = await api.delete(`/tenant-membership/${id}`);
-    return response.data;
-  },
-  getMyWorkspaces: async () => {
-    const response = await api.get('/tenant-membership/my-workspaces');
     return response.data;
   },
   acceptInvitation: async (id: string) => {
@@ -409,11 +441,11 @@ export const reportsAPI = {
     const response = await api.get('/reports/dashboard');
     return response.data;
   },
-  getFinancial: async (params?: { startDate?: string; endDate?: string; dentistId?: string }) => {
+  getFinancial: async (params?: { startDate?: string; endDate?: string; providerId?: string }) => {
     const response = await api.get('/reports/financial', { params });
     return response.data;
   },
-  getAppointments: async (params?: { startDate?: string; endDate?: string; dentistId?: string }) => {
+  getAppointments: async (params?: { startDate?: string; endDate?: string; providerId?: string }) => {
     const response = await api.get('/reports/appointments', { params });
     return response.data;
   },
@@ -421,7 +453,7 @@ export const reportsAPI = {
     const response = await api.get('/reports/patients', { params });
     return response.data;
   },
-  getTreatmentPlans: async (params?: { startDate?: string; endDate?: string; dentistId?: string }) => {
+  getTreatmentPlans: async (params?: { startDate?: string; endDate?: string; providerId?: string }) => {
     const response = await api.get('/reports/treatment-plans', { params });
     return response.data;
   },
@@ -495,6 +527,68 @@ export const auditLogsAPI = {
       params,
       responseType: 'blob'
     });
+    return response.data;
+  },
+};
+
+
+
+// Patient Registration & Portal API (Phase 1.2)
+export const patientRegistrationAPI = {
+  register: async (data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    documentId: string;
+    documentType?: string;
+    dateOfBirth: string;
+    gender: string;
+    phone: string;
+  }) => {
+    const response = await api.post('/portal/register', data);
+    return response.data;
+  },
+  claimProfile: async (data: { documentId: string; documentType?: string }) => {
+    const response = await api.post('/portal/claim-profile', data);
+    return response.data;
+  },
+  getMyProviders: async () => {
+    const response = await api.get('/portal/my-providers');
+    return response.data;
+  },
+  getMyConsents: async () => {
+    const response = await api.get('/portal/my-consents');
+    return response.data;
+  },
+  updatePrivacy: async (data: { defaultDataAccess: string }) => {
+    const response = await api.patch('/portal/privacy', data);
+    return response.data;
+  },
+  revokeConsent: async (consentId: string) => {
+    const response = await api.post("/portal/consents/" + consentId + "/revoke");
+    return response.data;
+  },
+};
+
+// Medical Exams API (Phase 1.2)
+export const medicalExamsAPI = {
+  upload: async (formData: FormData) => {
+    const response = await api.post('/medical-exams', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+  getAll: async () => {
+    const response = await api.get('/medical-exams');
+    return response.data;
+  },
+  getById: async (id: string) => {
+    const response = await api.get('/medical-exams/' + id);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    const response = await api.delete('/medical-exams/' + id);
     return response.data;
   },
 };

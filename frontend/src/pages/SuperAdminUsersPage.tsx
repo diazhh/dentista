@@ -264,7 +264,7 @@ export default function SuperAdminUsersPage() {
           >
             <option value="">Todos los roles</option>
             <option value="SUPER_ADMIN">Super Admin</option>
-            <option value="DENTIST">Dentista</option>
+            <option value="DENTIST">Profesional</option>
             <option value="STAFF_RECEPTIONIST">Recepcionista</option>
             <option value="STAFF_BILLING">Billing</option>
             <option value="PATIENT">Paciente</option>
@@ -475,7 +475,7 @@ export default function SuperAdminUsersPage() {
                   className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="SUPER_ADMIN">Super Admin</option>
-                  <option value="DENTIST">Dentista</option>
+                  <option value="DENTIST">Profesional</option>
                   <option value="STAFF_RECEPTIONIST">Recepcionista</option>
                   <option value="STAFF_BILLING">Billing</option>
                   <option value="PATIENT">Paciente</option>

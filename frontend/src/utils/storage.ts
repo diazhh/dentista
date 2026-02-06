@@ -1,5 +1,5 @@
 // Unique storage key prefix to avoid conflicts with other apps
-const STORAGE_PREFIX = 'denticloud_';
+const STORAGE_PREFIX = 'medicloud_';
 
 // Migrate old localStorage keys to new prefixed keys (one-time migration)
 const migrateOldStorage = () => {
@@ -20,7 +20,7 @@ const migrateOldStorage = () => {
   });
 
   if (migrated) {
-    console.log('[DentiCloud] Migrated authentication data to isolated storage');
+    console.log('[MediCloud] Migrated authentication data to isolated storage');
   }
 };
 
@@ -41,7 +41,7 @@ export const storage = {
   },
 
   clear: () => {
-    // Only clear DentiCloud items
+    // Only clear MediCloud items
     const keys = Object.keys(localStorage);
     keys.forEach(key => {
       if (key.startsWith(STORAGE_PREFIX)) {

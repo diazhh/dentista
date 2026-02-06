@@ -9,24 +9,24 @@ import { WaitlistStatus } from '@prisma/client';
 export class WaitlistService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createDto: CreateWaitlistDto, dentistId: string, tenantId: string) {
-    // Verify patient-dentist relation
-    const relation = await this.prisma.patientDentistRelation.findFirst({
+  async create(createDto: CreateWaitlistDto, providerId: string, tenantId: string) {
+    // Verify provider-patient relation
+    const relation = await this.prisma.providerPatientRelation.findFirst({
       where: {
         patientId: createDto.patientId,
-        dentistId: dentistId,
+        providerId: providerId,
         isActive: true,
       },
     });
 
     if (!relation) {
-      throw new ForbiddenException('Patient is not associated with this dentist');
+      throw new ForbiddenException('Patient is not associated with this provider');
     }
 
     return this.prisma.waitlist.create({
       data: {
         patientId: createDto.patientId,
-        dentistId: dentistId,
+        providerId: providerId,
         tenantId: tenantId,
         preferredDates: createDto.preferredDates.map(d => new Date(d)),
         preferredTimes: createDto.preferredTimes,
@@ -55,9 +55,9 @@ export class WaitlistService {
     });
   }
 
-  async findAll(dentistId: string, tenantId: string, status?: WaitlistStatus) {
+  async findAll(providerId: string, tenantId: string, status?: WaitlistStatus) {
     const where: any = {
-      dentistId: dentistId,
+      providerId: providerId,
       tenantId: tenantId,
     };
 
@@ -89,11 +89,11 @@ export class WaitlistService {
     });
   }
 
-  async findOne(id: string, dentistId: string, tenantId: string) {
+  async findOne(id: string, providerId: string, tenantId: string) {
     const waitlist = await this.prisma.waitlist.findFirst({
       where: {
         id: id,
-        dentistId: dentistId,
+        providerId: providerId,
         tenantId: tenantId,
       },
       include: {
@@ -121,8 +121,8 @@ export class WaitlistService {
     return waitlist;
   }
 
-  async update(id: string, updateDto: UpdateWaitlistDto, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async update(id: string, updateDto: UpdateWaitlistDto, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     const data: any = {};
 
@@ -172,8 +172,8 @@ export class WaitlistService {
     });
   }
 
-  async contact(id: string, contactDto: ContactWaitlistDto, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async contact(id: string, contactDto: ContactWaitlistDto, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.waitlist.update({
       where: { id },
@@ -200,14 +200,14 @@ export class WaitlistService {
     });
   }
 
-  async schedule(id: string, appointmentId: string, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async schedule(id: string, appointmentId: string, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
-    // Verify appointment exists and belongs to dentist
+    // Verify appointment exists and belongs to provider
     const appointment = await this.prisma.appointment.findFirst({
       where: {
         id: appointmentId,
-        dentistId: dentistId,
+        providerId: providerId,
         tenantId: tenantId,
       },
     });
@@ -240,8 +240,8 @@ export class WaitlistService {
     });
   }
 
-  async cancel(id: string, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async cancel(id: string, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.waitlist.update({
       where: { id },
@@ -251,8 +251,8 @@ export class WaitlistService {
     });
   }
 
-  async remove(id: string, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async remove(id: string, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.waitlist.delete({
       where: { id },
@@ -260,7 +260,7 @@ export class WaitlistService {
   }
 
   // Find available slots for waitlist entries
-  async findAvailableSlots(dentistId: string, tenantId: string, date: string) {
+  async findAvailableSlots(providerId: string, tenantId: string, date: string) {
     const targetDate = new Date(date);
     const startOfDay = new Date(targetDate);
     startOfDay.setHours(0, 0, 0, 0);
@@ -270,7 +270,7 @@ export class WaitlistService {
     // Get all appointments for the day
     const appointments = await this.prisma.appointment.findMany({
       where: {
-        dentistId: dentistId,
+        providerId: providerId,
         tenantId: tenantId,
         appointmentDate: {
           gte: startOfDay,

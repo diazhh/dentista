@@ -103,9 +103,9 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
                     {(sidebarOpen || !isDesktop) && (
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-xl">D</span>
+                                <span className="text-white font-bold text-xl">M</span>
                             </div>
-                            <span className="font-bold text-gray-900">DentiCloud</span>
+                            <span className="font-bold text-gray-900">MediCloud</span>
                         </div>
                     )}
                     <button

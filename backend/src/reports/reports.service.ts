@@ -8,7 +8,7 @@ interface DateRange {
 
 interface ReportFilters extends DateRange {
   tenantId: string;
-  dentistId?: string;
+  providerId?: string;
 }
 
 @Injectable()
@@ -21,7 +21,7 @@ export class ReportsService {
    * Get financial summary report
    */
   async getFinancialSummary(filters: ReportFilters) {
-    const { tenantId, startDate, endDate, dentistId } = filters;
+    const { tenantId, startDate, endDate, providerId } = filters;
 
     const whereClause: any = {
       tenantId,
@@ -31,8 +31,8 @@ export class ReportsService {
       },
     };
 
-    if (dentistId) {
-      whereClause.dentistId = dentistId;
+    if (providerId) {
+      whereClause.providerId = providerId;
     }
 
     // Get invoice totals by status
@@ -119,7 +119,7 @@ export class ReportsService {
    * Get appointment statistics report
    */
   async getAppointmentStats(filters: ReportFilters) {
-    const { tenantId, startDate, endDate, dentistId } = filters;
+    const { tenantId, startDate, endDate, providerId } = filters;
 
     const whereClause: any = {
       tenantId,
@@ -129,8 +129,8 @@ export class ReportsService {
       },
     };
 
-    if (dentistId) {
-      whereClause.dentistId = dentistId;
+    if (providerId) {
+      whereClause.providerId = providerId;
     }
 
     // Appointments by status
@@ -212,7 +212,7 @@ export class ReportsService {
     const { tenantId, startDate, endDate } = filters;
 
     // New patients in period
-    const newPatients = await this.prisma.patientDentistRelation.count({
+    const newPatients = await this.prisma.providerPatientRelation.count({
       where: {
         tenantId,
         startedAt: {
@@ -223,7 +223,7 @@ export class ReportsService {
     });
 
     // Total active patients
-    const totalActivePatients = await this.prisma.patientDentistRelation.count({
+    const totalActivePatients = await this.prisma.providerPatientRelation.count({
       where: {
         tenantId,
         isActive: true,
@@ -231,7 +231,7 @@ export class ReportsService {
     });
 
     // Patients by gender
-    const patientIds = await this.prisma.patientDentistRelation.findMany({
+    const patientIds = await this.prisma.providerPatientRelation.findMany({
       where: { tenantId, isActive: true },
       select: { patientId: true },
     });
@@ -303,7 +303,7 @@ export class ReportsService {
    * Get treatment plan statistics
    */
   async getTreatmentPlanStats(filters: ReportFilters) {
-    const { tenantId, startDate, endDate, dentistId } = filters;
+    const { tenantId, startDate, endDate, providerId } = filters;
 
     const whereClause: any = {
       tenantId,
@@ -313,8 +313,8 @@ export class ReportsService {
       },
     };
 
-    if (dentistId) {
-      whereClause.dentistId = dentistId;
+    if (providerId) {
+      whereClause.providerId = providerId;
     }
 
     // Treatment plans by status
@@ -409,7 +409,7 @@ export class ReportsService {
     });
 
     // Active patients
-    const activePatients = await this.prisma.patientDentistRelation.count({
+    const activePatients = await this.prisma.providerPatientRelation.count({
       where: { tenantId, isActive: true },
     });
 

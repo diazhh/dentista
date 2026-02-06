@@ -9,7 +9,7 @@ export class ServicesService {
 
   async create(createServiceDto: CreateServiceDto, tenantId: string) {
     // Check if code already exists for this tenant
-    const existing = await this.prisma.dentalService.findUnique({
+    const existing = await this.prisma.medicalService.findUnique({
       where: {
         tenantId_code: {
           tenantId,
@@ -22,7 +22,7 @@ export class ServicesService {
       throw new ConflictException(`Service with code ${createServiceDto.code} already exists`);
     }
 
-    return this.prisma.dentalService.create({
+    return this.prisma.medicalService.create({
       data: {
         ...createServiceDto,
         tenantId,
@@ -41,7 +41,7 @@ export class ServicesService {
       where.isActive = true;
     }
 
-    return this.prisma.dentalService.findMany({
+    return this.prisma.medicalService.findMany({
       where,
       orderBy: [
         { category: 'asc' },
@@ -51,7 +51,7 @@ export class ServicesService {
   }
 
   async findOne(id: string, tenantId: string) {
-    const service = await this.prisma.dentalService.findFirst({
+    const service = await this.prisma.medicalService.findFirst({
       where: { id, tenantId },
     });
 
@@ -63,7 +63,7 @@ export class ServicesService {
   }
 
   async findByCode(code: string, tenantId: string) {
-    const service = await this.prisma.dentalService.findUnique({
+    const service = await this.prisma.medicalService.findUnique({
       where: {
         tenantId_code: { tenantId, code },
       },
@@ -81,7 +81,7 @@ export class ServicesService {
 
     // If updating code, check for conflicts
     if (updateServiceDto.code) {
-      const existing = await this.prisma.dentalService.findFirst({
+      const existing = await this.prisma.medicalService.findFirst({
         where: {
           tenantId,
           code: updateServiceDto.code,
@@ -94,7 +94,7 @@ export class ServicesService {
       }
     }
 
-    return this.prisma.dentalService.update({
+    return this.prisma.medicalService.update({
       where: { id },
       data: updateServiceDto,
     });
@@ -104,14 +104,14 @@ export class ServicesService {
     await this.findOne(id, tenantId);
 
     // Soft delete by setting isActive to false
-    return this.prisma.dentalService.update({
+    return this.prisma.medicalService.update({
       where: { id },
       data: { isActive: false },
     });
   }
 
   async getCategories(tenantId: string) {
-    const services = await this.prisma.dentalService.findMany({
+    const services = await this.prisma.medicalService.findMany({
       where: { tenantId, isActive: true },
       select: { category: true },
       distinct: ['category'],
@@ -171,7 +171,7 @@ export class ServicesService {
     const results = [];
     for (const service of defaultServices) {
       try {
-        const created = await this.prisma.dentalService.upsert({
+        const created = await this.prisma.medicalService.upsert({
           where: {
             tenantId_code: { tenantId, code: service.code },
           },

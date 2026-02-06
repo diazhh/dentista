@@ -53,7 +53,7 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
         this.socket = makeWASocket({
             auth: state,
             printQRInTerminal: true,
-            browser: ['DentiCloud', 'Chrome', '1.0.0'],
+            browser: ['MediCloud', 'Chrome', '1.0.0'],
         });
 
         this.socket.ev.on('creds.update', saveCreds);

@@ -1,18 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsDateString, IsOptional, IsObject } from 'class-validator';
 
-export class AssignOperatoryDto {
-  @ApiProperty({ description: 'Operatory ID' })
+export class AssignRoomDto {
+  @ApiProperty({ description: 'Consultation Room ID' })
   @IsString()
   @IsNotEmpty()
-  operatoryId: string;
+  roomId: string;
 
-  @ApiProperty({ description: 'Dentist ID' })
+  @ApiProperty({ description: 'Provider ID' })
   @IsString()
   @IsNotEmpty()
-  dentistId: string;
+  providerId: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Schedule configuration',
     example: {
       monday: { start: '09:00', end: '17:00' },

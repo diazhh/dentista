@@ -93,7 +93,7 @@ export default function TenantsManagement() {
                 <tr key={tenant.id} className="hover:bg-gray-50">
                   <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{tenant.name}</div>
-                    <div className="text-xs sm:text-sm text-gray-500">{tenant.subdomain}.denticloud.com</div>
+                    <div className="text-xs sm:text-sm text-gray-500">{tenant.subdomain}.medicloud.com</div>
                   </td>
                   <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{tenant.owner.name}</div>
@@ -166,7 +166,7 @@ export default function TenantsManagement() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium text-gray-900 truncate">{tenant.name}</h3>
-                  <p className="text-xs text-gray-500 truncate">{tenant.subdomain}.denticloud.com</p>
+                  <p className="text-xs text-gray-500 truncate">{tenant.subdomain}.medicloud.com</p>
                 </div>
                 <div className="flex items-center gap-2 ml-2">
                   <button

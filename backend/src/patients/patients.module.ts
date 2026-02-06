@@ -4,8 +4,10 @@ import { PatientsDashboardService } from './patients-dashboard.service';
 import { PatientsController } from './patients.controller';
 import { PatientsPortalController } from './patients-portal.controller';
 import { PatientsPortalService } from './patients-portal.service';
+import { ConsentsModule } from '../consents/consents.module';
 
 @Module({
+  imports: [ConsentsModule],
   controllers: [PatientsController, PatientsPortalController],
   providers: [PatientsService, PatientsDashboardService, PatientsPortalService],
   exports: [PatientsService],

@@ -54,3 +54,70 @@ export interface TenantActivity {
   subscriptionTier: string;
   appointmentCount: number;
 }
+
+// Phase 1.2 - Independent Patient Entity Types
+
+export type DataAccessLevel = 'FULL' | 'CLINICAL_ONLY' | 'SCHEDULING_ONLY' | 'DOCUMENTS_SHARED' | 'MINIMAL';
+
+export type ConsentStatus = 'PENDING' | 'GRANTED' | 'DENIED' | 'REVOKED' | 'EXPIRED';
+
+export type ProviderPatientRelationType = 'REGISTERED_BY_PROVIDER' | 'LINKED_BY_PATIENT' | 'MUTUAL' | 'PROVIDER_ONLY';
+
+export interface PatientConsent {
+  id: string;
+  patientId: string;
+  providerId: string;
+  dataAccessLevel: DataAccessLevel;
+  shareAppointments: boolean;
+  shareMedicalHistory: boolean;
+  shareDocuments: boolean;
+  shareLabResults: boolean;
+  shareBilling: boolean;
+  status: ConsentStatus;
+  grantedAt: string | null;
+  revokedAt: string | null;
+  expiresAt: string | null;
+  requestedBy: string;
+  reason: string | null;
+  createdAt: string;
+}
+
+export interface ProviderRelation {
+  id: string;
+  providerId: string;
+  providerName: string;
+  providerEmail: string;
+  providerSpecialties: string[];
+  practiceName: string;
+  relationType: ProviderPatientRelationType;
+  dataAccessLevel: DataAccessLevel;
+  startedAt: string;
+}
+
+export interface MedicalExam {
+  id: string;
+  patientId: string;
+  title: string;
+  examType: string;
+  description: string | null;
+  examDate: string;
+  filePath: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  aiSummary: string | null;
+  aiProcessed: boolean;
+  tags: string[];
+  createdAt: string;
+}
+
+export interface SharedDocument {
+  id: string;
+  patientId: string;
+  documentId: string;
+  providerId: string;
+  sharedAt: string;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  isActive: boolean;
+}

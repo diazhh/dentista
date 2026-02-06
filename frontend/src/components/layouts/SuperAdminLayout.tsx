@@ -160,7 +160,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
         <div className="p-3 sm:p-4 flex items-center justify-between border-b border-indigo-700">
           {(sidebarOpen || !isDesktop) && (
             <div>
-              <h1 className="text-lg sm:text-xl font-bold">DentiCloud</h1>
+              <h1 className="text-lg sm:text-xl font-bold">MediCloud</h1>
               <p className="text-xs text-indigo-300">Panel de Super Administrador</p>
             </div>
           )}

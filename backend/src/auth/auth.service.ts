@@ -79,9 +79,9 @@ export class AuthService {
   }
 
   async login(user: any, userAgent?: string, ipAddress?: string): Promise<LoginResponseDto> {
-    // For dentists, get their tenant ID
+    // For providers/clinic admins, get their tenant ID
     let tenantId = null;
-    if (user.role === 'DENTIST' && user.ownedTenants && user.ownedTenants.length > 0) {
+    if ((user.role === 'PROVIDER' || user.role === 'CLINIC_ADMIN') && user.ownedTenants && user.ownedTenants.length > 0) {
       tenantId = user.ownedTenants[0].id;
     }
     
@@ -153,7 +153,7 @@ export class AuthService {
 
     const user = session.user;
     let tenantId = null;
-    if (user.role === 'DENTIST' && user.ownedTenants && user.ownedTenants.length > 0) {
+    if ((user.role === 'PROVIDER' || user.role === 'CLINIC_ADMIN') && user.ownedTenants && user.ownedTenants.length > 0) {
       tenantId = user.ownedTenants[0].id;
     }
 
@@ -245,11 +245,13 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    const { password, ...userData } = registerDto;
-    
+    const { password, specialties, ...userData } = registerDto;
+
     const user = await this.usersService.create({
       ...userData,
       passwordHash: hashedPassword,
+      // Only set specialties for providers
+      ...(specialties && specialties.length > 0 && { specialties }),
     });
 
     return this.login(user);

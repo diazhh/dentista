@@ -117,7 +117,10 @@ export const DentalModuleDefinition: ModuleDefinition = {
 };
 ```
 
-### 2.3 Frontend: Módulos Lazy-Loaded
+### 2.3 Frontend: Módulos como Tabs de Paciente (Lazy-Loaded)
+
+> **IMPORTANTE:** Los módulos de especialidad NO crean páginas independientes ni items en el sidebar.
+> Cada módulo registra **tabs dentro del detalle del paciente**. Ver `10-UX-PACIENTE-CENTRICO.md`.
 
 ```typescript
 // /frontend/src/modules/index.ts
@@ -126,24 +129,70 @@ export const moduleRegistry: Record<string, ModuleConfig> = {
     key: 'dental',
     name: 'Odontología',
     icon: ToothIcon,
-    routes: () => import('./dental/routes'),
-    components: () => import('./dental/components'),
+    // Tabs que aparecen en el detalle del paciente
+    patientTabs: [
+      {
+        id: 'odontograms',
+        label: 'Odontogramas',
+        icon: '🦷',
+        component: lazy(() => import('./dental/tabs/OdontogramsTab')),
+        order: 10,
+      },
+      {
+        id: 'treatments',
+        label: 'Tratamientos',
+        icon: '📋',
+        component: lazy(() => import('./dental/tabs/TreatmentPlansTab')),
+        order: 11,
+      },
+    ],
+    // Widgets opcionales para el tab de resumen del paciente
     dashboardWidgets: () => import('./dental/widgets'),
+    // Configuración del módulo
+    settingsComponent: lazy(() => import('./dental/settings/DentalSettings')),
   },
   'general-medicine': {
     key: 'general-medicine',
     name: 'Medicina General',
     icon: StethoscopeIcon,
-    routes: () => import('./general-medicine/routes'),
-    components: () => import('./general-medicine/components'),
+    patientTabs: [
+      {
+        id: 'clinical-notes',
+        label: 'Notas Clínicas',
+        icon: '📝',
+        component: lazy(() => import('./general-medicine/tabs/ClinicalNotesTab')),
+        order: 10,
+      },
+      {
+        id: 'prescriptions',
+        label: 'Recetas',
+        icon: '💊',
+        component: lazy(() => import('./general-medicine/tabs/PrescriptionsTab')),
+        order: 11,
+      },
+    ],
     dashboardWidgets: () => import('./general-medicine/widgets'),
   },
   psychology: {
     key: 'psychology',
     name: 'Psicología',
     icon: BrainIcon,
-    routes: () => import('./psychology/routes'),
-    components: () => import('./psychology/components'),
+    patientTabs: [
+      {
+        id: 'sessions',
+        label: 'Sesiones',
+        icon: '🧠',
+        component: lazy(() => import('./psychology/tabs/SessionsTab')),
+        order: 10,
+      },
+      {
+        id: 'assessments',
+        label: 'Evaluaciones',
+        icon: '📊',
+        component: lazy(() => import('./psychology/tabs/AssessmentsTab')),
+        order: 11,
+      },
+    ],
     dashboardWidgets: () => import('./psychology/widgets'),
   },
   // ...
@@ -338,33 +387,54 @@ POST   /api/modules/:key/deactivate   # Desactivar módulo
 PUT    /api/modules/:key/config       # Configurar módulo
 ```
 
-### 4.3 Frontend: Carga Dinámica
+### 4.3 Frontend: Integración Paciente-Céntrica
+
+> Los módulos NO agregan items al sidebar. Los módulos agregan tabs al detalle del paciente.
+> Ver `10-UX-PACIENTE-CENTRICO.md` para la arquitectura completa.
 
 ```typescript
 // En el layout principal del provider
 function ProviderLayout() {
-  const { activeModules } = useProviderModules();
-
   return (
     <Layout>
       <Sidebar>
-        {/* Menú core (siempre visible) */}
+        {/* Menú simplificado (sin módulos) */}
         <NavItem to="/dashboard" icon={DashboardIcon}>Dashboard</NavItem>
+        <NavItem to="/calendar" icon={CalendarIcon}>Calendario</NavItem>
         <NavItem to="/patients" icon={PatientsIcon}>Pacientes</NavItem>
-        <NavItem to="/appointments" icon={CalendarIcon}>Citas</NavItem>
-        <NavItem to="/billing" icon={BillingIcon}>Facturación</NavItem>
-
-        {/* Menú de módulos (dinámico) */}
-        {activeModules.map(mod => (
-          <ModuleNavItems key={mod.key} module={mod} />
-        ))}
-
+        <NavItem to="/clinics" icon={ClinicIcon}>Clínica</NavItem>
+        <NavItem to="/staff" icon={StaffIcon}>Staff</NavItem>
+        <NavItem to="/reports" icon={ReportsIcon}>Reportes</NavItem>
+        <NavItem to="/chat" icon={ChatIcon}>WhatsApp</NavItem>
         <NavItem to="/settings" icon={SettingsIcon}>Configuración</NavItem>
       </Sidebar>
       <Content>
         <Outlet />
       </Content>
     </Layout>
+  );
+}
+
+// Los módulos se cargan dinámicamente en el detalle del paciente
+function PatientDetailPage() {
+  const { activeModules } = useActiveModules();
+  const { tabs } = usePatientTabs(); // core tabs + module tabs
+
+  return (
+    <div>
+      <PatientHeader />
+      <Tabs>
+        {/* Core tabs siempre visibles */}
+        {/* + Module tabs basados en módulos activos */}
+        {tabs.map(tab => (
+          <TabPanel key={tab.id} value={tab.id}>
+            <Suspense fallback={<Loading />}>
+              <tab.component patientId={patientId} />
+            </Suspense>
+          </TabPanel>
+        ))}
+      </Tabs>
+    </div>
   );
 }
 ```

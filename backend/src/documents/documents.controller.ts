@@ -40,12 +40,12 @@ export class DocumentsController {
     @Body() createDocumentDto: CreateDocumentDto,
     @Request() req,
   ) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
     return this.documentsService.upload(
       file,
       createDocumentDto,
-      dentistId,
+      providerId,
       tenantId,
     );
   }
@@ -57,10 +57,10 @@ export class DocumentsController {
     @Query('patientId') patientId?: string,
     @Query('type') type?: string,
   ) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
     return this.documentsService.findAll(
-      dentistId,
+      providerId,
       tenantId,
       patientId,
       type,
@@ -70,9 +70,9 @@ export class DocumentsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get document by ID' })
   findOne(@Param('id') id: string, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.documentsService.findOne(id, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.documentsService.findOne(id, providerId, tenantId);
   }
 
   @Get(':id/download')
@@ -82,11 +82,11 @@ export class DocumentsController {
     @Request() req,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
     const document = await this.documentsService.findOne(
       id,
-      dentistId,
+      providerId,
       tenantId,
     );
 
@@ -107,12 +107,12 @@ export class DocumentsController {
     @Body() updateDocumentDto: UpdateDocumentDto,
     @Request() req,
   ) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
     return this.documentsService.update(
       id,
       updateDocumentDto,
-      dentistId,
+      providerId,
       tenantId,
     );
   }
@@ -120,8 +120,8 @@ export class DocumentsController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete document' })
   remove(@Param('id') id: string, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.documentsService.remove(id, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.documentsService.remove(id, providerId, tenantId);
   }
 }

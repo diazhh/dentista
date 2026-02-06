@@ -8,10 +8,10 @@ export class CreateAppointmentDto {
   @IsNotEmpty()
   patientId: string;
 
-  @ApiProperty({ description: 'Operatory ID (optional)' })
+  @ApiProperty({ description: 'Consultation room ID (optional)' })
   @IsString()
   @IsOptional()
-  operatoryId?: string;
+  roomId?: string;
 
   @ApiProperty({ description: 'Appointment date and time', example: '2025-01-15T10:00:00Z' })
   @IsDateString()

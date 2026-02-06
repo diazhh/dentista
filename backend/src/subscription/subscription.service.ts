@@ -125,7 +125,7 @@ export class SubscriptionService {
     const [patientCount, documentsSize] = await Promise.all([
       this.prisma.patient.count({
         where: {
-          patientDentistRelations: {
+          providerPatientRelations: {
             some: {
               tenantId,
               isActive: true,
@@ -216,7 +216,7 @@ export class SubscriptionService {
 
     const patientCount = await this.prisma.patient.count({
       where: {
-        patientDentistRelations: {
+        providerPatientRelations: {
           some: {
             tenantId,
             isActive: true,

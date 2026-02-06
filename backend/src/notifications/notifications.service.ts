@@ -227,8 +227,8 @@ export class NotificationsService {
       return;
     }
 
-    const dentist = await this.prisma.user.findUnique({
-      where: { id: appointment.dentistId },
+    const provider = await this.prisma.user.findUnique({
+      where: { id: appointment.providerId },
     });
 
     for (const hoursBefore of preferences.reminderHoursBefore) {
@@ -249,7 +249,7 @@ export class NotificationsService {
                 metadata: {
                   appointmentId: appointment.id,
                   appointmentDate: appointment.appointmentDate,
-                  dentistName: dentist?.name,
+                  providerName: provider?.name,
                   procedureType: appointment.procedureType,
                 },
                 scheduledFor: reminderTime.toISOString(),
@@ -270,7 +270,7 @@ export class NotificationsService {
                 metadata: {
                   appointmentId: appointment.id,
                   appointmentDate: appointment.appointmentDate,
-                  dentistName: dentist?.name,
+                  providerName: provider?.name,
                   procedureType: appointment.procedureType,
                 },
                 scheduledFor: reminderTime.toISOString(),
@@ -308,8 +308,8 @@ export class NotificationsService {
       return;
     }
 
-    const dentist = await this.prisma.user.findUnique({
-      where: { id: appointment.dentistId },
+    const provider = await this.prisma.user.findUnique({
+      where: { id: appointment.providerId },
     });
 
     // Email Confirmation
@@ -324,7 +324,7 @@ export class NotificationsService {
           metadata: {
             appointmentId: appointment.id,
             appointmentDate: appointment.appointmentDate,
-            dentistName: dentist?.name,
+            providerName: provider?.name,
             procedureType: appointment.procedureType,
           },
         },
@@ -344,7 +344,7 @@ export class NotificationsService {
           metadata: {
             appointmentId: appointment.id,
             appointmentDate: appointment.appointmentDate,
-            dentistName: dentist?.name,
+            providerName: provider?.name,
             procedureType: appointment.procedureType,
           },
         },

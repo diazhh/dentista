@@ -15,34 +15,34 @@ export class OdontogramsController {
   @Post()
   @ApiOperation({ summary: 'Create a new odontogram' })
   create(@Body() createOdontogramDto: CreateOdontogramDto, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.odontogramsService.create(createOdontogramDto, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.create(createOdontogramDto, providerId, tenantId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all odontograms' })
   @ApiQuery({ name: 'patientId', required: false })
   findAll(@Request() req, @Query('patientId') patientId?: string) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.odontogramsService.findAll(dentistId, tenantId, patientId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.findAll(providerId, tenantId, patientId);
   }
 
   @Get('patient/:patientId/latest')
   @ApiOperation({ summary: 'Get latest odontogram for a patient' })
   getLatestByPatient(@Param('patientId') patientId: string, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.odontogramsService.getLatestByPatient(patientId, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.getLatestByPatient(patientId, providerId, tenantId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get odontogram by ID' })
   findOne(@Param('id') id: string, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.odontogramsService.findOne(id, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.findOne(id, providerId, tenantId);
   }
 
   @Patch(':id')
@@ -52,16 +52,16 @@ export class OdontogramsController {
     @Body() updateOdontogramDto: UpdateOdontogramDto,
     @Request() req,
   ) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.odontogramsService.update(id, updateOdontogramDto, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.update(id, updateOdontogramDto, providerId, tenantId);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete odontogram' })
   remove(@Param('id') id: string, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.odontogramsService.remove(id, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.remove(id, providerId, tenantId);
   }
 }

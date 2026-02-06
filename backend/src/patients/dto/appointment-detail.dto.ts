@@ -68,7 +68,7 @@ export class AppointmentDetailDto {
         address: string;
       };
     };
-    dentist: {
+    provider: {
       id: string;
       name: string;
     };

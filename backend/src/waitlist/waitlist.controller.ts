@@ -17,75 +17,75 @@ export class WaitlistController {
   @Post()
   @ApiOperation({ summary: 'Add patient to waitlist' })
   create(@Body() createDto: CreateWaitlistDto, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.waitlistService.create(createDto, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.waitlistService.create(createDto, providerId, tenantId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all waitlist entries' })
   @ApiQuery({ name: 'status', enum: WaitlistStatus, required: false })
   findAll(@Request() req, @Query('status') status?: WaitlistStatus) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.waitlistService.findAll(dentistId, tenantId, status);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.waitlistService.findAll(providerId, tenantId, status);
   }
 
   @Get('available-slots')
   @ApiOperation({ summary: 'Find available slots for a specific date' })
   @ApiQuery({ name: 'date', description: 'Date in YYYY-MM-DD format', example: '2025-01-15' })
   findAvailableSlots(@Request() req, @Query('date') date: string) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.waitlistService.findAvailableSlots(dentistId, tenantId, date);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.waitlistService.findAvailableSlots(providerId, tenantId, date);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get waitlist entry by ID' })
   findOne(@Param('id') id: string, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.waitlistService.findOne(id, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.waitlistService.findOne(id, providerId, tenantId);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update waitlist entry' })
   update(@Param('id') id: string, @Body() updateDto: UpdateWaitlistDto, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.waitlistService.update(id, updateDto, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.waitlistService.update(id, updateDto, providerId, tenantId);
   }
 
   @Patch(':id/contact')
   @ApiOperation({ summary: 'Mark patient as contacted' })
   contact(@Param('id') id: string, @Body() contactDto: ContactWaitlistDto, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.waitlistService.contact(id, contactDto, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.waitlistService.contact(id, contactDto, providerId, tenantId);
   }
 
   @Patch(':id/schedule/:appointmentId')
   @ApiOperation({ summary: 'Mark waitlist entry as scheduled with appointment ID' })
   schedule(@Param('id') id: string, @Param('appointmentId') appointmentId: string, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.waitlistService.schedule(id, appointmentId, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.waitlistService.schedule(id, appointmentId, providerId, tenantId);
   }
 
   @Patch(':id/cancel')
   @ApiOperation({ summary: 'Cancel waitlist entry' })
   cancel(@Param('id') id: string, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.waitlistService.cancel(id, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.waitlistService.cancel(id, providerId, tenantId);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Remove waitlist entry' })
   remove(@Param('id') id: string, @Request() req) {
-    const dentistId = req.user.userId;
-    const tenantId = req.user.tenantId || dentistId;
-    return this.waitlistService.remove(id, dentistId, tenantId);
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.waitlistService.remove(id, providerId, tenantId);
   }
 
   @Post('expire-old')

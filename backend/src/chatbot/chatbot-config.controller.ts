@@ -24,7 +24,7 @@ export class ChatbotConfigController {
    * Get chatbot configuration for current tenant
    */
   @Get()
-  @Roles('DENTIST', 'STAFF_RECEPTIONIST', 'SUPER_ADMIN')
+  @Roles('PROVIDER', 'STAFF_RECEPTIONIST', 'SUPER_ADMIN')
   async getConfig(@Request() req: any) {
     const tenantId = req.user.tenantId;
     return this.chatbotConfigService.getConfig(tenantId);
@@ -43,7 +43,7 @@ export class ChatbotConfigController {
    * Create or update chatbot configuration
    */
   @Post()
-  @Roles('DENTIST', 'SUPER_ADMIN')
+  @Roles('PROVIDER', 'SUPER_ADMIN')
   async createOrUpdateConfig(@Request() req: any, @Body() dto: CreateChatbotConfigDto) {
     const tenantId = req.user.tenantId;
     return this.chatbotConfigService.upsertConfig(tenantId, dto);
@@ -53,7 +53,7 @@ export class ChatbotConfigController {
    * Update chatbot configuration
    */
   @Put()
-  @Roles('DENTIST', 'SUPER_ADMIN')
+  @Roles('PROVIDER', 'SUPER_ADMIN')
   async updateConfig(@Request() req: any, @Body() dto: UpdateChatbotConfigDto) {
     const tenantId = req.user.tenantId;
     return this.chatbotConfigService.upsertConfig(tenantId, dto);
@@ -75,7 +75,7 @@ export class ChatbotConfigController {
    * Delete chatbot configuration
    */
   @Delete()
-  @Roles('DENTIST', 'SUPER_ADMIN')
+  @Roles('PROVIDER', 'SUPER_ADMIN')
   async deleteConfig(@Request() req: any) {
     const tenantId = req.user.tenantId;
     return this.chatbotConfigService.deleteConfig(tenantId);
@@ -85,7 +85,7 @@ export class ChatbotConfigController {
    * Test chatbot response
    */
   @Post('test')
-  @Roles('DENTIST', 'SUPER_ADMIN')
+  @Roles('PROVIDER', 'SUPER_ADMIN')
   async testChatbot(@Request() req: any, @Body() body: { message: string }) {
     const tenantId = req.user.tenantId;
     const config = await this.chatbotConfigService.getConfig(tenantId);
@@ -93,7 +93,7 @@ export class ChatbotConfigController {
     return {
       config: {
         isEnabled: config.isEnabled,
-        clinicName: config.clinicName,
+        practiceName: config.practiceName,
         aiModel: config.aiModel,
       },
       testMessage: body.message,

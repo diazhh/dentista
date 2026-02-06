@@ -247,14 +247,14 @@ export class CalendarSyncService {
 
     const connection = await this.prisma.calendarConnection.findFirst({
       where: {
-        userId: appointment.dentistId,
+        userId: appointment.providerId,
         provider: 'GOOGLE',
         syncEnabled: true,
       },
     });
 
     if (!connection) {
-      this.logger.debug(`No calendar connection for dentist ${appointment.dentistId}`);
+      this.logger.debug(`No calendar connection for provider ${appointment.providerId}`);
       return;
     }
 
@@ -281,7 +281,7 @@ export class CalendarSyncService {
     };
 
     try {
-      const externalEventId = await this.createEvent(appointment.dentistId, event);
+      const externalEventId = await this.createEvent(appointment.providerId, event);
 
       // Log the sync
       await this.prisma.calendarSyncLog.create({

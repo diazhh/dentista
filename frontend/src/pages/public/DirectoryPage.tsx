@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { publicAPI } from '../../services/api';
-import { Search, MapPin, Star } from 'lucide-react';
+import { Search, MapPin, Stethoscope } from 'lucide-react';
+
+/** Helper: format MedicalSpecialty enum value to readable label */
+const formatSpecialty = (value: string) =>
+    value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 const DirectoryPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -12,6 +16,15 @@ const DirectoryPage = () => {
         city: searchParams.get('city') || '',
         specialty: searchParams.get('specialty') || '',
     });
+
+    // Fetch available specialties from API
+    const { data: specialtiesData } = useQuery({
+        queryKey: ['public-specialties'],
+        queryFn: () => publicAPI.getSpecialties(),
+        staleTime: 1000 * 60 * 30, // cache for 30 minutes
+    });
+
+    const specialties: { value: string; label: string }[] = specialtiesData?.data || [];
 
     const { data: clinics, isLoading } = useQuery({
         queryKey: ['public-clinics', searchTerm, filters],
@@ -25,7 +38,11 @@ const DirectoryPage = () => {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        setSearchParams({ q: searchTerm, ...filters });
+        const params: Record<string, string> = {};
+        if (searchTerm) params.q = searchTerm;
+        if (filters.city) params.city = filters.city;
+        if (filters.specialty) params.specialty = filters.specialty;
+        setSearchParams(params);
     };
 
     return (
@@ -33,7 +50,7 @@ const DirectoryPage = () => {
             {/* Search Header */}
             <div className="bg-white shadow border-b border-gray-200 py-4 sm:py-6 md:py-8">
                 <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Find Your Dentist</h1>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Find Your Provider</h1>
                     <form onSubmit={handleSearch} className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                         <div className="relative sm:col-span-2">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -41,7 +58,7 @@ const DirectoryPage = () => {
                             </div>
                             <input
                                 type="text"
-                                placeholder="Search clinics, dentists..."
+                                placeholder="Search clinics, providers..."
                                 className="block w-full pl-9 sm:pl-10 pr-3 py-2.5 sm:py-3 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -54,10 +71,11 @@ const DirectoryPage = () => {
                                 onChange={(e) => setFilters({ ...filters, specialty: e.target.value })}
                             >
                                 <option value="">All Specialties</option>
-                                <option value="General Dentist">General Dentist</option>
-                                <option value="Orthodontist">Orthodontist</option>
-                                <option value="Pediatric Dentist">Pediatric Dentist</option>
-                                <option value="Endodontist">Endodontist</option>
+                                {specialties.map((s) => (
+                                    <option key={s.value} value={s.value}>
+                                        {s.label}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         <div>
@@ -100,15 +118,27 @@ const DirectoryPage = () => {
                                     </div>
 
                                     <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
-                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Top Dentists</h4>
+                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Top Providers</h4>
                                         <div className="space-y-1.5 sm:space-y-2">
-                                            {clinic.users?.map((dentist: any) => (
-                                                <div key={dentist.id} className="text-xs sm:text-sm">
-                                                    <span className="font-medium text-gray-900">{dentist.name}</span>
-                                                    {dentist.specialization && (
-                                                        <span className="text-gray-500 ml-1 sm:ml-2 text-xs bg-gray-100 px-1.5 sm:px-2 py-0.5 rounded-full">
-                                                            {dentist.specialization}
-                                                        </span>
+                                            {clinic.memberships?.map((m: any) => (
+                                                <div key={m.user.id} className="text-xs sm:text-sm">
+                                                    <span className="font-medium text-gray-900">{m.user.name}</span>
+                                                    {m.user.specialties && m.user.specialties.length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 mt-0.5">
+                                                            {m.user.specialties.slice(0, 2).map((spec: string) => (
+                                                                <span
+                                                                    key={spec}
+                                                                    className="text-gray-500 text-xs bg-blue-50 text-blue-700 px-1.5 sm:px-2 py-0.5 rounded-full"
+                                                                >
+                                                                    {formatSpecialty(spec)}
+                                                                </span>
+                                                            ))}
+                                                            {m.user.specialties.length > 2 && (
+                                                                <span className="text-xs text-gray-400">
+                                                                    +{m.user.specialties.length - 2}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             ))}
@@ -128,7 +158,16 @@ const DirectoryPage = () => {
 
                         {clinics?.data?.length === 0 && (
                             <div className="col-span-full text-center py-8 sm:py-12">
+                                <Stethoscope className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                                 <p className="text-gray-500 text-sm sm:text-base md:text-lg">No clinics found matching your criteria.</p>
+                                {filters.specialty && (
+                                    <button
+                                        onClick={() => setFilters({ ...filters, specialty: '' })}
+                                        className="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                    >
+                                        Clear specialty filter
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

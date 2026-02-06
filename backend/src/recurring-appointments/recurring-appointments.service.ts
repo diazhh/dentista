@@ -8,27 +8,27 @@ import { RecurrenceFrequency } from '@prisma/client';
 export class RecurringAppointmentsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createDto: CreateRecurringAppointmentDto, dentistId: string, tenantId: string) {
-    // Verify patient-dentist relation
-    const relation = await this.prisma.patientDentistRelation.findFirst({
+  async create(createDto: CreateRecurringAppointmentDto, providerId: string, tenantId: string) {
+    // Verify provider-patient relation
+    const relation = await this.prisma.providerPatientRelation.findFirst({
       where: {
         patientId: createDto.patientId,
-        dentistId: dentistId,
+        providerId: providerId,
         isActive: true,
       },
     });
 
     if (!relation) {
-      throw new ForbiddenException('Patient is not associated with this dentist');
+      throw new ForbiddenException('Patient is not associated with this provider');
     }
 
     // Create recurring appointment
     const recurring = await this.prisma.recurringAppointment.create({
       data: {
         patientId: createDto.patientId,
-        dentistId: dentistId,
+        providerId: providerId,
         tenantId: tenantId,
-        operatoryId: createDto.operatoryId,
+        roomId: createDto.roomId,
         frequency: createDto.frequency,
         interval: createDto.interval || 1,
         startDate: new Date(createDto.startDate),
@@ -42,14 +42,14 @@ export class RecurringAppointmentsService {
     });
 
     // Generate initial appointments (next 3 months)
-    await this.generateAppointments(recurring.id, dentistId, tenantId);
+    await this.generateAppointments(recurring.id, providerId, tenantId);
 
-    return this.findOne(recurring.id, dentistId, tenantId);
+    return this.findOne(recurring.id, providerId, tenantId);
   }
 
-  async findAll(dentistId: string, tenantId: string, patientId?: string) {
+  async findAll(providerId: string, tenantId: string, patientId?: string) {
     const where: any = {
-      dentistId: dentistId,
+      providerId: providerId,
       tenantId: tenantId,
       isActive: true,
     };
@@ -79,11 +79,11 @@ export class RecurringAppointmentsService {
     });
   }
 
-  async findOne(id: string, dentistId: string, tenantId: string) {
+  async findOne(id: string, providerId: string, tenantId: string) {
     const recurring = await this.prisma.recurringAppointment.findFirst({
       where: {
         id: id,
-        dentistId: dentistId,
+        providerId: providerId,
         tenantId: tenantId,
       },
       include: {
@@ -102,13 +102,13 @@ export class RecurringAppointmentsService {
     return recurring;
   }
 
-  async update(id: string, updateDto: UpdateRecurringAppointmentDto, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async update(id: string, updateDto: UpdateRecurringAppointmentDto, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     const updated = await this.prisma.recurringAppointment.update({
       where: { id },
       data: {
-        operatoryId: updateDto.operatoryId,
+        roomId: updateDto.roomId,
         frequency: updateDto.frequency,
         interval: updateDto.interval,
         endDate: updateDto.endDate ? new Date(updateDto.endDate) : undefined,
@@ -122,14 +122,14 @@ export class RecurringAppointmentsService {
 
     // Regenerate future appointments if pattern changed
     if (updateDto.frequency || updateDto.interval || updateDto.timeOfDay || updateDto.daysOfWeek) {
-      await this.regenerateFutureAppointments(id, dentistId, tenantId);
+      await this.regenerateFutureAppointments(id, providerId, tenantId);
     }
 
-    return this.findOne(id, dentistId, tenantId);
+    return this.findOne(id, providerId, tenantId);
   }
 
-  async remove(id: string, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async remove(id: string, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     // Soft delete recurring appointment
     await this.prisma.recurringAppointment.update({
@@ -155,7 +155,7 @@ export class RecurringAppointmentsService {
   }
 
   // Generate appointments for the next 3 months
-  async generateAppointments(recurringId: string, dentistId: string, tenantId: string) {
+  async generateAppointments(recurringId: string, providerId: string, tenantId: string) {
     const recurring = await this.prisma.recurringAppointment.findUnique({
       where: { id: recurringId },
     });
@@ -179,9 +179,9 @@ export class RecurringAppointmentsService {
         await this.prisma.appointment.create({
           data: {
             patientId: recurring.patientId,
-            dentistId: dentistId,
+            providerId: providerId,
             tenantId: tenantId,
-            operatoryId: recurring.operatoryId,
+            roomId: recurring.roomId,
             recurringId: recurringId,
             appointmentDate: appointmentDate,
             duration: recurring.duration,
@@ -195,7 +195,7 @@ export class RecurringAppointmentsService {
   }
 
   // Regenerate future appointments (delete and recreate)
-  private async regenerateFutureAppointments(recurringId: string, dentistId: string, tenantId: string) {
+  private async regenerateFutureAppointments(recurringId: string, providerId: string, tenantId: string) {
     // Delete future scheduled appointments
     await this.prisma.appointment.deleteMany({
       where: {
@@ -208,7 +208,7 @@ export class RecurringAppointmentsService {
     });
 
     // Generate new appointments
-    await this.generateAppointments(recurringId, dentistId, tenantId);
+    await this.generateAppointments(recurringId, providerId, tenantId);
   }
 
   // Calculate occurrence dates based on recurrence pattern

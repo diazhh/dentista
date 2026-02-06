@@ -40,19 +40,19 @@ export class ReportsController {
   @ApiOperation({ summary: 'Get financial summary report' })
   @ApiQuery({ name: 'startDate', required: false, description: 'Start date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'End date (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'dentistId', required: false, description: 'Filter by dentist' })
+  @ApiQuery({ name: 'providerId', required: false, description: 'Filter by provider' })
   @ApiResponse({ status: 200, description: 'Financial summary report' })
   async getFinancialReport(
     @Req() req,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('dentistId') dentistId?: string,
+    @Query('providerId') providerId?: string,
   ) {
     const dateRange = this.getDateRange(startDate, endDate);
     return this.reportsService.getFinancialSummary({
       tenantId: req.user.tenantId,
       ...dateRange,
-      dentistId,
+      providerId,
     });
   }
 
@@ -60,19 +60,19 @@ export class ReportsController {
   @ApiOperation({ summary: 'Get appointment statistics report' })
   @ApiQuery({ name: 'startDate', required: false, description: 'Start date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'End date (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'dentistId', required: false, description: 'Filter by dentist' })
+  @ApiQuery({ name: 'providerId', required: false, description: 'Filter by provider' })
   @ApiResponse({ status: 200, description: 'Appointment statistics report' })
   async getAppointmentReport(
     @Req() req,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('dentistId') dentistId?: string,
+    @Query('providerId') providerId?: string,
   ) {
     const dateRange = this.getDateRange(startDate, endDate);
     return this.reportsService.getAppointmentStats({
       tenantId: req.user.tenantId,
       ...dateRange,
-      dentistId,
+      providerId,
     });
   }
 
@@ -97,19 +97,19 @@ export class ReportsController {
   @ApiOperation({ summary: 'Get treatment plan statistics report' })
   @ApiQuery({ name: 'startDate', required: false, description: 'Start date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'End date (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'dentistId', required: false, description: 'Filter by dentist' })
+  @ApiQuery({ name: 'providerId', required: false, description: 'Filter by provider' })
   @ApiResponse({ status: 200, description: 'Treatment plan statistics report' })
   async getTreatmentPlanReport(
     @Req() req,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('dentistId') dentistId?: string,
+    @Query('providerId') providerId?: string,
   ) {
     const dateRange = this.getDateRange(startDate, endDate);
     return this.reportsService.getTreatmentPlanStats({
       tenantId: req.user.tenantId,
       ...dateRange,
-      dentistId,
+      providerId,
     });
   }
 
@@ -121,19 +121,19 @@ export class ReportsController {
   @ApiOperation({ summary: 'Export financial report to Excel' })
   @ApiQuery({ name: 'startDate', required: false })
   @ApiQuery({ name: 'endDate', required: false })
-  @ApiQuery({ name: 'dentistId', required: false })
+  @ApiQuery({ name: 'providerId', required: false })
   async exportFinancialExcel(
     @Req() req,
     @Res() res: Response,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('dentistId') dentistId?: string,
+    @Query('providerId') providerId?: string,
   ) {
     const dateRange = this.getDateRange(startDate, endDate);
     const data = await this.reportsService.getFinancialSummary({
       tenantId: req.user.tenantId,
       ...dateRange,
-      dentistId,
+      providerId,
     });
 
     const buffer = await this.excelExporter.exportFinancialReport(data);
@@ -148,19 +148,19 @@ export class ReportsController {
   @ApiOperation({ summary: 'Export financial report to PDF' })
   @ApiQuery({ name: 'startDate', required: false })
   @ApiQuery({ name: 'endDate', required: false })
-  @ApiQuery({ name: 'dentistId', required: false })
+  @ApiQuery({ name: 'providerId', required: false })
   async exportFinancialPdf(
     @Req() req,
     @Res() res: Response,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('dentistId') dentistId?: string,
+    @Query('providerId') providerId?: string,
   ) {
     const dateRange = this.getDateRange(startDate, endDate);
     const data = await this.reportsService.getFinancialSummary({
       tenantId: req.user.tenantId,
       ...dateRange,
-      dentistId,
+      providerId,
     });
 
     const buffer = await this.pdfExporter.exportFinancialReport(data);
@@ -175,19 +175,19 @@ export class ReportsController {
   @ApiOperation({ summary: 'Export appointment statistics to Excel' })
   @ApiQuery({ name: 'startDate', required: false })
   @ApiQuery({ name: 'endDate', required: false })
-  @ApiQuery({ name: 'dentistId', required: false })
+  @ApiQuery({ name: 'providerId', required: false })
   async exportAppointmentsExcel(
     @Req() req,
     @Res() res: Response,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('dentistId') dentistId?: string,
+    @Query('providerId') providerId?: string,
   ) {
     const dateRange = this.getDateRange(startDate, endDate);
     const data = await this.reportsService.getAppointmentStats({
       tenantId: req.user.tenantId,
       ...dateRange,
-      dentistId,
+      providerId,
     });
 
     const buffer = await this.excelExporter.exportAppointmentStats(data);
@@ -202,19 +202,19 @@ export class ReportsController {
   @ApiOperation({ summary: 'Export appointment statistics to PDF' })
   @ApiQuery({ name: 'startDate', required: false })
   @ApiQuery({ name: 'endDate', required: false })
-  @ApiQuery({ name: 'dentistId', required: false })
+  @ApiQuery({ name: 'providerId', required: false })
   async exportAppointmentsPdf(
     @Req() req,
     @Res() res: Response,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('dentistId') dentistId?: string,
+    @Query('providerId') providerId?: string,
   ) {
     const dateRange = this.getDateRange(startDate, endDate);
     const data = await this.reportsService.getAppointmentStats({
       tenantId: req.user.tenantId,
       ...dateRange,
-      dentistId,
+      providerId,
     });
 
     const buffer = await this.pdfExporter.exportAppointmentStats(data);
@@ -277,19 +277,19 @@ export class ReportsController {
   @ApiOperation({ summary: 'Export treatment plan statistics to Excel' })
   @ApiQuery({ name: 'startDate', required: false })
   @ApiQuery({ name: 'endDate', required: false })
-  @ApiQuery({ name: 'dentistId', required: false })
+  @ApiQuery({ name: 'providerId', required: false })
   async exportTreatmentPlansExcel(
     @Req() req,
     @Res() res: Response,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('dentistId') dentistId?: string,
+    @Query('providerId') providerId?: string,
   ) {
     const dateRange = this.getDateRange(startDate, endDate);
     const data = await this.reportsService.getTreatmentPlanStats({
       tenantId: req.user.tenantId,
       ...dateRange,
-      dentistId,
+      providerId,
     });
 
     const buffer = await this.excelExporter.exportTreatmentPlanStats(data);
@@ -304,19 +304,19 @@ export class ReportsController {
   @ApiOperation({ summary: 'Export treatment plan statistics to PDF' })
   @ApiQuery({ name: 'startDate', required: false })
   @ApiQuery({ name: 'endDate', required: false })
-  @ApiQuery({ name: 'dentistId', required: false })
+  @ApiQuery({ name: 'providerId', required: false })
   async exportTreatmentPlansPdf(
     @Req() req,
     @Res() res: Response,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('dentistId') dentistId?: string,
+    @Query('providerId') providerId?: string,
   ) {
     const dateRange = this.getDateRange(startDate, endDate);
     const data = await this.reportsService.getTreatmentPlanStats({
       tenantId: req.user.tenantId,
       ...dateRange,
-      dentistId,
+      providerId,
     });
 
     const buffer = await this.pdfExporter.exportTreatmentPlanStats(data);

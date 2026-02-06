@@ -1,23 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
 
-export class CreateOperatoryDto {
+export class CreateConsultationRoomDto {
   @ApiProperty({ description: 'Clinic ID' })
   @IsString()
   @IsNotEmpty()
   clinicId: string;
 
-  @ApiProperty({ description: 'Operatory name', example: 'Operatory 1' })
+  @ApiProperty({ description: 'Consultation room name', example: 'Room 1' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ description: 'Operatory description', required: false })
+  @ApiProperty({ description: 'Consultation room description', required: false })
   @IsString()
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Equipment list',
     required: false,
     example: { chair: 'Dental Chair Model X', xray: 'Digital X-Ray System', tools: ['Drill', 'Scaler'] }

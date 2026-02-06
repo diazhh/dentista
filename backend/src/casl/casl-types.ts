@@ -16,8 +16,13 @@ export type Subjects =
     | 'Document'
     | 'Clinic'
     | 'Operatory'
+    | 'ConsultationRoom'
+    | 'ClinicStaff'
+    | 'RoomAssignment'
     | 'Notification'
     | 'Odontogram'
+    | 'TenantMembership'
+    | 'Report'
     | 'all';
 
 export type AppAbility = any; // Will be properly typed by CASL

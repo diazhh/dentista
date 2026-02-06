@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Building2, ChevronDown, Check, Plus } from 'lucide-react';
+import { Building2, ChevronDown, Check } from 'lucide-react';
 import { staffAPI } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import { storage } from '../utils/storage';
 
 interface Workspace {
   id: string;
@@ -54,6 +55,8 @@ export default function TenantSwitcher() {
 
     try {
       setSwitching(true);
+      // Store selected tenantId for X-Tenant-Id header
+      storage.setItem('selectedTenantId', tenantId);
       await switchTenant(tenantId);
       setIsOpen(false);
       // Reload to apply new tenant context

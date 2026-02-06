@@ -57,7 +57,7 @@ export default function PatientDashboard() {
                                         </div>
                                         <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-500 mt-1">
                                             <MapPin className="w-3 h-3 flex-shrink-0" />
-                                            <span className="truncate">{apt.location} - {apt.dentist}</span>
+                                            <span className="truncate">{apt.location} - {apt.provider}</span>
                                         </div>
                                     </div>
                                 </div>

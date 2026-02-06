@@ -4,81 +4,96 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { AppointmentStatus } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SchedulingService } from '../scheduling/scheduling.service';
 
 @Injectable()
 export class AppointmentsService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
+    private schedulingService: SchedulingService,
   ) {}
 
-  async create(createAppointmentDto: CreateAppointmentDto, dentistId: string, tenantId: string) {
-    // Verify patient has relation with this dentist
-    const patientRelation = await this.prisma.patientDentistRelation.findFirst({
+  async create(createAppointmentDto: CreateAppointmentDto, providerId: string, tenantId: string) {
+    // Verify patient has relation with this provider
+    const patientRelation = await this.prisma.providerPatientRelation.findFirst({
       where: {
         patientId: createAppointmentDto.patientId,
-        dentistId: dentistId,
+        providerId: providerId,
         isActive: true,
       },
     });
 
     if (!patientRelation) {
-      throw new ForbiddenException('Patient is not associated with this dentist');
+      throw new ForbiddenException('Patient is not associated with this provider');
     }
 
-    // If operatory is specified, verify dentist has access
-    if (createAppointmentDto.operatoryId) {
-      const operatoryAssignment = await this.prisma.operatoryAssignment.findFirst({
+    // If room is specified, verify provider has access
+    if (createAppointmentDto.roomId) {
+      const roomAssignment = await this.prisma.roomAssignment.findFirst({
         where: {
-          operatoryId: createAppointmentDto.operatoryId,
-          dentistId: dentistId,
+          roomId: createAppointmentDto.roomId,
+          providerId: providerId,
           isActive: true,
         },
       });
 
-      if (!operatoryAssignment) {
-        throw new ForbiddenException('Dentist does not have access to this operatory');
+      if (!roomAssignment) {
+        throw new ForbiddenException('Provider does not have access to this consultation room');
       }
     }
 
-    // Check for scheduling conflicts
+    // Check for scheduling conflicts using the scheduling service
     const appointmentDate = new Date(createAppointmentDto.appointmentDate);
     const endTime = new Date(appointmentDate.getTime() + createAppointmentDto.duration * 60000);
 
-    const conflicts = await this.prisma.appointment.findMany({
-      where: {
-        dentistId: dentistId,
-        tenantId: tenantId, // Agregado: validación de tenant
-        operatoryId: createAppointmentDto.operatoryId || undefined,
-        status: {
-          in: [AppointmentStatus.SCHEDULED],
-        },
-        OR: [
-          {
-            AND: [
-              { appointmentDate: { lte: appointmentDate } },
-              { appointmentDate: { gte: new Date(appointmentDate.getTime() - 24 * 60 * 60000) } },
-            ],
-          },
-        ],
-      },
-    });
+    // Use SchedulingService for precise room + provider double-booking prevention
+    if (createAppointmentDto.roomId) {
+      const validation = await this.schedulingService.validateAppointmentSlot(
+        providerId,
+        createAppointmentDto.roomId,
+        appointmentDate,
+        endTime,
+      );
 
-    // Simple conflict check (can be enhanced)
-    for (const conflict of conflicts) {
-      const conflictEnd = new Date(conflict.appointmentDate.getTime() + conflict.duration * 60000);
-      if (
-        (appointmentDate >= conflict.appointmentDate && appointmentDate < conflictEnd) ||
-        (endTime > conflict.appointmentDate && endTime <= conflictEnd)
-      ) {
-        throw new BadRequestException('Time slot conflicts with existing appointment');
+      if (!validation.valid) {
+        throw new BadRequestException(validation.conflict || 'Time slot is not available');
+      }
+    } else {
+      // Fallback: basic provider-only conflict check when no room is specified
+      const conflicts = await this.prisma.appointment.findMany({
+        where: {
+          providerId: providerId,
+          tenantId: tenantId,
+          status: {
+            in: [AppointmentStatus.SCHEDULED],
+          },
+          OR: [
+            {
+              AND: [
+                { appointmentDate: { lte: appointmentDate } },
+                { appointmentDate: { gte: new Date(appointmentDate.getTime() - 24 * 60 * 60000) } },
+              ],
+            },
+          ],
+        },
+      });
+
+      for (const conflict of conflicts) {
+        const conflictEnd = new Date(conflict.appointmentDate.getTime() + conflict.duration * 60000);
+        if (
+          (appointmentDate >= conflict.appointmentDate && appointmentDate < conflictEnd) ||
+          (endTime > conflict.appointmentDate && endTime <= conflictEnd)
+        ) {
+          throw new BadRequestException('Time slot conflicts with existing appointment');
+        }
       }
     }
 
     const appointment = await this.prisma.appointment.create({
       data: {
         ...createAppointmentDto,
-        dentistId,
+        providerId: providerId,
         tenantId,
         status: createAppointmentDto.status || AppointmentStatus.SCHEDULED,
       },
@@ -94,7 +109,7 @@ export class AppointmentsService {
             },
           },
         },
-        operatory: {
+        room: {
           include: {
             clinic: true,
           },
@@ -113,9 +128,9 @@ export class AppointmentsService {
     return appointment;
   }
 
-  async findAll(dentistId: string, tenantId: string, startDate?: string, endDate?: string) {
+  async findAll(providerId: string, tenantId: string, startDate?: string, endDate?: string) {
     const where: any = {
-      dentistId,
+      providerId: providerId,
       tenantId,
     };
 
@@ -156,7 +171,7 @@ export class AppointmentsService {
             },
           },
         },
-        operatory: {
+        room: {
           select: {
             id: true,
             name: true,
@@ -176,11 +191,11 @@ export class AppointmentsService {
     });
   }
 
-  async findOne(id: string, dentistId: string, tenantId: string) {
+  async findOne(id: string, providerId: string, tenantId: string) {
     const appointment = await this.prisma.appointment.findFirst({
       where: {
         id,
-        dentistId,
+        providerId: providerId,
         tenantId,
       },
       include: {
@@ -195,7 +210,7 @@ export class AppointmentsService {
             },
           },
         },
-        operatory: {
+        room: {
           include: {
             clinic: true,
           },
@@ -210,8 +225,8 @@ export class AppointmentsService {
     return appointment;
   }
 
-  async update(id: string, updateAppointmentDto: UpdateAppointmentDto, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async update(id: string, updateAppointmentDto: UpdateAppointmentDto, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.appointment.update({
       where: { id },
@@ -228,7 +243,7 @@ export class AppointmentsService {
             },
           },
         },
-        operatory: {
+        room: {
           include: {
             clinic: true,
           },
@@ -237,16 +252,16 @@ export class AppointmentsService {
     });
   }
 
-  async remove(id: string, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async remove(id: string, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.appointment.delete({
       where: { id },
     });
   }
 
-  async updateStatus(id: string, status: AppointmentStatus, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async updateStatus(id: string, status: AppointmentStatus, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.appointment.update({
       where: { id },
@@ -267,7 +282,7 @@ export class AppointmentsService {
     });
   }
 
-  async findToday(dentistId: string, tenantId: string) {
+  async findToday(providerId: string, tenantId: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -275,7 +290,7 @@ export class AppointmentsService {
 
     return this.prisma.appointment.findMany({
       where: {
-        dentistId,
+        providerId: providerId,
         tenantId,
         appointmentDate: {
           gte: today,
@@ -297,7 +312,7 @@ export class AppointmentsService {
             phone: true,
           },
         },
-        operatory: {
+        room: {
           select: {
             id: true,
             name: true,
@@ -310,14 +325,14 @@ export class AppointmentsService {
     });
   }
 
-  async findUpcoming(dentistId: string, tenantId: string, daysAhead: number = 7) {
+  async findUpcoming(providerId: string, tenantId: string, daysAhead: number = 7) {
     const now = new Date();
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + daysAhead);
 
     return this.prisma.appointment.findMany({
       where: {
-        dentistId,
+        providerId: providerId,
         tenantId,
         appointmentDate: {
           gte: now,
@@ -340,7 +355,7 @@ export class AppointmentsService {
             phone: true,
           },
         },
-        operatory: {
+        room: {
           select: {
             id: true,
             name: true,

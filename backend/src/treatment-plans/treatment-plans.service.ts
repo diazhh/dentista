@@ -8,18 +8,18 @@ import { UpdateTreatmentItemDto } from './dto/update-treatment-item.dto';
 export class TreatmentPlansService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateTreatmentPlanDto, dentistId: string, tenantId: string) {
-    // Verificar que el paciente tiene relación con el dentista
-    const relation = await this.prisma.patientDentistRelation.findFirst({
+  async create(dto: CreateTreatmentPlanDto, providerId: string, tenantId: string) {
+    // Verificar que el paciente tiene relación con el proveedor
+    const relation = await this.prisma.providerPatientRelation.findFirst({
       where: {
         patientId: dto.patientId,
-        dentistId,
+        providerId,
         isActive: true,
       },
     });
 
     if (!relation) {
-      throw new ForbiddenException('Patient is not associated with this dentist');
+      throw new ForbiddenException('Patient is not associated with this provider');
     }
 
     // Calcular costo total
@@ -28,7 +28,7 @@ export class TreatmentPlansService {
     const treatmentPlan = await this.prisma.treatmentPlan.create({
       data: {
         patientId: dto.patientId,
-        dentistId,
+        providerId,
         tenantId,
         title: dto.title,
         description: dto.description,
@@ -68,9 +68,9 @@ export class TreatmentPlansService {
     return treatmentPlan;
   }
 
-  async findAll(dentistId: string, tenantId: string, patientId?: string) {
+  async findAll(providerId: string, tenantId: string, patientId?: string) {
     const where: any = {
-      dentistId,
+      providerId,
       tenantId,
     };
 
@@ -97,11 +97,11 @@ export class TreatmentPlansService {
     });
   }
 
-  async findOne(id: string, dentistId: string, tenantId: string) {
+  async findOne(id: string, providerId: string, tenantId: string) {
     const treatmentPlan = await this.prisma.treatmentPlan.findFirst({
       where: {
         id,
-        dentistId,
+        providerId,
         tenantId,
       },
       include: {
@@ -129,8 +129,8 @@ export class TreatmentPlansService {
     return treatmentPlan;
   }
 
-  async update(id: string, dto: UpdateTreatmentPlanDto, dentistId: string, tenantId: string) {
-    const treatmentPlan = await this.findOne(id, dentistId, tenantId);
+  async update(id: string, dto: UpdateTreatmentPlanDto, providerId: string, tenantId: string) {
+    const treatmentPlan = await this.findOne(id, providerId, tenantId);
 
     let totalCost = treatmentPlan.totalCost;
     if (dto.items) {
@@ -163,7 +163,7 @@ export class TreatmentPlansService {
     });
   }
 
-  async updateItem(itemId: string, dto: UpdateTreatmentItemDto, dentistId: string, tenantId: string) {
+  async updateItem(itemId: string, dto: UpdateTreatmentItemDto, providerId: string, tenantId: string) {
     const item = await this.prisma.treatmentPlanItem.findUnique({
       where: { id: itemId },
       include: {
@@ -171,7 +171,7 @@ export class TreatmentPlansService {
       },
     });
 
-    if (!item || item.treatmentPlan.dentistId !== dentistId || item.treatmentPlan.tenantId !== tenantId) {
+    if (!item || item.treatmentPlan.providerId !== providerId || item.treatmentPlan.tenantId !== tenantId) {
       throw new NotFoundException('Treatment plan item not found');
     }
 
@@ -184,8 +184,8 @@ export class TreatmentPlansService {
     });
   }
 
-  async remove(id: string, dentistId: string, tenantId: string) {
-    await this.findOne(id, dentistId, tenantId);
+  async remove(id: string, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
 
     return this.prisma.treatmentPlan.delete({
       where: { id },

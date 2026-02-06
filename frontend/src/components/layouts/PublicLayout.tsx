@@ -15,7 +15,7 @@ const PublicLayout = () => {
                         <div className="flex items-center">
                             <Link to="/" className="flex-shrink-0 flex items-center">
                                 <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
-                                    Dentista.App
+                                    MediCloud.App
                                 </span>
                             </Link>
                             {/* Desktop Nav */}
@@ -24,13 +24,13 @@ const PublicLayout = () => {
                                     to="/directory"
                                     className="text-gray-500 hover:text-gray-900 px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-colors"
                                 >
-                                    Buscar Dentista
+                                    Buscar Profesional
                                 </Link>
                                 <Link
                                     to="/login"
                                     className="text-gray-500 hover:text-gray-900 px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-colors"
                                 >
-                                    Para Dentistas
+                                    Para Profesionales
                                 </Link>
                             </nav>
                         </div>
@@ -72,14 +72,14 @@ const PublicLayout = () => {
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                             >
-                                Buscar Dentista
+                                Buscar Profesional
                             </Link>
                             <Link
                                 to="/login"
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                             >
-                                Para Dentistas
+                                Para Profesionales
                             </Link>
                             <Link
                                 to="/login"
@@ -112,9 +112,9 @@ const PublicLayout = () => {
                 <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                         <div className="sm:col-span-2 lg:col-span-1">
-                            <h3 className="text-lg font-semibold mb-3 sm:mb-4">Dentista.App</h3>
+                            <h3 className="text-lg font-semibold mb-3 sm:mb-4">MediCloud.App</h3>
                             <p className="text-gray-400 text-sm leading-relaxed">
-                                Conectando pacientes con los mejores profesionales del cuidado dental.
+                                Conectando pacientes con los mejores profesionales de la salud.
                                 Reservas simples, rápidas y seguras.
                             </p>
                         </div>
@@ -123,19 +123,19 @@ const PublicLayout = () => {
                             <ul className="space-y-2 text-sm text-gray-400">
                                 <li><Link to="/directory" className="hover:text-white transition-colors">Buscar Clínica</Link></li>
                                 <li><Link to="/directory" className="hover:text-white transition-colors">Especialidades</Link></li>
-                                <li><Link to="/login" className="hover:text-white transition-colors">Acceso Dentistas</Link></li>
+                                <li><Link to="/login" className="hover:text-white transition-colors">Acceso Profesionales</Link></li>
                             </ul>
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold mb-3 sm:mb-4">Contacto</h3>
                             <ul className="space-y-2 text-sm text-gray-400">
-                                <li>support@dentista.app</li>
+                                <li>support@medicloud.app</li>
                                 <li>+1 (555) 123-4567</li>
                             </ul>
                         </div>
                     </div>
                     <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-700 text-center text-sm text-gray-500">
-                        &copy; {new Date().getFullYear()} Dentista.App. Todos los derechos reservados.
+                        &copy; {new Date().getFullYear()} MediCloud.App. Todos los derechos reservados.
                     </div>
                 </div>
             </footer>

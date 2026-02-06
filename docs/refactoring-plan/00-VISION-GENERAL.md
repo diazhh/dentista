@@ -28,6 +28,7 @@ MediCloud no es solo una plataforma para dentistas. Es un **ecosistema de servic
 4. **Consultorios compartidos**: Los consultorios son recursos que se alquilan/comparten entre doctores.
 5. **IA como asistente**: Cada doctor tiene un asistente virtual para gestión de citas via chat.
 6. **Staff flexible**: Un staff puede gestionar a uno o más doctores.
+7. **UX Paciente-Céntrico**: La interfaz del provider es paciente-céntrica. Toda acción clínica se realiza desde el detalle del paciente (tabs), no desde módulos independientes. Los módulos de especialidad se integran como tabs dentro del paciente. Ver `10-UX-PACIENTE-CENTRICO.md`.
 
 ---
 
@@ -164,19 +165,19 @@ Un proveedor activa los módulos que necesita según su especialidad. Un proveed
 
 ## 5. Fases de Implementación
 
-### Fase 0: Preparación (1-2 semanas)
-- Renombrar nomenclatura (Dentist → Provider, DentalService → MedicalService)
-- Refactorizar enum UserRole
-- Ajustar base de datos para modelo genérico
-- Preparar sistema de módulos/plugins
+### Fase 0: Preparación ✅ COMPLETADA
+- ✅ 0.1: Backend nomenclature + Prisma schema refactored
+- ✅ 0.2a: Frontend UX patient-centric restructuring
+- ✅ 0.2b: Frontend dental→generic nomenclature rename
+- ✅ 0.3: Prisma DB migration applied + all TS errors fixed
 
-### Fase 1: Core Multi-Disciplina (3-4 semanas)
-- Modelo de Provider genérico con especialidades
-- Paciente como entidad independiente con portal propio
-- Sistema de consentimiento y data sharing
-- Clínica como entidad autónoma con admin
-- Consultorios compartidos con calendario de disponibilidad
-- Staff flexible multi-provider
+### Fase 1: Core Multi-Disciplina ✅ COMPLETADA
+- ✅ 1.1: Modelo de Provider genérico con especialidades (registro, perfil público, directorio filtrable)
+- ✅ 1.2: Paciente como entidad independiente (auto-registro, claim profile, shared docs, medical exams)
+- ✅ 1.3: Sistema de consentimiento granular (request/grant/deny/revoke, middleware, audit logging)
+- ✅ 1.4: Clínica autónoma (CLINIC_ADMIN panel, staff CRUD, claim clinic, rental management)
+- ✅ 1.5: Consultorios compartidos (availability algorithm, conflict prevention, room/clinic calendars)
+- ✅ 1.6: Staff flexible multi-provider (granular permissions, tenant switcher, staff management)
 
 ### Fase 2: Asistente Virtual IA (2-3 semanas)
 - Chatbot IA por provider (no solo WhatsApp, también web chat)
@@ -219,3 +220,4 @@ Un proveedor activa los módulos que necesita según su especialidad. Un proveed
 | `07-PORTAL-PACIENTE.md` | Features del portal del paciente |
 | `08-MIGRACION-PASO-A-PASO.md` | Guía detallada de migración |
 | `09-API-ENDPOINTS-NUEVOS.md` | Listado de endpoints nuevos/modificados |
+| `10-UX-PACIENTE-CENTRICO.md` | **Arquitectura UX paciente-céntrica del provider** |

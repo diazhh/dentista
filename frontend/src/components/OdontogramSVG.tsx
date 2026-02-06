@@ -5,7 +5,7 @@ import { Odontogram } from 'react-odontogram';
 const CONDITION_COLORS: Record<string, string> = {
   HEALTHY: '#10b981',      // Verde
   CAVITY: '#ef4444',       // Rojo
-  FILLED: '#3b82f6',       // Azul
+  FILLED: '#3b82f6',       // Azul       
   CROWN: '#f59e0b',        // Amarillo/Naranja
   BRIDGE: '#8b5cf6',       // Púrpura
   IMPLANT: '#6366f1',      // Indigo

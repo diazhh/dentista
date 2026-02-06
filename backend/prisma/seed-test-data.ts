@@ -37,9 +37,9 @@ async function seedTestData() {
 
   const patient = await prisma.patient.findFirst({ where: { userId: patientUser?.id } });
   const patient2 = await prisma.patient.findFirst({ where: { userId: patient2User?.id } });
-  const operatory = await prisma.operatory.findFirst();
+  const room = await prisma.consultationRoom.findFirst();
 
-  if (!dentistUser || !tenant || !patient || !operatory) {
+  if (!dentistUser || !tenant || !patient || !room) {
     console.error('❌ Missing required entities. Run main seed first.');
     process.exit(1);
   }
@@ -51,7 +51,7 @@ async function seedTestData() {
 
   const additionalPatients = await Promise.all([
     prisma.patient.upsert({
-      where: { documentId: '003-1111111-1' },
+      where: { documentType_documentId: { documentType: 'CEDULA', documentId: '003-1111111-1' } },
       update: {},
       create: {
         documentId: '003-1111111-1',
@@ -69,7 +69,7 @@ async function seedTestData() {
       },
     }),
     prisma.patient.upsert({
-      where: { documentId: '004-2222222-2' },
+      where: { documentType_documentId: { documentType: 'CEDULA', documentId: '004-2222222-2' } },
       update: {},
       create: {
         documentId: '004-2222222-2',
@@ -87,7 +87,7 @@ async function seedTestData() {
       },
     }),
     prisma.patient.upsert({
-      where: { documentId: '005-3333333-3' },
+      where: { documentType_documentId: { documentType: 'CEDULA', documentId: '005-3333333-3' } },
       update: {},
       create: {
         documentId: '005-3333333-3',
@@ -105,7 +105,7 @@ async function seedTestData() {
       },
     }),
     prisma.patient.upsert({
-      where: { documentId: '006-4444444-4' },
+      where: { documentType_documentId: { documentType: 'CEDULA', documentId: '006-4444444-4' } },
       update: {},
       create: {
         documentId: '006-4444444-4',
@@ -123,7 +123,7 @@ async function seedTestData() {
       },
     }),
     prisma.patient.upsert({
-      where: { documentId: '007-5555555-5' },
+      where: { documentType_documentId: { documentType: 'CEDULA', documentId: '007-5555555-5' } },
       update: {},
       create: {
         documentId: '007-5555555-5',
@@ -145,19 +145,19 @@ async function seedTestData() {
 
   // Create patient-dentist relations for new patients
   for (const p of additionalPatients) {
-    await prisma.patientDentistRelation.upsert({
-      where: { patientId_dentistId: { patientId: p.id, dentistId: dentistUser.id } },
+    await prisma.providerPatientRelation.upsert({
+      where: { patientId_providerId: { patientId: p.id, providerId: dentistUser.id } },
       update: {},
       create: {
         patientId: p.id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
         isActive: true,
-        notes: 'Added as test patient',
+        providerNotes: 'Added as test patient',
       },
     });
   }
-  console.log('✅ Created patient-dentist relations');
+  console.log('✅ Created provider-patient relations');
 
   // ==========================================
   // Create Appointments
@@ -198,9 +198,9 @@ async function seedTestData() {
       await prisma.appointment.create({
         data: {
           patientId: patient!.id,
-          dentistId: dentistUser.id,
+          providerId: dentistUser.id,
           tenantId: tenant.id,
-          operatoryId: operatory.id,
+          roomId: room.id,
           appointmentDate: apptDate,
           duration: 30 + (i * 15),
           status: AppointmentStatus.COMPLETED,
@@ -220,9 +220,9 @@ async function seedTestData() {
     await prisma.appointment.create({
       data: {
         patientId: additionalPatients[0].id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
-        operatoryId: operatory.id,
+        roomId: room.id,
         appointmentDate: cancelledDate,
         duration: 45,
         status: AppointmentStatus.CANCELLED,
@@ -240,9 +240,9 @@ async function seedTestData() {
     await prisma.appointment.create({
       data: {
         patientId: additionalPatients[1].id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
-        operatoryId: operatory.id,
+        roomId: room.id,
         appointmentDate: noShowDate,
         duration: 30,
         status: AppointmentStatus.NO_SHOW,
@@ -270,9 +270,9 @@ async function seedTestData() {
       await prisma.appointment.create({
         data: {
           patientId: [patient!.id, patient2!.id, ...additionalPatients.map(p => p.id)][i % 7],
-          dentistId: dentistUser.id,
+          providerId: dentistUser.id,
           tenantId: tenant.id,
-          operatoryId: operatory.id,
+          roomId: room.id,
           appointmentDate: apptDate,
           duration: 30 + (i * 15),
           status: AppointmentStatus.SCHEDULED,
@@ -294,9 +294,9 @@ async function seedTestData() {
   const recurring1 = await prisma.recurringAppointment.create({
     data: {
       patientId: patient!.id,
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
-      operatoryId: operatory.id,
+      roomId: room.id,
       frequency: RecurrenceFrequency.MONTHLY,
       interval: 1,
       startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
@@ -313,7 +313,7 @@ async function seedTestData() {
   const recurring2 = await prisma.recurringAppointment.create({
     data: {
       patientId: additionalPatients[2].id, // Sofia (child)
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       frequency: RecurrenceFrequency.QUARTERLY,
       interval: 1,
@@ -337,7 +337,7 @@ async function seedTestData() {
     prisma.waitlist.create({
       data: {
         patientId: additionalPatients[0].id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
         preferredDates: [
           new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
@@ -356,7 +356,7 @@ async function seedTestData() {
     prisma.waitlist.create({
       data: {
         patientId: additionalPatients[3].id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
         preferredDates: [
           new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000),
@@ -374,7 +374,7 @@ async function seedTestData() {
     prisma.waitlist.create({
       data: {
         patientId: additionalPatients[4].id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
         preferredDates: [
           new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
@@ -399,7 +399,7 @@ async function seedTestData() {
   const treatmentPlan1 = await prisma.treatmentPlan.create({
     data: {
       patientId: patient!.id,
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       title: 'Plan de Tratamiento Integral - Jane Doe',
       description: 'Tratamiento completo incluyendo limpieza, rellenos y corona',
@@ -475,7 +475,7 @@ async function seedTestData() {
   const treatmentPlan2 = await prisma.treatmentPlan.create({
     data: {
       patientId: additionalPatients[1].id, // Carlos Martinez
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       title: 'Rehabilitación Oral Completa',
       description: 'Plan de rehabilitación para paciente con enfermedad periodontal',
@@ -541,7 +541,7 @@ async function seedTestData() {
   const treatmentPlan3 = await prisma.treatmentPlan.create({
     data: {
       patientId: additionalPatients[2].id, // Sofia (child)
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       title: 'Tratamiento Ortodóncico - Fase 1',
       description: 'Ortodoncia interceptiva para corrección de mordida cruzada',
@@ -599,7 +599,7 @@ async function seedTestData() {
     create: {
       invoiceNumber: 'INV-2026-0001',
       patientId: patient!.id,
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       treatmentPlanId: treatmentPlan1.id,
       issueDate: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000),
@@ -651,7 +651,7 @@ async function seedTestData() {
     data: {
       invoiceNumber: 'INV-2026-0002',
       patientId: patient!.id,
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       treatmentPlanId: treatmentPlan1.id,
       issueDate: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000),
@@ -696,7 +696,7 @@ async function seedTestData() {
     data: {
       invoiceNumber: 'INV-2026-0003',
       patientId: additionalPatients[0].id,
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       issueDate: new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000),
       dueDate: new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000),
@@ -726,7 +726,7 @@ async function seedTestData() {
     data: {
       invoiceNumber: 'INV-2026-0004',
       patientId: additionalPatients[2].id,
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       treatmentPlanId: treatmentPlan3.id,
       issueDate: now,
@@ -762,7 +762,7 @@ async function seedTestData() {
     prisma.document.create({
       data: {
         patientId: patient!.id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
         type: DocumentType.XRAY,
         title: 'Radiografía Panorámica',
@@ -778,7 +778,7 @@ async function seedTestData() {
     prisma.document.create({
       data: {
         patientId: patient!.id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
         type: DocumentType.XRAY,
         title: 'Radiografía Periapical - Molar 16',
@@ -794,7 +794,7 @@ async function seedTestData() {
     prisma.document.create({
       data: {
         patientId: patient!.id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
         type: DocumentType.PHOTO,
         title: 'Fotos Intraorales - Pre-tratamiento',
@@ -810,7 +810,7 @@ async function seedTestData() {
     prisma.document.create({
       data: {
         patientId: patient!.id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
         type: DocumentType.CONSENT_FORM,
         title: 'Consentimiento Informado - Corona',
@@ -826,7 +826,7 @@ async function seedTestData() {
     prisma.document.create({
       data: {
         patientId: additionalPatients[1].id,
-        dentistId: dentistUser.id,
+        providerId: dentistUser.id,
         tenantId: tenant.id,
         type: DocumentType.MEDICAL_RECORD,
         title: 'Historia Clínica Cardiológica',
@@ -850,7 +850,7 @@ async function seedTestData() {
   const odontogram1 = await prisma.odontogram.create({
     data: {
       patientId: patient!.id,
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       date: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
       notes: 'Evaluación inicial - múltiples caries detectadas',
@@ -877,7 +877,7 @@ async function seedTestData() {
   const odontogram2 = await prisma.odontogram.create({
     data: {
       patientId: additionalPatients[1].id, // Carlos Martinez
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       date: new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000),
       notes: 'Evaluación periodontal completa',
@@ -900,7 +900,7 @@ async function seedTestData() {
   const odontogram3 = await prisma.odontogram.create({
     data: {
       patientId: additionalPatients[2].id, // Sofia (child)
-      dentistId: dentistUser.id,
+      providerId: dentistUser.id,
       tenantId: tenant.id,
       date: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000),
       notes: 'Evaluación ortodóncica - dentición mixta',
@@ -1276,10 +1276,10 @@ async function seedTestData() {
       isEnabled: true,
       welcomeMessage: '¡Hola! Bienvenido a Dr. Smith Dental Practice. Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?',
       fallbackMessage: 'Lo siento, no entendí tu mensaje. Por favor selecciona una opción o escribe "humano" para hablar con una persona.',
-      clinicName: 'Dr. Smith Dental Practice',
-      clinicAddress: '123 Main Street, New York, NY 10001',
-      clinicPhone: '+1234567893',
-      clinicWebsite: 'https://drsmith-dental.com',
+      practiceName: 'Dr. Smith Dental Practice',
+      practiceAddress: '123 Main Street, New York, NY 10001',
+      practicePhone: '+1234567893',
+      practiceWebsite: 'https://drsmith-dental.com',
       operatingHours: {
         monday: { open: '09:00', close: '17:00' },
         tuesday: { open: '09:00', close: '17:00' },
