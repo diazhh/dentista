@@ -151,6 +151,15 @@ export default function Login() {
           </div>
         </div>
 
+        <div className="text-center text-sm text-gray-600">
+          <p>
+            ¿Eres paciente?{' '}
+            <Link to="/register" className="text-indigo-600 hover:text-indigo-500 font-medium">
+              Crea tu cuenta aquí
+            </Link>
+          </p>
+        </div>
+
         <div className="text-center text-xs sm:text-sm text-gray-600">
           <p>Credenciales de prueba:</p>
           <p className="font-mono text-[10px] sm:text-xs mt-1">admin@medicloud.com / Admin123!</p>

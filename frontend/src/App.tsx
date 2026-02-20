@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './hooks/useAuth';
@@ -9,6 +9,7 @@ import PublicLayout from './components/layouts/PublicLayout';
 import SuperAdminLayout from './components/layouts/SuperAdminLayout';
 import TenantLayout from './components/layouts/TenantLayout';
 import PatientLayout from './components/layouts/PatientLayout';
+import ClinicAdminLayout from './components/layouts/ClinicAdminLayout';
 
 // Public Pages
 import LandingPage from './pages/public/LandingPage';
@@ -60,6 +61,19 @@ import PatientDashboard from './pages/patient/PatientDashboard';
 import PatientAppointments from './pages/patient/PatientAppointments';
 import PatientDocuments from './pages/patient/PatientDocuments';
 import PatientInvoices from './pages/patient/PatientInvoices';
+import PatientProviders from './pages/patient/PatientProviders';
+import PatientExams from './pages/patient/PatientExams';
+import PatientHealthProfile from './pages/patient/PatientHealthProfile';
+import PatientConsents from './pages/patient/PatientConsents';
+import PatientRegisterPage from './pages/patient/PatientRegisterPage';
+
+// Clinic Admin Pages (lazy loaded)
+const ClinicDashboard = lazy(() => import('./pages/clinic-admin/ClinicDashboard'));
+const ClinicRooms = lazy(() => import('./pages/clinic-admin/ClinicRooms'));
+const ClinicStaff = lazy(() => import('./pages/clinic-admin/ClinicStaff'));
+const ClinicRentals = lazy(() => import('./pages/clinic-admin/ClinicRentals'));
+const ClinicReports = lazy(() => import('./pages/clinic-admin/ClinicReports'));
+const ClinicSettings = lazy(() => import('./pages/clinic-admin/ClinicSettings'));
 
 const queryClient = new QueryClient();
 
@@ -117,6 +131,24 @@ function PatientRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function ClinicAdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== 'CLINIC_ADMIN') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 function AppContent() {
   const { user } = useAuth();
 
@@ -130,6 +162,7 @@ function AppContent() {
           <Route path="/clinic/:slug" element={<PublicClinicProfile />} />
         </Route>
 
+        <Route path="/register" element={<PatientRegisterPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
@@ -512,6 +545,54 @@ function AppContent() {
             </PatientRoute>
           }
         />
+        <Route
+          path="/patient/providers"
+          element={
+            <PatientRoute>
+              <PatientLayout>
+                <PatientProviders />
+              </PatientLayout>
+            </PatientRoute>
+          }
+        />
+        <Route
+          path="/patient/exams"
+          element={
+            <PatientRoute>
+              <PatientLayout>
+                <PatientExams />
+              </PatientLayout>
+            </PatientRoute>
+          }
+        />
+        <Route
+          path="/patient/health-profile"
+          element={
+            <PatientRoute>
+              <PatientLayout>
+                <PatientHealthProfile />
+              </PatientLayout>
+            </PatientRoute>
+          }
+        />
+        <Route
+          path="/patient/consents"
+          element={
+            <PatientRoute>
+              <PatientLayout>
+                <PatientConsents />
+              </PatientLayout>
+            </PatientRoute>
+          }
+        />
+
+        {/* Clinic Admin Routes */}
+        <Route path="/clinic-admin/dashboard" element={<ClinicAdminRoute><Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}><ClinicAdminLayout><ClinicDashboard /></ClinicAdminLayout></Suspense></ClinicAdminRoute>} />
+        <Route path="/clinic-admin/rooms" element={<ClinicAdminRoute><Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}><ClinicAdminLayout><ClinicRooms /></ClinicAdminLayout></Suspense></ClinicAdminRoute>} />
+        <Route path="/clinic-admin/staff" element={<ClinicAdminRoute><Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}><ClinicAdminLayout><ClinicStaff /></ClinicAdminLayout></Suspense></ClinicAdminRoute>} />
+        <Route path="/clinic-admin/rentals" element={<ClinicAdminRoute><Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}><ClinicAdminLayout><ClinicRentals /></ClinicAdminLayout></Suspense></ClinicAdminRoute>} />
+        <Route path="/clinic-admin/reports" element={<ClinicAdminRoute><Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}><ClinicAdminLayout><ClinicReports /></ClinicAdminLayout></Suspense></ClinicAdminRoute>} />
+        <Route path="/clinic-admin/settings" element={<ClinicAdminRoute><Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}><ClinicAdminLayout><ClinicSettings /></ClinicAdminLayout></Suspense></ClinicAdminRoute>} />
 
         {/* Redirect /admin to /superadmin */}
         <Route path="/admin" element={<Navigate to="/superadmin" replace />} />
