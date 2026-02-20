@@ -2,7 +2,7 @@
 
 set -e
 
-echo "🧪 DentiCloud API Endpoint Testing"
+echo "🧪 MediCloud API Endpoint Testing"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# DentiCloud - Complete Super Admin Module Tests
+# MediCloud - Complete Super Admin Module Tests
 # Tests all super admin endpoints with various scenarios
 
 API_URL="http://localhost:3000"
@@ -11,7 +11,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BLUE}🔧 DentiCloud - Super Admin Module Tests${NC}"
+echo -e "${BLUE}🔧 MediCloud - Super Admin Module Tests${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
 # Test counters

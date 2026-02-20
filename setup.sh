@@ -2,7 +2,7 @@
 
 set -e
 
-echo "🚀 DentiCloud Setup Script"
+echo "🚀 MediCloud Setup Script"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Check if Docker is running

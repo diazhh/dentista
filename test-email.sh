@@ -75,12 +75,12 @@ NEW_CONFIG=$(curl -s -X POST "http://localhost:3000/api/admin/email/config" \
   -d '{
     "smtpHost": "smtp.gmail.com",
     "smtpPort": 587,
-    "smtpUser": "noreply@denticloud.com",
+    "smtpUser": "noreply@medicloud.com",
     "smtpPassword": "your-app-password-here",
     "smtpSecure": true,
-    "fromEmail": "noreply@denticloud.com",
-    "fromName": "DentiCloud",
-    "replyToEmail": "soporte@denticloud.com"
+    "fromEmail": "noreply@medicloud.com",
+    "fromName": "MediCloud",
+    "replyToEmail": "soporte@medicloud.com"
   }')
 echo $NEW_CONFIG | jq '.'
 NEW_CONFIG_ID=$(echo $NEW_CONFIG | jq -r '.id')
@@ -94,7 +94,7 @@ if [ -n "$NEW_CONFIG_ID" ] && [ "$NEW_CONFIG_ID" != "null" ]; then
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
     -d '{
-      "fromName": "DentiCloud - Sistema Dental"
+      "fromName": "MediCloud - Sistema de Salud"
     }' | jq '.'
   
   # 9. Eliminar la configuración de prueba

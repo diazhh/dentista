@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================
-# DentiCloud - Database Setup Script
+# MediCloud - Database Setup Script
 # ============================================
 # Este script crea la base de datos PostgreSQL
 # y ejecuta las migraciones de Prisma
@@ -28,7 +28,7 @@ DOCKER_CONTAINER="postgres-instance"
 DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public"
 
 echo -e "${BLUE}============================================${NC}"
-echo -e "${BLUE}   DentiCloud - Database Setup${NC}"
+echo -e "${BLUE}   MediCloud - Database Setup${NC}"
 echo -e "${BLUE}============================================${NC}"
 echo ""
 

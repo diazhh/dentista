@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# DentiCloud - Complete Authentication Module Tests
+# MediCloud - Complete Authentication Module Tests
 # Tests all authentication endpoints with various scenarios
 
 API_URL="http://localhost:3000"
@@ -11,7 +11,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BLUE}🔐 DentiCloud - Authentication Module Tests${NC}"
+echo -e "${BLUE}🔐 MediCloud - Authentication Module Tests${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
 # Test counters

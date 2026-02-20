@@ -1,10 +1,10 @@
-# DentiCloud - Sistema SaaS Dental Multi-Tenant
+# MediCloud - Sistema SaaS Multi-Especialidad Multi-Tenant
 
-> Sistema de gestión dental multi-tenant con IA, integraciones de calendario, WhatsApp, y características avanzadas para consultorios dentales y DSOs.
+> Sistema de gestión de salud multi-tenant con IA, integraciones de calendario, WhatsApp, y características avanzadas para clínicas y consultorios médicos.
 
 ## 📋 Documentación del Proyecto
 
-Este repositorio contiene la documentación completa para el desarrollo de DentiCloud, un sistema SaaS multi-tenant para gestión de consultorios dentales.
+Este repositorio contiene la documentación completa para el desarrollo de MediCloud, un sistema SaaS multi-tenant para gestión de clínicas y consultorios médicos multi-especialidad.
 
 ### Documentos Principales
 
@@ -251,7 +251,7 @@ _Una vez que el desarrollo comience, aquí irán las instrucciones de instalaci�
 
 ```bash
 # Clone el repositorio
-git clone https://github.com/yourorg/denticloud.git
+git clone https://github.com/yourorg/medicloud.git
 
 # Setup backend
 cd backend
@@ -407,8 +407,8 @@ La arquitectura modular permite:
 **Equipo de Desarrollo:** [Tu contacto aquí]
 
 **Links:**
-- 🌐 Website: [https://denticloud.com](https://denticloud.com) (futuro)
-- 📧 Email: info@denticloud.com
+- 🌐 Website: [https://medicloud.com](https://medicloud.com) (futuro)
+- 📧 Email: info@medicloud.com
 - 💬 Slack: [Link al workspace]
 
 ## 📄 Licencia

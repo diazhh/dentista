@@ -1,4 +1,4 @@
-# 🦷 DentiCloud - Plan de Implementación Completo
+# 🦷 MediCloud - Plan de Implementación Completo
 
 **Fecha:** 30 Enero 2026
 **Estado:** Completado
@@ -340,8 +340,8 @@ model CalendarConnection {
 
 ### 4.3 Sync Bidireccional
 
-- Crear cita en DentiCloud → Crear evento en Google
-- Crear evento en Google → Crear cita en DentiCloud
+- Crear cita en MediCloud → Crear evento en Google
+- Crear evento en Google → Crear cita en MediCloud
 - Cancelar en cualquiera → Sincronizar
 
 ---
@@ -597,7 +597,7 @@ select: {
 
 ## 🔗 Referencias
 
-- [Notion - Plan Original](https://www.notion.so/DentiCloud-Plan-de-Implementaci-n-Detallado-2da74f435143818aad43d7ad65631149)
+- [Notion - Plan Original](https://www.notion.so/MediCloud-Plan-de-Implementaci-n-Detallado-2da74f435143818aad43d7ad65631149)
 - [Stripe Docs](https://stripe.com/docs)
 - [OpenAI API](https://platform.openai.com/docs)
 - [Google Calendar API](https://developers.google.com/calendar)

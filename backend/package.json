@@ -1,8 +1,8 @@
 {
   "name": "dentista-backend",
   "version": "1.0.0",
-  "description": "DentiCloud - Multi-tenant Dental Management System",
-  "author": "DentiCloud Team",
+  "description": "MediCloud - Multi-tenant Healthcare Management System",
+  "author": "MediCloud Team",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

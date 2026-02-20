@@ -1,6 +1,6 @@
-# DentiCloud Backend
+# MediCloud Backend
 
-Multi-tenant Dental Management System API built with NestJS, PostgreSQL, and Prisma.
+Multi-tenant Healthcare Management System API built with NestJS, PostgreSQL, and Prisma.
 
 ## Prerequisites
 
