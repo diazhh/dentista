@@ -45,6 +45,7 @@ import { PediatricsModule } from './modules/pediatrics/pediatrics.module';
 import { NutritionModule } from './modules/nutrition/nutrition.module';
 import { GynecologyModule } from './modules/gynecology/gynecology.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { InsuranceModule } from './insurance/insurance.module';
 
 @Module({
   imports: [
@@ -105,6 +106,7 @@ import { InventoryModule } from './inventory/inventory.module';
     NutritionModule,
     GynecologyModule,
     InventoryModule,
+    InsuranceModule,
   ],
 })
 export class AppModule { }

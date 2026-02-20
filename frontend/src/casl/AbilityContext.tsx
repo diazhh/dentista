@@ -25,6 +25,9 @@ export type Subjects =
     | 'Operatory'
     | 'Notification'
     | 'Odontogram'
+    | 'ClinicStaff'
+    | 'ConsultationRoom'
+    | 'RoomAssignment'
     | 'all';
 
 export type AppAbility = Ability<[ActionType, Subjects]>;
@@ -73,6 +76,21 @@ export const createAbilityFor = (user: {
         can(Action.Read, 'Odontogram');
         can(Action.Read, 'User');
         can(Action.Update, 'User');
+        return build();
+    }
+
+    // CLINIC_ADMIN: Full clinic management
+    if (user.role === 'CLINIC_ADMIN') {
+        can(Action.Manage, 'Clinic');
+        can(Action.Manage, 'ConsultationRoom');
+        can(Action.Manage, 'ClinicStaff');
+        can(Action.Manage, 'RoomAssignment');
+        can(Action.Manage, 'Appointment');
+        can(Action.Manage, 'Invoice');
+        can(Action.Manage, 'Document');
+        can(Action.Manage, 'Notification');
+        can(Action.Read, 'Patient');
+        can(Action.Read, 'Tenant');
         return build();
     }
 

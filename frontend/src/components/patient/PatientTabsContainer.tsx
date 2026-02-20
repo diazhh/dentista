@@ -1,6 +1,7 @@
-import { Suspense, lazy, useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { usePatientTabs } from '../../hooks/usePatientTabs';
 import {
   LayoutDashboard,
   Calendar,
@@ -10,96 +11,53 @@ import {
   ClipboardList,
   Smile,
   Stethoscope,
+  FileText,
+  Pill,
+  Brain,
+  BarChart2,
+  Dumbbell,
+  Activity,
+  Scan,
+  Eye,
+  Glasses,
+  HeartPulse,
+  Ruler,
+  Syringe,
+  Apple,
+  Scale,
+  Baby,
 } from 'lucide-react';
 
-// Core tabs (always available)
-import SummaryTab from '../patient-tabs/SummaryTab';
-import AppointmentsTab from '../patient-tabs/AppointmentsTab';
-import TreatmentsTab from '../patient-tabs/TreatmentsTab';
-import InvoicesTab from '../patient-tabs/InvoicesTab';
-import PaymentsTab from '../patient-tabs/PaymentsTab';
-import DocumentsTab from '../patient-tabs/DocumentsTab';
-import MedicalHistoryTab from '../patient-tabs/MedicalHistoryTab';
-
-// Module tabs (dental - loaded directly for now, will be lazy-loaded when module system is built)
-import OdontogramsTab from '../modules/dental/OdontogramsTab';
-
-interface TabDefinition {
-  id: string;
-  label: string;
-  shortLabel?: string;
-  icon: React.ReactNode;
-  component: React.ComponentType<{ patientId: string }>;
-  order: number;
-}
+// Icon map for dynamic rendering based on iconName string
+const iconMap: Record<string, React.ReactNode> = {
+  'layout-dashboard': <LayoutDashboard className="h-4 w-4" />,
+  'calendar': <Calendar className="h-4 w-4" />,
+  'dollar-sign': <DollarSign className="h-4 w-4" />,
+  'credit-card': <CreditCard className="h-4 w-4" />,
+  'folder-open': <FolderOpen className="h-4 w-4" />,
+  'clipboard-list': <ClipboardList className="h-4 w-4" />,
+  'smile': <Smile className="h-4 w-4" />,
+  'stethoscope': <Stethoscope className="h-4 w-4" />,
+  'file-text': <FileText className="h-4 w-4" />,
+  'pill': <Pill className="h-4 w-4" />,
+  'brain': <Brain className="h-4 w-4" />,
+  'bar-chart-2': <BarChart2 className="h-4 w-4" />,
+  'dumbbell': <Dumbbell className="h-4 w-4" />,
+  'activity': <Activity className="h-4 w-4" />,
+  'scan': <Scan className="h-4 w-4" />,
+  'eye': <Eye className="h-4 w-4" />,
+  'glasses': <Glasses className="h-4 w-4" />,
+  'heart-pulse': <HeartPulse className="h-4 w-4" />,
+  'ruler': <Ruler className="h-4 w-4" />,
+  'syringe': <Syringe className="h-4 w-4" />,
+  'apple': <Apple className="h-4 w-4" />,
+  'scale': <Scale className="h-4 w-4" />,
+  'baby': <Baby className="h-4 w-4" />,
+};
 
 interface PatientTabsContainerProps {
   patientId: string;
 }
-
-// Core tabs always visible for all providers
-const coreTabs: TabDefinition[] = [
-  {
-    id: 'summary',
-    label: 'Resumen',
-    icon: <LayoutDashboard className="h-4 w-4" />,
-    component: SummaryTab,
-    order: 0,
-  },
-  {
-    id: 'appointments',
-    label: 'Citas',
-    icon: <Calendar className="h-4 w-4" />,
-    component: AppointmentsTab,
-    order: 1,
-  },
-  {
-    id: 'treatments',
-    label: 'Tratamientos',
-    shortLabel: 'Trat.',
-    icon: <Stethoscope className="h-4 w-4" />,
-    component: TreatmentsTab,
-    order: 2,
-  },
-  {
-    id: 'odontograms',
-    label: 'Odontogramas',
-    shortLabel: 'Odont.',
-    icon: <Smile className="h-4 w-4" />,
-    component: OdontogramsTab,
-    order: 10,
-  },
-  {
-    id: 'invoices',
-    label: 'Facturas',
-    icon: <DollarSign className="h-4 w-4" />,
-    component: InvoicesTab,
-    order: 3,
-  },
-  {
-    id: 'payments',
-    label: 'Pagos',
-    icon: <CreditCard className="h-4 w-4" />,
-    component: PaymentsTab,
-    order: 4,
-  },
-  {
-    id: 'documents',
-    label: 'Documentos',
-    shortLabel: 'Docs',
-    icon: <FolderOpen className="h-4 w-4" />,
-    component: DocumentsTab,
-    order: 5,
-  },
-  {
-    id: 'medical',
-    label: 'Historia Médica',
-    shortLabel: 'Médica',
-    icon: <ClipboardList className="h-4 w-4" />,
-    component: MedicalHistoryTab,
-    order: 6,
-  },
-];
 
 function TabLoadingFallback() {
   return (
@@ -109,29 +67,50 @@ function TabLoadingFallback() {
   );
 }
 
+function ModulesLoadingState() {
+  return (
+    <div className="flex items-center justify-center py-8">
+      <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+        <span>Cargando modulos...</span>
+      </div>
+    </div>
+  );
+}
+
 export default function PatientTabsContainer({ patientId }: PatientTabsContainerProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'summary';
+  const { tabs, isLoading } = usePatientTabs();
 
-  // Sort tabs by order
-  const sortedTabs = useMemo(() => {
-    return [...coreTabs].sort((a, b) => a.order - b.order);
-  }, []);
+  // Dynamically set grid columns based on number of tabs
+  const gridColsClass = useMemo(() => {
+    const count = tabs.length;
+    if (count <= 4) return 'grid-cols-4';
+    if (count <= 6) return 'grid-cols-3 sm:grid-cols-6';
+    if (count <= 8) return 'grid-cols-4 sm:grid-cols-4 lg:grid-cols-8';
+    if (count <= 10) return 'grid-cols-4 sm:grid-cols-5 lg:grid-cols-10';
+    return 'grid-cols-4 sm:grid-cols-6 lg:grid-cols-12';
+  }, [tabs.length]);
 
   const handleTabChange = (tab: string) => {
     setSearchParams({ tab }, { replace: true });
   };
 
+  if (isLoading) {
+    return <ModulesLoadingState />;
+  }
+
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-      <TabsList className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-2 h-auto p-1">
-        {sortedTabs.map((tab) => (
+      <TabsList className={`grid ${gridColsClass} gap-1 sm:gap-2 h-auto p-1`}>
+        {tabs.map((tab) => (
           <TabsTrigger
             key={tab.id}
             value={tab.id}
             className="text-xs sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2 flex items-center gap-1"
           >
-            <span className="hidden lg:inline">{tab.icon}</span>
+            <span className="hidden lg:inline">{iconMap[tab.iconName]}</span>
             {tab.shortLabel ? (
               <>
                 <span className="hidden sm:inline">{tab.label}</span>
@@ -144,7 +123,7 @@ export default function PatientTabsContainer({ patientId }: PatientTabsContainer
         ))}
       </TabsList>
 
-      {sortedTabs.map((tab) => {
+      {tabs.map((tab) => {
         const TabComponent = tab.component;
         return (
           <TabsContent key={tab.id} value={tab.id}>

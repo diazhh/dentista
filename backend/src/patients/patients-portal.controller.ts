@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/public.decorator';
@@ -6,6 +6,10 @@ import { PatientsPortalService } from './patients-portal.service';
 import { RegisterPatientDto } from './dto/register-patient.dto';
 import { ClaimProfileDto } from './dto/claim-profile.dto';
 import { UpdatePrivacyDto } from './dto/update-privacy.dto';
+import { UpdateHealthProfileDto } from './dto/update-health-profile.dto';
+import { GrantConsentDto } from './dto/grant-consent.dto';
+import { ModifyConsentDto } from './dto/modify-consent.dto';
+import { ShareExamDto } from './dto/share-exam.dto';
 
 @ApiTags('Patient Portal')
 @Controller('portal')
@@ -78,5 +82,79 @@ export class PatientsPortalController {
     @ApiOperation({ summary: 'Revoke a specific consent' })
     async revokeConsent(@Request() req, @Param('id') consentId: string) {
         return this.portalService.revokeConsent(req.user.userId, consentId);
+    }
+
+    // ==========================================
+    // Phase 4 - Portal del Paciente Avanzado
+    // ==========================================
+
+    @Get('enhanced-dashboard')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get enhanced patient dashboard with counts and recent exams' })
+    async getEnhancedDashboard(@Request() req) {
+        return this.portalService.getEnhancedDashboard(req.user.userId);
+    }
+
+    @Get('health-profile')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get patient health profile data' })
+    async getHealthProfile(@Request() req) {
+        return this.portalService.getHealthProfile(req.user.userId);
+    }
+
+    @Put('health-profile')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update patient health profile' })
+    async updateHealthProfile(@Request() req, @Body() dto: UpdateHealthProfileDto) {
+        return this.portalService.updateHealthProfile(req.user.userId, dto);
+    }
+
+    @Get('notifications')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get patient notifications (consent requests, appointment reminders)' })
+    async getNotifications(@Request() req) {
+        return this.portalService.getNotifications(req.user.userId);
+    }
+
+    @Post('consents/:id/grant')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Grant a pending consent request' })
+    async grantConsent(@Request() req, @Param('id') consentId: string, @Body() dto: GrantConsentDto) {
+        return this.portalService.grantConsent(req.user.userId, consentId, dto);
+    }
+
+    @Post('consents/:id/deny')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Deny a pending consent request' })
+    async denyConsent(@Request() req, @Param('id') consentId: string) {
+        return this.portalService.denyConsent(req.user.userId, consentId);
+    }
+
+    @Put('consents/:id')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Modify an existing granted consent' })
+    async modifyConsent(@Request() req, @Param('id') consentId: string, @Body() dto: ModifyConsentDto) {
+        return this.portalService.modifyConsent(req.user.userId, consentId, dto);
+    }
+
+    @Post('exams/:examId/share')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Share a medical exam with a provider' })
+    async shareExam(@Request() req, @Param('examId') examId: string, @Body() dto: ShareExamDto) {
+        return this.portalService.shareExam(req.user.userId, examId, dto);
+    }
+
+    @Delete('exam-shares/:shareId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Revoke a shared exam' })
+    async unshareExam(@Request() req, @Param('shareId') shareId: string) {
+        return this.portalService.unshareExam(req.user.userId, shareId);
+    }
+
+    @Get('exam-shares')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'List all active exam shares with providers' })
+    async getExamShares(@Request() req) {
+        return this.portalService.getExamShares(req.user.userId);
     }
 }

@@ -363,6 +363,10 @@ model Tenant {
   inventoryItems     InventoryItem[]
   inventoryMovements InventoryMovement[]
 
+  // Insurance
+  insuranceProviders InsuranceProvider[]
+  patientInsurances  PatientInsurance[]
+
   @@index([ownerId])
   @@map("tenants")
 }
@@ -453,6 +457,9 @@ model Patient {
   nutritionPlans        NutritionPlan[]
   bodyMeasurements      BodyMeasurement[]
   gynecologicalExams    GynecologicalExam[]
+
+  // Insurance
+  patientInsurances PatientInsurance[]
 
   @@unique([documentType, documentId])
   @@map("patients")
@@ -2044,4 +2051,74 @@ model InventoryMovement {
   @@index([type])
   @@index([createdAt])
   @@map("inventory_movements")
+}
+
+// ==========================================
+// Insurance
+// ==========================================
+
+model InsuranceProvider {
+  id       String @id @default(uuid())
+  tenantId String @map("tenant_id")
+
+  name            String
+  code            String? // internal code
+  contactPhone    String? @map("contact_phone")
+  contactEmail    String? @map("contact_email")
+  website         String?
+  coverageDetails Json?   @map("coverage_details") // plans, limits, copays
+  isActive        Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patientInsurances PatientInsurance[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([isActive])
+  @@map("insurance_providers")
+}
+
+model PatientInsurance {
+  id                  String @id @default(uuid())
+  patientId           String @map("patient_id")
+  insuranceProviderId String @map("insurance_provider_id")
+  tenantId            String @map("tenant_id")
+
+  policyNumber       String  @map("policy_number")
+  groupNumber        String? @map("group_number")
+  subscriberName     String? @map("subscriber_name")
+  subscriberRelation String? @map("subscriber_relation") // SELF, SPOUSE, CHILD, OTHER
+  coverageType       String  @default("BASIC") @map("coverage_type") // BASIC, PREMIUM, COMPLEMENTARY
+
+  effectiveDate  DateTime  @map("effective_date")
+  expirationDate DateTime? @map("expiration_date")
+  isActive       Boolean   @default(true) @map("is_active")
+  isPrimary      Boolean   @default(false) @map("is_primary")
+
+  verificationStatus String    @default("PENDING") @map("verification_status") // PENDING, VERIFIED, REJECTED, EXPIRED
+  verifiedAt         DateTime? @map("verified_at")
+  verifiedBy         String?   @map("verified_by")
+  verificationNotes  String?   @map("verification_notes") @db.Text
+
+  copayAmount        Float? @map("copay_amount")
+  coinsurancePercent Float? @map("coinsurance_percent")
+  deductible         Float?
+  maxAnnualBenefit   Float? @map("max_annual_benefit")
+  usedBenefit        Float? @default(0) @map("used_benefit")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient           Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  insuranceProvider InsuranceProvider @relation(fields: [insuranceProviderId], references: [id], onDelete: Cascade)
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([insuranceProviderId])
+  @@index([tenantId])
+  @@index([verificationStatus])
+  @@map("patient_insurances")
 }

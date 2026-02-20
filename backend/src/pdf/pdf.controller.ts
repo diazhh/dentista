@@ -8,7 +8,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PdfService } from './pdf.service';
 
 @Controller('pdf')

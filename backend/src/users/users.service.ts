@@ -12,6 +12,9 @@ export class UsersService {
       where: { email },
       include: {
         ownedTenants: true,
+        tenantMemberships: {
+          where: { isActive: true },
+        },
       },
     });
   }

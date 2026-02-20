@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { ConsentsService, ConsentAccessResult } from './consents.service';
 
@@ -31,6 +31,8 @@ declare global {
 
 @Injectable()
 export class ConsentCheckMiddleware implements NestMiddleware {
+  private readonly logger = new Logger(ConsentCheckMiddleware.name);
+
   constructor(private readonly consentsService: ConsentsService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -58,6 +60,7 @@ export class ConsentCheckMiddleware implements NestMiddleware {
       // Inject the access result into the request object
       req.consentAccess = access;
     } catch (error) {
+      this.logger.warn(`Consent check failed for provider=${providerId} patient=${patientId}: ${error.message}`);
       // If consent check fails, default to minimal access
       req.consentAccess = {
         hasConsent: false,

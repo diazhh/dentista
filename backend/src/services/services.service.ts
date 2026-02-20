@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 
 @Injectable()
 export class ServicesService {
+  private readonly logger = new Logger(ServicesService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(createServiceDto: CreateServiceDto, tenantId: string) {
@@ -183,7 +185,7 @@ export class ServicesService {
         });
         results.push(created);
       } catch (error) {
-        // Skip if exists
+        this.logger.warn(`Failed to seed service ${service.code}: ${error.message}`);
       }
     }
 

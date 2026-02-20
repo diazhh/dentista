@@ -10,6 +10,10 @@ import {
     Menu,
     X,
     User,
+    Users,
+    FlaskConical,
+    Heart,
+    Shield,
 } from 'lucide-react';
 
 interface PatientLayoutProps {
@@ -59,14 +63,34 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
             path: '/patient/appointments',
         },
         {
-            name: 'Facturas',
-            icon: CreditCard,
-            path: '/patient/invoices',
+            name: 'Mis Providers',
+            icon: Users,
+            path: '/patient/providers',
+        },
+        {
+            name: 'Exámenes',
+            icon: FlaskConical,
+            path: '/patient/exams',
         },
         {
             name: 'Documentos',
             icon: FileText,
             path: '/patient/documents',
+        },
+        {
+            name: 'Mi Salud',
+            icon: Heart,
+            path: '/patient/health-profile',
+        },
+        {
+            name: 'Consentimientos',
+            icon: Shield,
+            path: '/patient/consents',
+        },
+        {
+            name: 'Facturas',
+            icon: CreditCard,
+            path: '/patient/invoices',
         },
     ];
 

@@ -190,24 +190,42 @@ Un proveedor activa los módulos que necesita según su especialidad. Un proveed
 - ✅ 2.8: Frontend ChatWidget flotante con soporte de temas y quick replies
 - ✅ 2.9: Página de configuración del chatbot actualizada (tabs: General, Channels, FAQs)
 
-### Fase 3: Módulos por Especialidad (4-6 semanas)
-- Sistema de plugins
-- Módulo dental (migrar odontograma existente)
-- Módulo medicina general
-- Módulo psicología
-- Framework para crear nuevos módulos
+### Fase 3: Módulos por Especialidad ✅ COMPLETADA
+- ✅ 3.1: Framework de módulos (ModuleDefinition, ModulesService/Controller, useActiveModules, usePatientTabs, moduleRegistry, PatientTabsContainer dinámico)
+- ✅ 3.2: Módulo dental migrado (OdontogramsTab conectado a API, TreatmentPlansTab con progreso y CRUD)
+- ✅ 3.3: Módulo medicina general (ClinicalNote + Prescription models, SOAP notes, recetas, signos vitales)
+- ✅ 3.4: Módulo psicología (TherapySession + PsychologicalAssessment models, PHQ-9/GAD-7 scoring, mood tracking)
 
-### Fase 4: Portal del Paciente Avanzado (2-3 semanas)
-- Dashboard unificado del paciente (todos sus proveedores)
-- Carga de exámenes médicos
-- Compartir datos con proveedores (con tiempo limitado)
-- IA para resúmenes de exámenes (futuro)
+### Fase 4: Portal del Paciente Avanzado ✅ COMPLETADA
+- ✅ 4.1: Dashboard unificado con métricas (providers, exámenes, consentimientos pendientes) + notificaciones
+- ✅ 4.2: Gestión de exámenes médicos (upload, listado, compartir con providers, revocar acceso)
+- ✅ 4.3: Perfil de salud editable (tipo sangre, alergias, medicamentos, condiciones crónicas, contacto emergencia)
+- ✅ 4.4: Gestión de consentimientos (pendientes/activos/historial, grant/deny/modify/revoke)
+- ✅ 4.5: Vista de providers vinculados con niveles de acceso
+- ✅ 4.6: Sistema de notificaciones (consent requests + appointment reminders 48h)
+- 🔮 4.7: IA para resúmenes de exámenes (futuro - OCR + LLM)
 
-### Fase 5: Gestión de Clínicas (2-3 semanas)
-- Panel de admin de clínica
-- Alquiler de consultorios
-- Gestión de recursos y equipamiento
-- Reportes de ocupación
+### Fase 5: Gestión de Clínicas ✅ COMPLETADA
+- ✅ 5.1: ClinicAdminLayout (sidebar emerald, 6 menu items, responsive)
+- ✅ 5.2: Dashboard de clínica (ocupación %, ingresos, personal, solicitudes pendientes)
+- ✅ 5.3: Gestión de consultorios (room cards, capabilities, horario con modal calendario)
+- ✅ 5.4: Gestión de personal (CRUD staff con roles RECEPTIONIST/ADMIN/MAINTENANCE)
+- ✅ 5.5: Solicitudes de alquiler (approve/reject rental requests de providers)
+- ✅ 5.6: Reportes de ocupación e ingresos (tabs, date range filters, tablas de desglose)
+- ✅ 5.7: Configuración de clínica (info, horarios, especialidades, amenidades, alquiler)
+- ✅ 5.8: ClinicAdminRoute guard + CASL integration + clinicAdminAPI (14 methods)
+
+### Fase 6: Módulos de Especialidad Restantes ✅ COMPLETADA
+- ✅ 6.1: 11 modelos Prisma nuevos (ExercisePlan, FunctionalAssessment, SkinLesion, EyeExam, LensPrescription, CardiacAssessment, GrowthRecord, VaccinationRecord, NutritionPlan, BodyMeasurement, GynecologicalExam)
+- ✅ 6.2: 7 definiciones de módulo + app.module imports (physiotherapy, dermatology, ophthalmology, cardiology, pediatrics, nutrition, gynecology)
+- ✅ 6.3: Módulo fisioterapia (ExercisePlan + FunctionalAssessment CRUD, planes de ejercicios, escala de dolor, ROM)
+- ✅ 6.4: Módulo dermatología (SkinLesion CRUD, body mapping, tipos de lesión, biopsia tracking)
+- ✅ 6.5: Módulo oftalmología (EyeExam + LensPrescription CRUD, agudeza visual OD/OS, PIO, receta óptica)
+- ✅ 6.6: Módulo cardiología (CardiacAssessment CRUD, PA, FC, ritmo, factores de riesgo, perfil lipídico)
+- ✅ 6.7: Módulo pediatría (GrowthRecord + VaccinationRecord CRUD, percentiles con colores, calendario vacunas)
+- ✅ 6.8: Módulo nutrición (NutritionPlan + BodyMeasurement CRUD, macros, restricciones, medidas corporales)
+- ✅ 6.9: Módulo ginecología (GynecologicalExam CRUD, prenatal, PAP, ecografías, historia obstétrica)
+- ✅ 6.10: 11 tabs frontend con CRUD completo + registry + iconMap (17 tabs total en 10 módulos)
 
 ---
 

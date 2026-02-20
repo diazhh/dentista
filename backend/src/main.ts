@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
 
   // Global prefix
   app.setGlobalPrefix('api');
@@ -30,8 +31,8 @@ async function bootstrap() {
 
   // Swagger documentation
   const config = new DocumentBuilder()
-    .setTitle('DentiCloud API')
-    .setDescription('Multi-tenant Dental Management System API')
+    .setTitle('MediCloud API')
+    .setDescription('Multi-tenant Healthcare Management System API')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -40,9 +41,9 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  
-  console.log(`\n🚀 DentiCloud API is running on: http://localhost:${port}`);
-  console.log(`📚 API Documentation: http://localhost:${port}/api/docs\n`);
+
+  logger.log(`MediCloud API is running on: http://localhost:${port}`);
+  logger.log(`API Documentation: http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

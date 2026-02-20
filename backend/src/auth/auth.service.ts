@@ -79,10 +79,12 @@ export class AuthService {
   }
 
   async login(user: any, userAgent?: string, ipAddress?: string): Promise<LoginResponseDto> {
-    // For providers/clinic admins, get their tenant ID
+    // Resolve tenantId: first check owned tenants, then memberships
     let tenantId = null;
-    if ((user.role === 'PROVIDER' || user.role === 'CLINIC_ADMIN') && user.ownedTenants && user.ownedTenants.length > 0) {
+    if (user.ownedTenants && user.ownedTenants.length > 0) {
       tenantId = user.ownedTenants[0].id;
+    } else if (user.tenantMemberships && user.tenantMemberships.length > 0) {
+      tenantId = user.tenantMemberships[0].tenantId;
     }
     
     const payload = { 
@@ -144,7 +146,7 @@ export class AuthService {
   async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
     const session = await this.prisma.session.findUnique({
       where: { refreshToken },
-      include: { user: { include: { ownedTenants: true } } },
+      include: { user: { include: { ownedTenants: true, tenantMemberships: { where: { isActive: true } } } } },
     });
 
     if (!session || session.isRevoked || session.expiresAt < new Date()) {
@@ -153,8 +155,10 @@ export class AuthService {
 
     const user = session.user;
     let tenantId = null;
-    if ((user.role === 'PROVIDER' || user.role === 'CLINIC_ADMIN') && user.ownedTenants && user.ownedTenants.length > 0) {
+    if (user.ownedTenants && user.ownedTenants.length > 0) {
       tenantId = user.ownedTenants[0].id;
+    } else if (user.tenantMemberships && user.tenantMemberships.length > 0) {
+      tenantId = user.tenantMemberships[0].tenantId;
     }
 
     const payload = {

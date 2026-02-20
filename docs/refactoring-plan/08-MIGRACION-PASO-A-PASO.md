@@ -386,58 +386,108 @@ model ProviderPatientRelation {
 
 > **IMPORTANTE:** Todos los módulos de especialidad DEBEN seguir el patrón paciente-céntrico definido en `10-UX-PACIENTE-CENTRICO.md`. Cada módulo registra **tabs dentro del detalle de paciente**, NO crea páginas independientes.
 
-### Paso 3.1: Framework de Módulos
+### Paso 3.1: Framework de Módulos ✅ COMPLETADO
 
-1. Crear ProviderModule model
-2. Crear `ModuleDefinition` interface (incluye `patientTabs[]`)
-3. Implementar ModuleRegistry (backend)
-4. Implementar carga dinámica de tabs por módulo (frontend) vía `usePatientTabs` + `useActiveModules`
-5. Crear API de activación/desactivación de módulos
-6. Cada módulo debe exportar sus `patientTabs` con componentes lazy-loaded
+> **Estado:** Completado. Framework completo de módulos pluggables con backend y frontend.
+> - `backend/src/modules/module-definitions.ts`: ModuleDefinition interface + 3 definiciones (dental, general-medicine, psychology) con compatibleSpecialties
+> - `backend/src/modules/modules.service.ts`: getAvailableModules, getActiveModules, activateModule, deactivateModule, getModuleConfig, updateModuleConfig
+> - `backend/src/modules/modules.controller.ts`: GET /modules/available|active, POST /modules/:key/activate|deactivate, PUT /modules/:key/config
+> - `backend/src/modules/modules.module.ts`: NestJS module registered in AppModule
+> - `frontend/src/hooks/useActiveModules.ts`: Fetch active modules from API
+> - `frontend/src/hooks/usePatientTabs.ts`: Core tabs + dynamic module tabs merged by order
+> - `frontend/src/modules/registry.ts`: Module registry with lazy-loaded tab components
+> - `frontend/src/components/patient/PatientTabsContainer.tsx`: Refactored to use usePatientTabs() dynamic tabs
+> - `frontend/src/services/api.ts`: modulesAPI added
 
-### Paso 3.2: Módulo Dental (Migrar existente)
+1. ✅ Crear ProviderModule model (ya existía desde Fase 0.3)
+2. ✅ Crear `ModuleDefinition` interface (incluye `patientTabs[]`)
+3. ✅ Implementar ModuleRegistry (backend + frontend)
+4. ✅ Implementar carga dinámica de tabs por módulo (frontend) vía `usePatientTabs` + `useActiveModules`
+5. ✅ Crear API de activación/desactivación de módulos
+6. ✅ Cada módulo exporta sus `patientTabs` con componentes lazy-loaded
 
-1. Mover Odontogram a `components/modules/dental/OdontogramsTab.tsx`
-2. Mover TreatmentPlan a `components/modules/dental/TreatmentPlansTab.tsx`
-3. Registrar módulo dental con `patientTabs: [odontograms, treatments]`
-4. Verificar que tabs aparecen correctamente en detalle de paciente
-5. Eliminar páginas independientes deprecadas (OdontogramsListPage, NewOdontogramPage, etc.)
+### Paso 3.2: Módulo Dental (Migrar existente) ✅ COMPLETADO
 
-### Paso 3.3: Módulo Medicina General
+> **Estado:** Completado. Módulo dental migrado con OdontogramsTab y TreatmentPlansTab funcionales.
+> - `frontend/src/components/modules/dental/OdontogramsTab.tsx`: Reescrito con API, lista expandible, modal de creación con selector de dientes FDI y condiciones
+> - `frontend/src/components/modules/dental/TreatmentPlansTab.tsx`: Nuevo, lista de planes con progreso %, status badges, modal de creación, items table expandible
+> - Registrado en moduleRegistry con patientTabs (order 10, 11)
 
-1. Crear ClinicalNote model
-2. Crear Prescription model
-3. Implementar `ClinicalNotesTab` (notas SOAP) como tab de paciente
-4. Implementar `PrescriptionsTab` (recetas con PDF) como tab de paciente
-5. Implementar referidos como acción dentro del contexto del paciente
+1. ✅ Reescribir OdontogramsTab conectado a API existente
+2. ✅ Crear TreatmentPlansTab conectado a API existente
+3. ✅ Registrar módulo dental con `patientTabs: [odontograms, treatments]`
+4. ✅ Tabs aparecen dinámicamente si módulo dental está activo
 
-### Paso 3.4: Módulo Psicología
+### Paso 3.3: Módulo Medicina General ✅ COMPLETADO
 
-1. Crear TherapySession model
-2. Crear PsychologicalAssessment model
-3. Implementar `SessionsTab` como tab de paciente
-4. Implementar escalas (PHQ-9, GAD-7) dentro del tab de sesiones
-5. Dashboard de progreso terapéutico dentro del tab de resumen del paciente
+> **Estado:** Completado. Backend completo + frontend tabs para notas clínicas SOAP y recetas.
+> - `backend/prisma/schema.prisma`: Modelos ClinicalNote y Prescription agregados
+> - `backend/src/modules/general-medicine/`: clinical-notes.service/controller, prescriptions.service/controller, DTOs, general-medicine.module
+> - `frontend/src/components/modules/general-medicine/ClinicalNotesTab.tsx`: Lista de notas, modal SOAP (Subjetivo/Objetivo/Evaluación/Plan), signos vitales (PA, temp, peso, altura, FC, FR), diagnósticos
+> - `frontend/src/components/modules/general-medicine/PrescriptionsTab.tsx`: Lista de recetas, modal con medicamentos dinámicos (nombre, dosis, frecuencia, duración, instrucciones), diagnóstico, notas
+
+1. ✅ Crear ClinicalNote model
+2. ✅ Crear Prescription model
+3. ✅ Implementar `ClinicalNotesTab` (notas SOAP) como tab de paciente
+4. ✅ Implementar `PrescriptionsTab` (recetas) como tab de paciente
+
+### Paso 3.4: Módulo Psicología ✅ COMPLETADO
+
+> **Estado:** Completado. Backend completo + frontend tabs para sesiones terapéuticas y evaluaciones psicológicas.
+> - `backend/prisma/schema.prisma`: Modelos TherapySession y PsychologicalAssessment agregados
+> - `backend/src/modules/psychology/`: therapy-sessions.service/controller, assessments.service/controller (con scoring PHQ-9/GAD-7), DTOs, psychology.module
+> - `frontend/src/components/modules/psychology/SessionsTab.tsx`: Lista de sesiones con mood rating, risk level badges, modal de creación con tipo/duración/notas/técnicas/homework/mood/risk
+> - `frontend/src/components/modules/psychology/AssessmentsTab.tsx`: PHQ-9 y GAD-7 como formularios interactivos con scoring automático, severity badges, score bar visual
+
+1. ✅ Crear TherapySession model
+2. ✅ Crear PsychologicalAssessment model
+3. ✅ Implementar `SessionsTab` como tab de paciente
+4. ✅ Implementar escalas (PHQ-9, GAD-7) con scoring automático
 
 ---
 
-## Fase 4: Portal del Paciente Avanzado (Semanas 16-18)
+## Fase 4: Portal del Paciente Avanzado ✅ COMPLETADA
 
-### Paso 4.1: Dashboard Unificado
+### Paso 4.1: Dashboard Unificado ✅ COMPLETADO
 
-1. Rediseñar PatientLayout
-2. Crear dashboard con vista de todos los providers
-3. Calendario unificado de citas
-4. Notificaciones centralizadas
+1. ✅ Rediseñar PatientLayout (8 menu items: Inicio, Citas, Providers, Exámenes, Documentos, Salud, Consentimientos, Facturas)
+2. ✅ Crear dashboard con vista de todos los providers + métricas (próxima cita, providers activos, exámenes)
+3. ✅ Notificaciones centralizadas (consent requests + appointment reminders 48h)
+4. ✅ Sección de exámenes recientes en dashboard
 
-### Paso 4.2: Gestión de Exámenes
+> **Archivos modificados/creados:**
+> - `frontend/src/components/layouts/PatientLayout.tsx`: 4 nuevos menu items con iconos (Users, FlaskConical, Heart, Shield)
+> - `frontend/src/pages/patient/PatientDashboard.tsx`: Reescrito con enhanced dashboard, métricas, notificaciones
+> - `backend/src/patients/patients-portal.service.ts`: getEnhancedDashboard() + getNotifications()
+> - `backend/src/patients/patients-portal.controller.ts`: GET /portal/enhanced-dashboard, GET /portal/notifications
 
-1. Crear UI de upload de exámenes
-2. Implementar compartir documentos con providers
-3. Implementar compartir temporal (con expiración)
-4. Crear vista de documentos compartidos conmigo (para provider)
+### Paso 4.2: Gestión de Exámenes ✅ COMPLETADO
 
-### Paso 4.3: Futuro - IA para Exámenes
+1. ✅ Crear UI de upload de exámenes (modal con título, tipo, fecha, archivo, descripción, tags)
+2. ✅ Implementar compartir documentos con providers (selector de provider + fecha expiración opcional)
+3. ✅ Implementar compartir temporal (con expiración) via SharedDocument model
+4. ✅ Crear vista de documentos compartidos (tab "Mis Compartidos" con revoke)
+
+> **Archivos creados:**
+> - `frontend/src/pages/patient/PatientExams.tsx`: Upload, listado, compartir, revocar exámenes médicos
+> - `backend/src/patients/dto/share-exam.dto.ts`: ShareExamDto con providerId + expiresAt opcional
+> - Backend: shareExam(), unshareExam(), getExamShares() en portal service/controller
+
+### Paso 4.3: Perfil de Salud + Consentimientos ✅ COMPLETADO
+
+1. ✅ Perfil de salud editable (tipo sangre, alergias, medicamentos, condiciones crónicas, contacto emergencia)
+2. ✅ Gestión de consentimientos (pendientes/activos/historial con grant/deny/modify/revoke)
+3. ✅ Vista de providers vinculados con niveles de acceso y tipo de relación
+4. ✅ Control de privacidad (DataAccessLevel por defecto configurable)
+
+> **Archivos creados:**
+> - `frontend/src/pages/patient/PatientHealthProfile.tsx`: Perfil de salud con EditableListCard reutilizable
+> - `frontend/src/pages/patient/PatientConsents.tsx`: Gestión de consentimientos con 3 secciones
+> - `frontend/src/pages/patient/PatientProviders.tsx`: Lista de providers con badges de acceso
+> - `backend/src/patients/dto/grant-consent.dto.ts`, `modify-consent.dto.ts`, `update-health-profile.dto.ts`
+> - Backend: 7 nuevos métodos en portal service (health profile CRUD, consent grant/deny/modify)
+
+### Paso 4.4: Futuro - IA para Exámenes
 
 1. Integrar OCR para PDFs de exámenes
 2. Usar LLM para generar resúmenes
@@ -446,21 +496,36 @@ model ProviderPatientRelation {
 
 ---
 
-## Fase 5: Gestión de Clínicas (Semanas 19-21)
+## Fase 5: Gestión de Clínicas ✅ COMPLETADA
 
-### Paso 5.1: Panel de Clínica
+### Paso 5.1: Panel de Clínica ✅ COMPLETADO
 
-1. Crear layout ClinicAdmin
-2. Dashboard de ocupación
-3. Gestión de consultorios
-4. Gestión de staff de clínica
+1. ✅ Crear ClinicAdminLayout (sidebar emerald, 6 menu items, responsive mobile/desktop)
+2. ✅ Dashboard con métricas (ocupación %, ingresos estimados, personal, solicitudes pendientes)
+3. ✅ Gestión de consultorios (room cards con capabilities, horario modal con citas/asignaciones)
+4. ✅ Gestión de staff (CRUD con roles RECEPTIONIST/ADMIN/MAINTENANCE, toggle inactivos)
 
-### Paso 5.2: Alquiler de Consultorios
+> **Archivos creados/modificados:**
+> - `frontend/src/components/layouts/ClinicAdminLayout.tsx`: Layout emerald con 6 menu items
+> - `frontend/src/pages/clinic-admin/ClinicDashboard.tsx`: 4 stat cards + quick links
+> - `frontend/src/pages/clinic-admin/ClinicRooms.tsx`: Room cards + schedule modal
+> - `frontend/src/pages/clinic-admin/ClinicStaff.tsx`: Staff CRUD table + modals
+> - `frontend/src/App.tsx`: ClinicAdminRoute guard + 6 routes + lazy imports
+> - `frontend/src/casl/AbilityContext.tsx`: CLINIC_ADMIN role + 3 nuevos subjects
 
-1. Flujo de solicitud de alquiler
-2. Aprobación por clinic admin
-3. Facturación de alquiler
-4. Reportes de ingresos
+### Paso 5.2: Alquiler y Reportes ✅ COMPLETADO
+
+1. ✅ Solicitudes de alquiler (approve/reject con confirm dialogs)
+2. ✅ Reportes de ocupación (summary cards + tabla desglose por consultorio + barras utilización)
+3. ✅ Reportes de ingresos (summary cards + tabla revenue por consultorio)
+4. ✅ Configuración de clínica (info general, horarios, especialidades, amenidades, alquiler)
+
+> **Archivos creados/modificados:**
+> - `frontend/src/pages/clinic-admin/ClinicRentals.tsx`: Rental request cards con approve/reject
+> - `frontend/src/pages/clinic-admin/ClinicReports.tsx`: Tabs ocupación/ingresos con date filters
+> - `frontend/src/pages/clinic-admin/ClinicSettings.tsx`: 5 secciones de configuración
+> - `frontend/src/services/api.ts`: clinicAdminAPI (14 methods) + schedulingAPI (5 methods)
+> - `frontend/src/types/index.ts`: 12 nuevas interfaces para clinic admin
 
 ---
 

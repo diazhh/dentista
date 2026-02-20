@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -8,6 +8,8 @@ import { SchedulingService } from '../scheduling/scheduling.service';
 
 @Injectable()
 export class AppointmentsService {
+  private readonly logger = new Logger(AppointmentsService.name);
+
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
@@ -122,7 +124,7 @@ export class AppointmentsService {
       await this.notificationsService.sendAppointmentConfirmation(appointment.id);
       await this.notificationsService.scheduleAppointmentReminders(appointment.id);
     } catch (error) {
-      console.error('Failed to send notifications:', error);
+      this.logger.error('Failed to send notifications:', error);
     }
 
     return appointment;

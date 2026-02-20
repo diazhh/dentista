@@ -858,4 +858,53 @@ export const inventoryAPI = {
   },
 };
 
+export const insuranceAPI = {
+  // Insurance Providers (catalog)
+  getProviders: async (includeInactive = false) => {
+    const response = await api.get('/insurance/providers', { params: { includeInactive } });
+    return response.data;
+  },
+  getProvider: async (id: string) => {
+    const response = await api.get(`/insurance/providers/${id}`);
+    return response.data;
+  },
+  createProvider: async (data: any) => {
+    const response = await api.post('/insurance/providers', data);
+    return response.data;
+  },
+  updateProvider: async (id: string, data: any) => {
+    const response = await api.patch(`/insurance/providers/${id}`, data);
+    return response.data;
+  },
+  deleteProvider: async (id: string) => {
+    const response = await api.delete(`/insurance/providers/${id}`);
+    return response.data;
+  },
+  // Patient Insurances
+  getPatientInsurances: async (patientId: string) => {
+    const response = await api.get(`/insurance/patients/${patientId}`);
+    return response.data;
+  },
+  createPatientInsurance: async (data: any) => {
+    const response = await api.post('/insurance', data);
+    return response.data;
+  },
+  updatePatientInsurance: async (id: string, data: any) => {
+    const response = await api.patch(`/insurance/${id}`, data);
+    return response.data;
+  },
+  deletePatientInsurance: async (id: string) => {
+    const response = await api.delete(`/insurance/${id}`);
+    return response.data;
+  },
+  verifyInsurance: async (id: string, data: { verificationStatus: string; verificationNotes?: string }) => {
+    const response = await api.post(`/insurance/${id}/verify`, data);
+    return response.data;
+  },
+  checkCoverage: async (patientId: string) => {
+    const response = await api.get(`/insurance/patients/${patientId}/coverage`);
+    return response.data;
+  },
+};
+
 export default api;

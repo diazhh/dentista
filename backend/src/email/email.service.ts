@@ -177,8 +177,8 @@ export class EmailService {
       await testTransporter.sendMail({
         from: `"${config.fromName}" <${config.fromEmail}>`,
         to: testEmail,
-        subject: 'Test Email - DentiCloud',
-        html: '<h1>Test Email</h1><p>This is a test email from DentiCloud. If you received this, your SMTP configuration is working correctly!</p>',
+        subject: 'Test Email - MediCloud',
+        html: '<h1>Test Email</h1><p>This is a test email from MediCloud. If you received this, your SMTP configuration is working correctly!</p>',
       });
 
       // Update configuration
