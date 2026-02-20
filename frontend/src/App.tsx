@@ -67,6 +67,9 @@ import PatientHealthProfile from './pages/patient/PatientHealthProfile';
 import PatientConsents from './pages/patient/PatientConsents';
 import PatientRegisterPage from './pages/patient/PatientRegisterPage';
 
+// Lazy loaded pages
+const InventoryPage = lazy(() => import('./pages/InventoryPage'));
+
 // Clinic Admin Pages (lazy loaded)
 const ClinicDashboard = lazy(() => import('./pages/clinic-admin/ClinicDashboard'));
 const ClinicRooms = lazy(() => import('./pages/clinic-admin/ClinicRooms'));
@@ -467,6 +470,20 @@ function AppContent() {
             <TenantRoute>
               <TenantLayout>
                 <StaffListPage />
+              </TenantLayout>
+            </TenantRoute>
+          }
+        />
+
+        {/* Inventory */}
+        <Route
+          path="/inventory"
+          element={
+            <TenantRoute>
+              <TenantLayout>
+                <Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}>
+                  <InventoryPage />
+                </Suspense>
               </TenantLayout>
             </TenantRoute>
           }

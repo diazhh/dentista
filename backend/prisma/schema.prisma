@@ -359,6 +359,10 @@ model Tenant {
   bodyMeasurements      BodyMeasurement[]
   gynecologicalExams    GynecologicalExam[]
 
+  // Inventory
+  inventoryItems     InventoryItem[]
+  inventoryMovements InventoryMovement[]
+
   @@index([ownerId])
   @@map("tenants")
 }
@@ -1975,4 +1979,69 @@ model GynecologicalExam {
   @@index([providerId])
   @@index([tenantId])
   @@map("gynecological_exams")
+}
+
+// ==========================================
+// Medical Inventory
+// ==========================================
+
+model InventoryItem {
+  id          String  @id @default(uuid())
+  tenantId    String  @map("tenant_id")
+  name        String
+  sku         String?
+  category    String // MEDICATION, SUPPLY, EQUIPMENT, INSTRUMENT, OTHER
+  description String? @db.Text
+  unit        String  @default("unidad") // unidad, caja, ml, mg, etc.
+
+  currentStock Int  @default(0) @map("current_stock")
+  minimumStock Int  @default(0) @map("minimum_stock")
+  maximumStock Int? @map("maximum_stock")
+
+  costPrice Float? @map("cost_price")
+  salePrice Float? @map("sale_price")
+
+  supplier String?
+  location String? // storage location within clinic
+
+  expirationDate DateTime? @map("expiration_date")
+  isActive       Boolean   @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant    Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  movements InventoryMovement[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId])
+  @@index([category])
+  @@index([isActive])
+  @@map("inventory_items")
+}
+
+model InventoryMovement {
+  id       String @id @default(uuid())
+  itemId   String @map("item_id")
+  tenantId String @map("tenant_id")
+  userId   String @map("user_id") // who performed the movement
+
+  type      String // IN, OUT, ADJUSTMENT, RETURN, EXPIRED
+  quantity  Int
+  reason    String?
+  reference String? // invoice number, PO number, etc.
+
+  previousStock Int @map("previous_stock")
+  newStock      Int @map("new_stock")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  item   InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+  @@index([tenantId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("inventory_movements")
 }

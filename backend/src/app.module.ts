@@ -44,6 +44,7 @@ import { CardiologyModule } from './modules/cardiology/cardiology.module';
 import { PediatricsModule } from './modules/pediatrics/pediatrics.module';
 import { NutritionModule } from './modules/nutrition/nutrition.module';
 import { GynecologyModule } from './modules/gynecology/gynecology.module';
+import { InventoryModule } from './inventory/inventory.module';
 
 @Module({
   imports: [
@@ -103,6 +104,7 @@ import { GynecologyModule } from './modules/gynecology/gynecology.module';
     PediatricsModule,
     NutritionModule,
     GynecologyModule,
+    InventoryModule,
   ],
 })
 export class AppModule { }

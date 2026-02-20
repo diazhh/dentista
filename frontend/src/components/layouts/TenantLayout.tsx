@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Building2,
   UserPlus,
+  Package,
 } from 'lucide-react';
 
 interface TenantLayoutProps {
@@ -81,6 +82,12 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
       icon: UserPlus,
       path: '/staff',
       description: 'Personal y colaboradores',
+    },
+    {
+      name: 'Inventario',
+      icon: Package,
+      path: '/inventory',
+      description: 'Insumos y medicamentos',
     },
     {
       name: 'Reportes',

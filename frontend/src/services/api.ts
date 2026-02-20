@@ -153,7 +153,7 @@ export const authAPI = {
   },
 
   validateResetToken: async (token: string): Promise<{ valid: boolean; email?: string }> => {
-    const response = await api.get(`/auth/reset-password/validate?token=${token}`);
+    const response = await api.get(`/auth/validate-reset-token?token=${token}`);
     return response.data;
   },
 
@@ -243,7 +243,70 @@ export const patientPortalAPI = {
   getDocuments: async () => {
     const response = await api.get('/portal/documents');
     return response.data;
-  }
+  },
+  // Phase 4 - Patient Portal Advanced
+  getEnhancedDashboard: async () => {
+    const response = await api.get('/portal/enhanced-dashboard');
+    return response.data;
+  },
+  getNotifications: async () => {
+    const response = await api.get('/portal/notifications');
+    return response.data;
+  },
+  getHealthProfile: async () => {
+    const response = await api.get('/portal/health-profile');
+    return response.data;
+  },
+  updateHealthProfile: async (data: {
+    bloodType?: string;
+    allergies?: string[];
+    medications?: string[];
+    chronicConditions?: string[];
+    emergencyContactName?: string;
+    emergencyContactPhone?: string;
+    emergencyContactRelation?: string;
+  }) => {
+    const response = await api.put('/portal/health-profile', data);
+    return response.data;
+  },
+  grantConsent: async (consentId: string, data?: {
+    dataAccessLevel?: string;
+    shareAppointments?: boolean;
+    shareMedicalHistory?: boolean;
+    shareDocuments?: boolean;
+    shareLabResults?: boolean;
+    shareBilling?: boolean;
+  }) => {
+    const response = await api.post(`/portal/consents/${consentId}/grant`, data);
+    return response.data;
+  },
+  denyConsent: async (consentId: string) => {
+    const response = await api.post(`/portal/consents/${consentId}/deny`);
+    return response.data;
+  },
+  modifyConsent: async (consentId: string, data: {
+    dataAccessLevel?: string;
+    shareAppointments?: boolean;
+    shareMedicalHistory?: boolean;
+    shareDocuments?: boolean;
+    shareLabResults?: boolean;
+    shareBilling?: boolean;
+  }) => {
+    const response = await api.put(`/portal/consents/${consentId}`, data);
+    return response.data;
+  },
+  shareExam: async (examId: string, data: { providerId: string; expiresAt?: string }) => {
+    const response = await api.post(`/portal/exams/${examId}/share`, data);
+    return response.data;
+  },
+  unshareExam: async (shareId: string) => {
+    const response = await api.delete(`/portal/exam-shares/${shareId}`);
+    return response.data;
+  },
+  getExamShares: async () => {
+    const response = await api.get('/portal/exam-shares');
+    return response.data;
+  },
 };
 
 // Clinics API
@@ -619,6 +682,178 @@ export const medicalExamsAPI = {
   },
   delete: async (id: string) => {
     const response = await api.delete('/medical-exams/' + id);
+    return response.data;
+  },
+};
+
+// Modules API (Phase 3)
+export const modulesAPI = {
+  getAvailable: async () => {
+    const response = await api.get('/modules/available');
+    return response.data;
+  },
+  getActive: async () => {
+    const response = await api.get('/modules/active');
+    return response.data;
+  },
+  activate: async (moduleKey: string, config?: Record<string, unknown>) => {
+    const response = await api.post(`/modules/${moduleKey}/activate`, { config });
+    return response.data;
+  },
+  deactivate: async (moduleKey: string) => {
+    const response = await api.post(`/modules/${moduleKey}/deactivate`);
+    return response.data;
+  },
+  updateConfig: async (moduleKey: string, config: Record<string, unknown>) => {
+    const response = await api.put(`/modules/${moduleKey}/config`, { config });
+    return response.data;
+  },
+};
+
+// Clinic Admin API (Phase 5)
+export const clinicAdminAPI = {
+  // Dashboard
+  getDashboard: async () => {
+    const response = await api.get('/clinic-admin/dashboard');
+    return response.data;
+  },
+  // Clinic details
+  getClinic: async () => {
+    const response = await api.get('/clinic-admin/clinic');
+    return response.data;
+  },
+  updateClinic: async (data: {
+    name?: string;
+    phone?: string;
+    email?: string;
+    description?: string;
+    website?: string;
+    taxId?: string;
+    businessHours?: Record<string, { open: string; close: string } | null>;
+    specialties?: string[];
+    amenities?: string[];
+    rentalEnabled?: boolean;
+    rentalRateHourly?: number;
+    rentalRateDaily?: number;
+    rentalRateMonthly?: number;
+    isPublic?: boolean;
+  }) => {
+    const response = await api.put('/clinic-admin/clinic', data);
+    return response.data;
+  },
+  // Rooms
+  getRooms: async () => {
+    const response = await api.get('/clinic-admin/rooms');
+    return response.data;
+  },
+  getRoomSchedule: async (roomId: string, date: string) => {
+    const response = await api.get(`/clinic-admin/rooms/${roomId}/schedule`, { params: { date } });
+    return response.data;
+  },
+  // Reports
+  getOccupancy: async (start: string, end: string) => {
+    const response = await api.get('/clinic-admin/occupancy', { params: { start, end } });
+    return response.data;
+  },
+  getRevenue: async (start: string, end: string) => {
+    const response = await api.get('/clinic-admin/revenue', { params: { start, end } });
+    return response.data;
+  },
+  // Staff
+  getStaff: async () => {
+    const response = await api.get('/clinic-admin/staff');
+    return response.data;
+  },
+  addStaff: async (data: { userId: string; role: string }) => {
+    const response = await api.post('/clinic-admin/staff', data);
+    return response.data;
+  },
+  updateStaff: async (staffId: string, data: { role?: string; isActive?: boolean }) => {
+    const response = await api.put(`/clinic-admin/staff/${staffId}`, data);
+    return response.data;
+  },
+  removeStaff: async (staffId: string) => {
+    const response = await api.delete(`/clinic-admin/staff/${staffId}`);
+    return response.data;
+  },
+  // Rental requests
+  getRentalRequests: async () => {
+    const response = await api.get('/clinic-admin/rental-requests');
+    return response.data;
+  },
+  approveRental: async (requestId: string) => {
+    const response = await api.post(`/clinic-admin/rental-requests/${requestId}/approve`);
+    return response.data;
+  },
+  rejectRental: async (requestId: string) => {
+    const response = await api.post(`/clinic-admin/rental-requests/${requestId}/reject`);
+    return response.data;
+  },
+};
+
+// Scheduling API (Phase 5)
+export const schedulingAPI = {
+  getAvailableSlots: async (params: { providerId: string; date: string; serviceId?: string; clinicId?: string }) => {
+    const response = await api.get('/scheduling/available-slots', { params });
+    return response.data;
+  },
+  validateSlot: async (data: { providerId: string; roomId: string; startTime: string; endTime: string }) => {
+    const response = await api.post('/scheduling/validate-slot', data);
+    return response.data;
+  },
+  getRoomCalendar: async (roomId: string, start: string, end: string) => {
+    const response = await api.get(`/scheduling/room-calendar/${roomId}`, { params: { start, end } });
+    return response.data;
+  },
+  getClinicCalendar: async (clinicId: string, date: string) => {
+    const response = await api.get(`/scheduling/clinic-calendar/${clinicId}`, { params: { date } });
+    return response.data;
+  },
+  requestRental: async (data: {
+    roomId: string;
+    schedule: Record<string, { start: string; end: string }[]>;
+    startDate: string;
+    endDate?: string;
+    assignmentType?: string;
+    rentalRate?: number;
+    rentalPeriod?: string;
+  }) => {
+    const response = await api.post('/scheduling/rental-request', data);
+    return response.data;
+  },
+};
+
+export const inventoryAPI = {
+  getAll: async (params?: { category?: string; search?: string; lowStock?: boolean }) => {
+    const response = await api.get('/inventory', { params });
+    return response.data;
+  },
+  getOne: async (id: string) => {
+    const response = await api.get(`/inventory/${id}`);
+    return response.data;
+  },
+  create: async (data: any) => {
+    const response = await api.post('/inventory', data);
+    return response.data;
+  },
+  update: async (id: string, data: any) => {
+    const response = await api.patch(`/inventory/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    const response = await api.delete(`/inventory/${id}`);
+    return response.data;
+  },
+  getSummary: async () => {
+    const response = await api.get('/inventory/summary');
+    return response.data;
+  },
+  createMovement: async (data: { itemId: string; type: string; quantity: number; reason?: string; reference?: string }) => {
+    const response = await api.post('/inventory/movements', data);
+    return response.data;
+  },
+  getMovements: async (itemId: string) => {
+    const response = await api.get(`/inventory/${itemId}/movements`);
     return response.data;
   },
 };
