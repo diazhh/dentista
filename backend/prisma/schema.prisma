@@ -13,9 +13,9 @@ datasource db {
 
 enum UserRole {
   SUPER_ADMIN
-  PROVIDER           // Renombrado de DENTIST - cualquier profesional de salud
-  CLINIC_ADMIN       // NUEVO - administrador de clínica
-  STAFF_MANAGER      // NUEVO - staff que gestiona agenda/pacientes
+  PROVIDER // Renombrado de DENTIST - cualquier profesional de salud
+  CLINIC_ADMIN // NUEVO - administrador de clínica
+  STAFF_MANAGER // NUEVO - staff que gestiona agenda/pacientes
   STAFF_RECEPTIONIST
   STAFF_BILLING
   STAFF_ASSISTANT
@@ -278,10 +278,10 @@ model User {
   avatarUrl    String?  @map("avatar_url")
 
   // Campos profesionales (para PROVIDER)
-  licenseNumber   String?            @map("license_number")
-  npiNumber       String?            @map("npi_number")
-  specialties     MedicalSpecialty[] // CAMBIO: array de especialidades (antes era specialization String?)
-  bio             String?            @db.Text // NUEVO
+  licenseNumber String?            @map("license_number")
+  npiNumber     String?            @map("npi_number")
+  specialties   MedicalSpecialty[] // CAMBIO: array de especialidades (antes era specialization String?)
+  bio           String?            @db.Text // NUEVO
 
   // OAuth
   oauthProvider String? @map("oauth_provider")
@@ -294,14 +294,14 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  ownedTenants         Tenant[]              @relation("TenantOwner")
-  tenantMemberships    TenantMembership[]
-  patientProfile       Patient?
-  sessions             Session[]
-  auditLogs            AuditLog[]
-  passwordResetTokens  PasswordResetToken[]
-  managedClinics       Clinic[]              @relation("ClinicAdmin") // NUEVO
-  providerModules      ProviderModule[]      // NUEVO
+  ownedTenants        Tenant[]             @relation("TenantOwner")
+  tenantMemberships   TenantMembership[]
+  patientProfile      Patient?
+  sessions            Session[]
+  auditLogs           AuditLog[]
+  passwordResetTokens PasswordResetToken[]
+  managedClinics      Clinic[]             @relation("ClinicAdmin") // NUEVO
+  providerModules     ProviderModule[] // NUEVO
 
   @@unique([oauthProvider, oauthId])
   @@map("users")
@@ -335,25 +335,38 @@ model Tenant {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  owner                     User                      @relation("TenantOwner", fields: [ownerId], references: [id])
-  memberships               TenantMembership[]
-  providerPatientRelations  ProviderPatientRelation[] // RENOMBRADO
-  appointments              Appointment[]
-  roomAssignments           RoomAssignment[]          // RENOMBRADO
-  auditLogs                 AuditLog[]
-  odontograms               Odontogram[]
-  medicalServices           MedicalService[]          // RENOMBRADO
-  treatmentPlans            TreatmentPlan[]
-  invoices                  Invoice[]
+  owner                    User                      @relation("TenantOwner", fields: [ownerId], references: [id])
+  memberships              TenantMembership[]
+  providerPatientRelations ProviderPatientRelation[] // RENOMBRADO
+  appointments             Appointment[]
+  roomAssignments          RoomAssignment[] // RENOMBRADO
+  auditLogs                AuditLog[]
+  odontograms              Odontogram[]
+  medicalServices          MedicalService[] // RENOMBRADO
+  treatmentPlans           TreatmentPlan[]
+  invoices                 Invoice[]
+
+  // Phase 6 specialty modules
+  exercisePlans         ExercisePlan[]
+  functionalAssessments FunctionalAssessment[]
+  skinLesions           SkinLesion[]
+  eyeExams              EyeExam[]
+  lensPrescriptions     LensPrescription[]
+  cardiacAssessments    CardiacAssessment[]
+  growthRecords         GrowthRecord[]
+  vaccinationRecords    VaccinationRecord[]
+  nutritionPlans        NutritionPlan[]
+  bodyMeasurements      BodyMeasurement[]
+  gynecologicalExams    GynecologicalExam[]
 
   @@index([ownerId])
   @@map("tenants")
 }
 
 model TenantMembership {
-  id       String           @id @default(uuid())
-  userId   String           @map("user_id")
-  tenantId String           @map("tenant_id")
+  id       String   @id @default(uuid())
+  userId   String   @map("user_id")
+  tenantId String   @map("tenant_id")
   role     UserRole
 
   permissions Json?
@@ -377,20 +390,20 @@ model TenantMembership {
 // ==========================================
 
 model Patient {
-  id          String   @id @default(uuid())
-  userId      String?  @unique @map("user_id")
+  id     String  @id @default(uuid())
+  userId String? @unique @map("user_id")
 
   // Identificación (CAMBIO: documentType + documentId como unique compuesto)
-  documentType  String   @default("CEDULA") @map("document_type")
-  documentId    String   @map("document_id")
+  documentType String @default("CEDULA") @map("document_type")
+  documentId   String @map("document_id")
 
   firstName   String   @map("first_name")
   lastName    String   @map("last_name")
   dateOfBirth DateTime @map("date_of_birth")
   gender      Gender
   phone       String
-  email       String?  // NUEVO: email propio
-  address     Json?    // NUEVO: dirección
+  email       String? // NUEVO: email propio
+  address     Json? // NUEVO: dirección
 
   // Datos médicos generales (propiedad del paciente)
   bloodType         String?  @map("blood_type") // NUEVO
@@ -411,8 +424,8 @@ model Patient {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user                     User?                      @relation(fields: [userId], references: [id])
-  providerPatientRelations ProviderPatientRelation[]   // RENOMBRADO
+  user                     User?                     @relation(fields: [userId], references: [id])
+  providerPatientRelations ProviderPatientRelation[] // RENOMBRADO
   appointments             Appointment[]
   waitlistEntries          Waitlist[]
   treatmentPlans           TreatmentPlan[]
@@ -420,9 +433,22 @@ model Patient {
   payments                 Payment[]
   documents                Document[]
   odontograms              Odontogram[]
-  patientConsents          PatientConsent[]            // NUEVO
-  sharedDocuments          SharedDocument[]            // NUEVO
-  medicalExams             MedicalExam[]               // NUEVO
+  patientConsents          PatientConsent[] // NUEVO
+  sharedDocuments          SharedDocument[] // NUEVO
+  medicalExams             MedicalExam[] // NUEVO
+
+  // Phase 6 specialty modules
+  exercisePlans         ExercisePlan[]
+  functionalAssessments FunctionalAssessment[]
+  skinLesions           SkinLesion[]
+  eyeExams              EyeExam[]
+  lensPrescriptions     LensPrescription[]
+  cardiacAssessments    CardiacAssessment[]
+  growthRecords         GrowthRecord[]
+  vaccinationRecords    VaccinationRecord[]
+  nutritionPlans        NutritionPlan[]
+  bodyMeasurements      BodyMeasurement[]
+  gynecologicalExams    GynecologicalExam[]
 
   @@unique([documentType, documentId])
   @@map("patients")
@@ -433,10 +459,10 @@ model Patient {
 // ==========================================
 
 model ProviderPatientRelation {
-  id         String    @id @default(uuid())
-  patientId  String    @map("patient_id")
-  providerId String    @map("provider_id") // RENOMBRADO de dentistId
-  tenantId   String    @map("tenant_id")
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  providerId String @map("provider_id") // RENOMBRADO de dentistId
+  tenantId   String @map("tenant_id")
 
   // NUEVO: tipo de relación
   relationType ProviderPatientRelationType @default(REGISTERED_BY_PROVIDER) @map("relation_type")
@@ -449,7 +475,7 @@ model ProviderPatientRelation {
   dataAccessLevel DataAccessLevel @default(MINIMAL) @map("data_access_level")
 
   // NUEVO: Notas del provider (privadas)
-  providerNotes String? @db.Text @map("provider_notes")
+  providerNotes String? @map("provider_notes") @db.Text
 
   // NUEVO: Datos locales del provider sobre este paciente
   localMedicalHistory Json?    @map("local_medical_history")
@@ -474,9 +500,9 @@ model ProviderPatientRelation {
 // ==========================================
 
 model PatientConsent {
-  id          String          @id @default(uuid())
-  patientId   String          @map("patient_id")
-  providerId  String          @map("provider_id")
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  providerId String @map("provider_id")
 
   dataAccessLevel DataAccessLevel
 
@@ -514,10 +540,10 @@ model PatientConsent {
 // ==========================================
 
 model SharedDocument {
-  id          String    @id @default(uuid())
-  patientId   String    @map("patient_id")
-  documentId  String    @map("document_id")
-  providerId  String    @map("provider_id")
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  documentId String @map("document_id")
+  providerId String @map("provider_id")
 
   sharedAt  DateTime  @default(now()) @map("shared_at")
   expiresAt DateTime? @map("expires_at")
@@ -539,21 +565,21 @@ model SharedDocument {
 // ==========================================
 
 model MedicalExam {
-  id          String   @id @default(uuid())
-  patientId   String   @map("patient_id")
+  id        String @id @default(uuid())
+  patientId String @map("patient_id")
 
   title       String
   examType    String   @map("exam_type")
   description String?  @db.Text
   examDate    DateTime @map("exam_date")
 
-  filePath  String @map("file_path")
-  fileName  String @map("file_name")
-  fileSize  Int    @map("file_size")
-  mimeType  String @map("mime_type")
+  filePath String @map("file_path")
+  fileName String @map("file_name")
+  fileSize Int    @map("file_size")
+  mimeType String @map("mime_type")
 
   // Futuro: Resumen IA
-  aiSummary   String? @db.Text @map("ai_summary")
+  aiSummary   String? @map("ai_summary") @db.Text
   aiProcessed Boolean @default(false) @map("ai_processed")
 
   tags String[] @default([])
@@ -574,11 +600,11 @@ model MedicalExam {
 // ==========================================
 
 model Clinic {
-  id        String  @id @default(uuid())
-  name      String
-  address   Json
-  phone     String
-  email     String
+  id      String @id @default(uuid())
+  name    String
+  address Json
+  phone   String
+  email   String
 
   latitude  Float?
   longitude Float?
@@ -597,10 +623,10 @@ model Clinic {
   amenities     String[]           @default([])
 
   // NUEVO: Configuración de alquiler
-  rentalEnabled    Boolean @default(false) @map("rental_enabled")
-  rentalRateHourly Float?  @map("rental_rate_hourly")
-  rentalRateDaily  Float?  @map("rental_rate_daily")
-  rentalRateMonthly Float? @map("rental_rate_monthly")
+  rentalEnabled     Boolean @default(false) @map("rental_enabled")
+  rentalRateHourly  Float?  @map("rental_rate_hourly")
+  rentalRateDaily   Float?  @map("rental_rate_daily")
+  rentalRateMonthly Float?  @map("rental_rate_monthly")
 
   createdBy String  @map("created_by")
   isActive  Boolean @default(true) @map("is_active")
@@ -611,7 +637,7 @@ model Clinic {
 
   admin       User?              @relation("ClinicAdmin", fields: [adminUserId], references: [id])
   rooms       ConsultationRoom[] // RENOMBRADO de operatories
-  clinicStaff ClinicStaff[]      // NUEVO
+  clinicStaff ClinicStaff[] // NUEVO
 
   @@map("clinics")
 }
@@ -650,10 +676,10 @@ model ConsultationRoom {
 }
 
 model RoomAssignment {
-  id         String    @id @default(uuid())
-  roomId     String    @map("room_id")     // RENOMBRADO de operatoryId
-  providerId String    @map("provider_id") // RENOMBRADO de dentistId
-  tenantId   String    @map("tenant_id")
+  id         String @id @default(uuid())
+  roomId     String @map("room_id") // RENOMBRADO de operatoryId
+  providerId String @map("provider_id") // RENOMBRADO de dentistId
+  tenantId   String @map("tenant_id")
 
   schedule  Json
   startDate DateTime  @map("start_date")
@@ -682,9 +708,9 @@ model RoomAssignment {
 
 // NUEVO: Staff propio de la clínica
 model ClinicStaff {
-  id       String  @id @default(uuid())
-  clinicId String  @map("clinic_id")
-  userId   String  @map("user_id")
+  id       String @id @default(uuid())
+  clinicId String @map("clinic_id")
+  userId   String @map("user_id")
   role     String
 
   isActive Boolean @default(true) @map("is_active")
@@ -705,12 +731,12 @@ model ClinicStaff {
 // ==========================================
 
 model Appointment {
-  id          String            @id @default(uuid())
-  patientId   String            @map("patient_id")
-  providerId  String            @map("provider_id") // RENOMBRADO de dentistId
-  tenantId    String            @map("tenant_id")
-  roomId      String?           @map("room_id")     // RENOMBRADO de operatoryId
-  recurringId String?           @map("recurring_id")
+  id          String  @id @default(uuid())
+  patientId   String  @map("patient_id")
+  providerId  String  @map("provider_id") // RENOMBRADO de dentistId
+  tenantId    String  @map("tenant_id")
+  roomId      String? @map("room_id") // RENOMBRADO de operatoryId
+  recurringId String? @map("recurring_id")
 
   appointmentDate DateTime          @map("appointment_date")
   duration        Int
@@ -724,9 +750,9 @@ model Appointment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  patient   Patient              @relation(fields: [patientId], references: [id])
-  tenant    Tenant               @relation(fields: [tenantId], references: [id])
-  room      ConsultationRoom?    @relation(fields: [roomId], references: [id]) // RENOMBRADO
+  patient   Patient               @relation(fields: [patientId], references: [id])
+  tenant    Tenant                @relation(fields: [tenantId], references: [id])
+  room      ConsultationRoom?     @relation(fields: [roomId], references: [id]) // RENOMBRADO
   recurring RecurringAppointment? @relation(fields: [recurringId], references: [id])
 
   @@index([patientId])
@@ -738,19 +764,19 @@ model Appointment {
 }
 
 model RecurringAppointment {
-  id          String               @id @default(uuid())
-  patientId   String               @map("patient_id")
-  providerId  String               @map("provider_id") // RENOMBRADO de dentistId
-  tenantId    String               @map("tenant_id")
-  roomId      String?              @map("room_id")     // RENOMBRADO de operatoryId
+  id         String  @id @default(uuid())
+  patientId  String  @map("patient_id")
+  providerId String  @map("provider_id") // RENOMBRADO de dentistId
+  tenantId   String  @map("tenant_id")
+  roomId     String? @map("room_id") // RENOMBRADO de operatoryId
 
-  frequency   RecurrenceFrequency
-  interval    Int                  @default(1)
-  startDate   DateTime             @map("start_date")
-  endDate     DateTime?            @map("end_date")
+  frequency RecurrenceFrequency
+  interval  Int                 @default(1)
+  startDate DateTime            @map("start_date")
+  endDate   DateTime?           @map("end_date")
 
   duration      Int
-  procedureType String             @map("procedure_type")
+  procedureType String  @map("procedure_type")
   notes         String?
 
   timeOfDay  String @map("time_of_day")
@@ -771,16 +797,16 @@ model RecurringAppointment {
 }
 
 model Waitlist {
-  id          String         @id @default(uuid())
-  patientId   String         @map("patient_id")
-  providerId  String         @map("provider_id") // RENOMBRADO de dentistId
-  tenantId    String         @map("tenant_id")
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  providerId String @map("provider_id") // RENOMBRADO de dentistId
+  tenantId   String @map("tenant_id")
 
-  preferredDates    DateTime[]   @map("preferred_dates")
-  preferredTimes    String[]     @map("preferred_times")
-  procedureType     String       @map("procedure_type")
-  duration          Int
-  priority          Int          @default(1)
+  preferredDates DateTime[] @map("preferred_dates")
+  preferredTimes String[]   @map("preferred_times")
+  procedureType  String     @map("procedure_type")
+  duration       Int
+  priority       Int        @default(1)
 
   status WaitlistStatus @default(WAITING)
   notes  String?
@@ -901,9 +927,9 @@ model NotificationPreference {
 }
 
 model Notification {
-  id       String             @id @default(uuid())
-  userId   String             @map("user_id")
-  tenantId String             @map("tenant_id")
+  id       String @id @default(uuid())
+  userId   String @map("user_id")
+  tenantId String @map("tenant_id")
 
   type    NotificationType
   channel NotificationChannel
@@ -935,10 +961,10 @@ model Notification {
 // ==========================================
 
 model TreatmentPlan {
-  id          String              @id @default(uuid())
-  patientId   String              @map("patient_id")
-  providerId  String              @map("provider_id") // RENOMBRADO de dentistId
-  tenantId    String              @map("tenant_id")
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  providerId String @map("provider_id") // RENOMBRADO de dentistId
+  tenantId   String @map("tenant_id")
 
   title       String
   description String?
@@ -969,14 +995,14 @@ model TreatmentPlan {
 }
 
 model TreatmentPlanItem {
-  id              String              @id @default(uuid())
-  treatmentPlanId String              @map("treatment_plan_id")
+  id              String @id @default(uuid())
+  treatmentPlanId String @map("treatment_plan_id")
 
   tooth   String?
   surface String?
 
-  procedureCode String @map("procedure_code")
-  procedureName String @map("procedure_name")
+  procedureCode String  @map("procedure_code")
+  procedureName String  @map("procedure_name")
   description   String?
 
   status TreatmentItemStatus @default(PENDING)
@@ -1002,22 +1028,22 @@ model TreatmentPlanItem {
 }
 
 model Invoice {
-  id              String        @id @default(uuid())
-  invoiceNumber   String        @unique @map("invoice_number")
-  patientId       String        @map("patient_id")
-  providerId      String        @map("provider_id") // RENOMBRADO de dentistId
-  tenantId        String        @map("tenant_id")
-  treatmentPlanId String?       @map("treatment_plan_id")
+  id              String  @id @default(uuid())
+  invoiceNumber   String  @unique @map("invoice_number")
+  patientId       String  @map("patient_id")
+  providerId      String  @map("provider_id") // RENOMBRADO de dentistId
+  tenantId        String  @map("tenant_id")
+  treatmentPlanId String? @map("treatment_plan_id")
 
-  issueDate DateTime      @map("issue_date")
-  dueDate   DateTime      @map("due_date")
+  issueDate DateTime @map("issue_date")
+  dueDate   DateTime @map("due_date")
 
   status InvoiceStatus @default(DRAFT)
 
-  subtotal   Float
-  tax        Float @default(0)
-  discount   Float @default(0)
-  total      Float
+  subtotal Float
+  tax      Float @default(0)
+  discount Float @default(0)
+  total    Float
 
   amountPaid Float @default(0) @map("amount_paid")
   balance    Float @default(0)
@@ -1090,10 +1116,10 @@ model Payment {
 }
 
 model Document {
-  id         String       @id @default(uuid())
-  patientId  String       @map("patient_id")
-  providerId String       @map("provider_id") // RENOMBRADO de dentistId
-  tenantId   String       @map("tenant_id")
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  providerId String @map("provider_id") // RENOMBRADO de dentistId
+  tenantId   String @map("tenant_id")
 
   type        DocumentType
   title       String
@@ -1126,10 +1152,10 @@ model Document {
 // ==========================================
 
 model Odontogram {
-  id         String   @id @default(uuid())
-  patientId  String   @map("patient_id")
-  providerId String   @map("provider_id") // RENOMBRADO de dentistId
-  tenantId   String   @map("tenant_id")
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  providerId String @map("provider_id") // RENOMBRADO de dentistId
+  tenantId   String @map("tenant_id")
 
   date  DateTime @default(now())
   notes String?
@@ -1150,8 +1176,8 @@ model Odontogram {
 }
 
 model OdontogramTooth {
-  id           String          @id @default(uuid())
-  odontogramId String          @map("odontogram_id")
+  id           String @id @default(uuid())
+  odontogramId String @map("odontogram_id")
 
   toothNumber Int            @map("tooth_number")
   condition   ToothCondition
@@ -1212,9 +1238,9 @@ model MedicalService {
 // ==========================================
 
 model ProviderModule {
-  id         String  @id @default(uuid())
-  providerId String  @map("provider_id")
-  moduleKey  String  @map("module_key")
+  id         String @id @default(uuid())
+  providerId String @map("provider_id")
+  moduleKey  String @map("module_key")
 
   isActive Boolean @default(true) @map("is_active")
   config   Json?
@@ -1276,8 +1302,8 @@ model EmailConfiguration {
   fromName     String  @map("from_name")
   replyToEmail String? @map("reply_to_email")
 
-  isActive   Boolean   @default(true) @map("is_active")
-  isVerified Boolean   @default(false) @map("is_verified")
+  isActive   Boolean @default(true) @map("is_active")
+  isVerified Boolean @default(false) @map("is_verified")
 
   lastTestedAt DateTime? @map("last_tested_at")
   testResult   String?   @map("test_result")
@@ -1368,13 +1394,13 @@ model ChatSession {
 }
 
 model ChatMessage {
-  id        String            @id @default(uuid())
-  sessionId String            @map("session_id")
-  sender    ChatMessageSender
-  message   String            @db.Text
-  intent    String?
+  id         String            @id @default(uuid())
+  sessionId  String            @map("session_id")
+  sender     ChatMessageSender
+  message    String            @db.Text
+  intent     String?
   confidence Float?
-  metadata  Json?
+  metadata   Json?
 
   staffUserId String? @map("staff_user_id")
 
@@ -1406,8 +1432,8 @@ model CalendarConnection {
   calendarId   String? @map("calendar_id")
   calendarName String? @map("calendar_name")
 
-  syncEnabled   Boolean @default(true) @map("sync_enabled")
-  syncDirection String  @default("both") @map("sync_direction")
+  syncEnabled   Boolean   @default(true) @map("sync_enabled")
+  syncDirection String    @default("both") @map("sync_direction")
   lastSyncAt    DateTime? @map("last_sync_at")
   lastSyncError String?   @map("last_sync_error")
 
@@ -1422,8 +1448,8 @@ model CalendarConnection {
 }
 
 model CalendarSyncLog {
-  id           String  @id @default(uuid())
-  connectionId String  @map("connection_id")
+  id           String @id @default(uuid())
+  connectionId String @map("connection_id")
 
   action    String
   direction String
@@ -1463,9 +1489,9 @@ model ChatbotConfig {
   operatingHours Json? @map("operating_hours")
   pricingInfo    Json? @map("pricing_info")
 
-  aiModel       String @default("gpt-3.5-turbo") @map("ai_model")
-  aiTemperature Float  @default(0.7) @map("ai_temperature")
-  maxTokens     Int    @default(300) @map("max_tokens")
+  aiModel       String  @default("gpt-3.5-turbo") @map("ai_model")
+  aiTemperature Float   @default(0.7) @map("ai_temperature")
+  maxTokens     Int     @default(300) @map("max_tokens")
   systemPrompt  String? @map("system_prompt") @db.Text
 
   allowScheduling       Boolean @default(true) @map("allow_scheduling")
@@ -1474,7 +1500,7 @@ model ChatbotConfig {
   requireIdentification Boolean @default(true) @map("require_identification")
 
   autoResponseDelay    Int      @default(1000) @map("auto_response_delay")
-  humanHandoffKeywords String[] @map("human_handoff_keywords") @default(["humano", "persona", "agente", "recepcionista"])
+  humanHandoffKeywords String[] @default(["humano", "persona", "agente", "recepcionista"]) @map("human_handoff_keywords")
 
   maxMessagesPerHour Int @default(100) @map("max_messages_per_hour")
 
@@ -1487,17 +1513,466 @@ model ChatbotConfig {
   faqs Json? @map("faqs") // Array of { question: string, answer: string }
 
   // Escalation settings
-  escalationEmail    String?  @map("escalation_email")
-  escalationPhone    String?  @map("escalation_phone")
-  maxUnanswered      Int      @default(3) @map("max_unanswered") // Auto-escalate after N unanswered
+  escalationEmail String? @map("escalation_email")
+  escalationPhone String? @map("escalation_phone")
+  maxUnanswered   Int     @default(3) @map("max_unanswered") // Auto-escalate after N unanswered
 
   // Special instructions for AI
-  specialInstructions String? @map("special_instructions") @db.Text
-  cancellationPolicy  String? @map("cancellation_policy") @db.Text
+  specialInstructions String?  @map("special_instructions") @db.Text
+  cancellationPolicy  String?  @map("cancellation_policy") @db.Text
   paymentMethods      String[] @default([]) @map("payment_methods")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("chatbot_configs")
+}
+
+// ==========================================
+// Specialty Module: General Medicine
+// ==========================================
+
+model ClinicalNote {
+  id            String  @id @default(uuid())
+  patientId     String  @map("patient_id")
+  providerId    String  @map("provider_id")
+  tenantId      String  @map("tenant_id")
+  appointmentId String? @map("appointment_id")
+
+  noteType String @default("SOAP") @map("note_type")
+
+  subjective String? @db.Text
+  objective  String? @db.Text
+  assessment String? @db.Text
+  plan       String? @db.Text
+
+  vitalSigns Json? @map("vital_signs")
+  diagnoses  Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("clinical_notes")
+}
+
+model Prescription {
+  id             String  @id @default(uuid())
+  patientId      String  @map("patient_id")
+  providerId     String  @map("provider_id")
+  tenantId       String  @map("tenant_id")
+  clinicalNoteId String? @map("clinical_note_id")
+
+  medications Json
+  diagnosis   String?
+  notes       String? @db.Text
+
+  issuedAt  DateTime  @default(now()) @map("issued_at")
+  expiresAt DateTime? @map("expires_at")
+
+  pdfPath String? @map("pdf_path")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("prescriptions")
+}
+
+// ==========================================
+// Specialty Module: Psychology
+// ==========================================
+
+model TherapySession {
+  id            String  @id @default(uuid())
+  patientId     String  @map("patient_id")
+  providerId    String  @map("provider_id")
+  tenantId      String  @map("tenant_id")
+  appointmentId String? @map("appointment_id")
+
+  sessionNumber Int    @map("session_number")
+  sessionType   String @default("INDIVIDUAL") @map("session_type")
+  duration      Int    @default(50)
+
+  notes      String?  @db.Text
+  techniques String[] @default([])
+  homework   String?  @db.Text
+  progress   String?  @db.Text
+
+  moodRating Int?    @map("mood_rating")
+  riskLevel  String? @default("NONE") @map("risk_level")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("therapy_sessions")
+}
+
+model PsychologicalAssessment {
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  providerId String @map("provider_id")
+  tenantId   String @map("tenant_id")
+
+  assessmentType String  @map("assessment_type")
+  responses      Json
+  score          Int
+  interpretation String? @db.Text
+  severity       String?
+
+  administeredAt DateTime @default(now()) @map("administered_at")
+
+  @@index([patientId])
+  @@index([assessmentType])
+  @@index([tenantId])
+  @@map("psychological_assessments")
+}
+
+// ==========================================
+// Phase 6 - Specialty Module Models
+// ==========================================
+
+// --- Physiotherapy ---
+
+model ExercisePlan {
+  id          String    @id @default(uuid())
+  patientId   String    @map("patient_id")
+  providerId  String    @map("provider_id")
+  tenantId    String    @map("tenant_id")
+  title       String
+  description String?   @db.Text
+  exercises   Json // [{name, sets, reps, duration, instructions, videoUrl}]
+  frequency   String? // e.g. "3x/week"
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  status      String    @default("ACTIVE") // ACTIVE, COMPLETED, PAUSED
+  progress    Json? // tracking data
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("exercise_plans")
+}
+
+model FunctionalAssessment {
+  id              String   @id @default(uuid())
+  patientId       String   @map("patient_id")
+  providerId      String   @map("provider_id")
+  tenantId        String   @map("tenant_id")
+  assessmentType  String   @default("INITIAL") @map("assessment_type") // INITIAL, PROGRESS, DISCHARGE
+  rangeOfMotion   Json?    @map("range_of_motion") // [{joint, movement, degrees, side}]
+  painScale       Int?     @map("pain_scale") // 1-10
+  functionalScore Int?     @map("functional_score")
+  mobility        Json?
+  strength        Json?
+  balance         Json?
+  goals           Json? // [{goal, targetDate, achieved}]
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("functional_assessments")
+}
+
+// --- Dermatology ---
+
+model SkinLesion {
+  id                    String    @id @default(uuid())
+  patientId             String    @map("patient_id")
+  providerId            String    @map("provider_id")
+  tenantId              String    @map("tenant_id")
+  bodyLocation          String    @map("body_location")
+  locationDetails       String?   @map("location_details")
+  lesionType            String    @map("lesion_type") // MACULE, PAPULE, NODULE, VESICLE, PUSTULE, PLAQUE, PATCH, ULCER, OTHER
+  size                  Json? // {length, width, depth}
+  color                 String?
+  shape                 String?
+  borders               String?
+  texture               String?
+  symptoms              String[]  @default([])
+  diagnosis             String?
+  differentialDiagnosis String[]  @default([]) @map("differential_diagnosis")
+  biopsyRequired        Boolean   @default(false) @map("biopsy_required")
+  biopsyDate            DateTime? @map("biopsy_date")
+  biopsyResult          String?   @map("biopsy_result")
+  images                Json? // [{path, date, description}]
+  status                String    @default("ACTIVE") // ACTIVE, MONITORING, RESOLVED, REFERRED
+  followUpDate          DateTime? @map("follow_up_date")
+  notes                 String?   @db.Text
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("skin_lesions")
+}
+
+// --- Ophthalmology ---
+
+model EyeExam {
+  id                       String   @id @default(uuid())
+  patientId                String   @map("patient_id")
+  providerId               String   @map("provider_id")
+  tenantId                 String   @map("tenant_id")
+  examType                 String   @default("COMPREHENSIVE") @map("exam_type")
+  visualAcuityRight        String?  @map("visual_acuity_right")
+  visualAcuityLeft         String?  @map("visual_acuity_left")
+  intraocularPressureRight Float?   @map("intraocular_pressure_right")
+  intraocularPressureLeft  Float?   @map("intraocular_pressure_left")
+  pupilResponse            String?  @map("pupil_response")
+  anteriorSegment          Json?    @map("anterior_segment")
+  posteriorSegment         Json?    @map("posterior_segment")
+  fundoscopy               Json?
+  colorVision              String?  @map("color_vision")
+  peripheralVision         String?  @map("peripheral_vision")
+  diagnosis                String?
+  notes                    String?  @db.Text
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  patient           Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  lensPrescriptions LensPrescription[]
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("eye_exams")
+}
+
+model LensPrescription {
+  id               String    @id @default(uuid())
+  patientId        String    @map("patient_id")
+  providerId       String    @map("provider_id")
+  tenantId         String    @map("tenant_id")
+  eyeExamId        String?   @map("eye_exam_id")
+  rightSphere      Float?    @map("right_sphere")
+  rightCylinder    Float?    @map("right_cylinder")
+  rightAxis        Int?      @map("right_axis")
+  rightAdd         Float?    @map("right_add")
+  rightPd          Float?    @map("right_pd")
+  leftSphere       Float?    @map("left_sphere")
+  leftCylinder     Float?    @map("left_cylinder")
+  leftAxis         Int?      @map("left_axis")
+  leftAdd          Float?    @map("left_add")
+  leftPd           Float?    @map("left_pd")
+  prescriptionType String    @default("GLASSES") @map("prescription_type") // GLASSES, CONTACT_LENSES
+  material         String?
+  coatings         String[]  @default([])
+  expiresAt        DateTime? @map("expires_at")
+  notes            String?   @db.Text
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  patient Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  eyeExam EyeExam? @relation(fields: [eyeExamId], references: [id])
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@index([eyeExamId])
+  @@map("lens_prescriptions")
+}
+
+// --- Cardiology ---
+
+model CardiacAssessment {
+  id                     String   @id @default(uuid())
+  patientId              String   @map("patient_id")
+  providerId             String   @map("provider_id")
+  tenantId               String   @map("tenant_id")
+  assessmentType         String   @default("INITIAL") @map("assessment_type")
+  bloodPressureSystolic  Int?     @map("bp_systolic")
+  bloodPressureDiastolic Int?     @map("bp_diastolic")
+  heartRate              Int?     @map("heart_rate")
+  rhythm                 String? // REGULAR, IRREGULAR, ARRHYTHMIA
+  ecgFindings            String?  @map("ecg_findings") @db.Text
+  echoFindings           Json?    @map("echo_findings")
+  lipidPanel             Json?    @map("lipid_panel")
+  riskFactors            String[] @default([]) @map("risk_factors")
+  riskScore              Float?   @map("risk_score")
+  medications            Json?
+  diagnosis              String?
+  plan                   String?  @db.Text
+  notes                  String?  @db.Text
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("cardiac_assessments")
+}
+
+// --- Pediatrics ---
+
+model GrowthRecord {
+  id                String   @id @default(uuid())
+  patientId         String   @map("patient_id")
+  providerId        String   @map("provider_id")
+  tenantId          String   @map("tenant_id")
+  measurementDate   DateTime @map("measurement_date")
+  ageMonths         Int      @map("age_months")
+  weight            Float?
+  height            Float?
+  headCircumference Float?   @map("head_circumference")
+  bmi               Float?
+  weightPercentile  Float?   @map("weight_percentile")
+  heightPercentile  Float?   @map("height_percentile")
+  headPercentile    Float?   @map("head_percentile")
+  bmiPercentile     Float?   @map("bmi_percentile")
+  notes             String?  @db.Text
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("growth_records")
+}
+
+model VaccinationRecord {
+  id               String    @id @default(uuid())
+  patientId        String    @map("patient_id")
+  providerId       String    @map("provider_id")
+  tenantId         String    @map("tenant_id")
+  vaccineName      String    @map("vaccine_name")
+  vaccineType      String?   @map("vaccine_type")
+  doseNumber       Int       @map("dose_number")
+  administeredDate DateTime  @map("administered_date")
+  nextDoseDate     DateTime? @map("next_dose_date")
+  batchNumber      String?   @map("batch_number")
+  site             String?
+  route            String?
+  manufacturer     String?
+  adverseReaction  String?   @map("adverse_reaction")
+  notes            String?   @db.Text
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("vaccination_records")
+}
+
+// --- Nutrition ---
+
+model NutritionPlan {
+  id            String    @id @default(uuid())
+  patientId     String    @map("patient_id")
+  providerId    String    @map("provider_id")
+  tenantId      String    @map("tenant_id")
+  title         String
+  objective     String?
+  dailyCalories Int?      @map("daily_calories")
+  macros        Json?
+  meals         Json?
+  restrictions  String[]  @default([])
+  supplements   String[]  @default([])
+  startDate     DateTime  @map("start_date")
+  endDate       DateTime? @map("end_date")
+  status        String    @default("ACTIVE")
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("nutrition_plans")
+}
+
+model BodyMeasurement {
+  id                 String   @id @default(uuid())
+  patientId          String   @map("patient_id")
+  providerId         String   @map("provider_id")
+  tenantId           String   @map("tenant_id")
+  measurementDate    DateTime @map("measurement_date")
+  weight             Float?
+  height             Float?
+  bmi                Float?
+  bodyFatPercentage  Float?   @map("body_fat_percentage")
+  muscleMass         Float?   @map("muscle_mass")
+  waistCircumference Float?   @map("waist_circumference")
+  hipCircumference   Float?   @map("hip_circumference")
+  chestCircumference Float?   @map("chest_circumference")
+  armCircumference   Float?   @map("arm_circumference")
+  thighCircumference Float?   @map("thigh_circumference")
+  notes              String?  @db.Text
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("body_measurements")
+}
+
+// --- Gynecology ---
+
+model GynecologicalExam {
+  id                   String    @id @default(uuid())
+  patientId            String    @map("patient_id")
+  providerId           String    @map("provider_id")
+  tenantId             String    @map("tenant_id")
+  examType             String    @default("ROUTINE") @map("exam_type")
+  lastMenstrualPeriod  DateTime? @map("last_menstrual_period")
+  menstrualCycleLength Int?      @map("menstrual_cycle_length")
+  menstrualRegularity  String?   @map("menstrual_regularity")
+  contraceptiveMethod  String?   @map("contraceptive_method")
+  pregnancyHistory     Json?     @map("pregnancy_history")
+  currentPregnancy     Json?     @map("current_pregnancy")
+  examFindings         Json?     @map("exam_findings")
+  papSmearResult       String?   @map("pap_smear_result")
+  ultrasoundFindings   Json?     @map("ultrasound_findings")
+  labResults           Json?     @map("lab_results")
+  diagnosis            String?
+  plan                 String?   @db.Text
+  nextAppointmentDate  DateTime? @map("next_appointment_date")
+  notes                String?   @db.Text
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@map("gynecological_exams")
 }
