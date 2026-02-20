@@ -66,14 +66,14 @@ export class MessageRouterService {
     const { channel, senderId, tenantId, message } = incoming;
 
     // 1. Retrieve (or create) the session
-    const session = this.sessionService.getOrCreateSession(
+    const session = await this.sessionService.getOrCreateSession(
       channel,
       senderId,
       tenantId,
     );
 
     // Log the user message
-    this.sessionService.addMessage(session.id, 'user', message);
+    await this.sessionService.addMessage(session.id, 'user', message);
 
     // 2. If the session is in human-handoff mode, skip the AI entirely
     if (session.isHumanHandoff) {
@@ -100,11 +100,11 @@ export class MessageRouterService {
     const normalised = message.toLowerCase().trim();
 
     if (handoffKeywords.some((kw: string) => normalised.includes(kw))) {
-      this.initiateHumanHandoff(session.id);
+      await this.initiateHumanHandoff(session.id);
 
       const handoffText =
         'Entiendo, te transferire con un miembro de nuestro equipo. En un momento te atendera alguien.';
-      this.sessionService.addMessage(session.id, 'assistant', handoffText);
+      await this.sessionService.addMessage(session.id, 'assistant', handoffText);
 
       return this.buildOutgoing(incoming, handoffText);
     }
@@ -114,11 +114,11 @@ export class MessageRouterService {
       normalised === 'volver_asistente' ||
       normalised === 'volver al asistente'
     ) {
-      this.endHumanHandoff(session.id);
+      await this.endHumanHandoff(session.id);
 
       const returnText =
         'Has vuelto al asistente virtual. En que puedo ayudarte?';
-      this.sessionService.addMessage(session.id, 'assistant', returnText);
+      await this.sessionService.addMessage(session.id, 'assistant', returnText);
 
       return this.buildOutgoing(incoming, returnText);
     }
@@ -132,7 +132,7 @@ export class MessageRouterService {
     );
 
     // Update session with intent and any patient identification
-    this.sessionService.updateSession(session.id, {
+    await this.sessionService.updateSession(session.id, {
       lastIntent: agentResponse.intent,
     });
 
@@ -143,7 +143,7 @@ export class MessageRouterService {
           action.function === 'identify_patient' &&
           action.result?.found
         ) {
-          this.sessionService.updateSession(session.id, {
+          await this.sessionService.updateSession(session.id, {
             patientId: action.result.patientId,
             patientName: action.result.patientName,
           });
@@ -152,7 +152,7 @@ export class MessageRouterService {
     }
 
     // 5. Log the assistant response
-    this.sessionService.addMessage(session.id, 'assistant', agentResponse.text);
+    await this.sessionService.addMessage(session.id, 'assistant', agentResponse.text);
 
     // 6. Build and return the outgoing message
     const outgoingActions = this.buildQuickReplies(agentResponse.intent);
@@ -173,12 +173,12 @@ export class MessageRouterService {
    * Mark a session for human handling.  Messages will be forwarded to staff
    * instead of the AI agent.
    */
-  initiateHumanHandoff(sessionId: string, staffId?: string): void {
-    this.sessionService.updateSession(sessionId, {
+  async initiateHumanHandoff(sessionId: string, staffId?: string): Promise<void> {
+    await this.sessionService.updateSession(sessionId, {
       isHumanHandoff: true,
       handoffStaffId: staffId,
     });
-    this.sessionService.addMessage(
+    await this.sessionService.addMessage(
       sessionId,
       'system',
       'Human handoff initiated.',
@@ -189,12 +189,12 @@ export class MessageRouterService {
   /**
    * Return a session to AI mode after a human handoff period.
    */
-  endHumanHandoff(sessionId: string): void {
-    this.sessionService.updateSession(sessionId, {
+  async endHumanHandoff(sessionId: string): Promise<void> {
+    await this.sessionService.updateSession(sessionId, {
       isHumanHandoff: false,
       handoffStaffId: undefined,
     });
-    this.sessionService.addMessage(
+    await this.sessionService.addMessage(
       sessionId,
       'system',
       'Human handoff ended -- returning to AI.',
