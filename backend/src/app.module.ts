@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -33,12 +34,27 @@ import { ClinicAdminModule } from './clinic-admin/clinic-admin.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
 import { StaffManagementModule } from './staff-management/staff-management.module';
 import { SharedDocumentsModule } from './shared-documents/shared-documents.module';
+import { ModulesModule } from './modules/modules.module';
+import { GeneralMedicineModule } from './modules/general-medicine/general-medicine.module';
+import { PsychologyModule } from './modules/psychology/psychology.module';
+import { PhysiotherapyModule } from './modules/physiotherapy/physiotherapy.module';
+import { DermatologyModule } from './modules/dermatology/dermatology.module';
+import { OphthalmologyModule } from './modules/ophthalmology/ophthalmology.module';
+import { CardiologyModule } from './modules/cardiology/cardiology.module';
+import { PediatricsModule } from './modules/pediatrics/pediatrics.module';
+import { NutritionModule } from './modules/nutrition/nutrition.module';
+import { GynecologyModule } from './modules/gynecology/gynecology.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot([{
+      name: 'default',
+      ttl: 60_000,
+      limit: 100,
+    }]),
     BullModule.forRoot({
       redis: {
         host: process.env.REDIS_HOST || 'localhost',
@@ -77,6 +93,16 @@ import { SharedDocumentsModule } from './shared-documents/shared-documents.modul
     SchedulingModule,
     StaffManagementModule,
     SharedDocumentsModule,
+    ModulesModule,
+    GeneralMedicineModule,
+    PsychologyModule,
+    PhysiotherapyModule,
+    DermatologyModule,
+    OphthalmologyModule,
+    CardiologyModule,
+    PediatricsModule,
+    NutritionModule,
+    GynecologyModule,
   ],
 })
 export class AppModule { }

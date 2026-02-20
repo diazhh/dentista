@@ -5,39 +5,27 @@ import {
   Logger,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { MessageRouterService, ChatChannel } from './message-router.service';
-
-interface SendMessageDto {
-  tenantId: string;
-  message: string;
-  sessionId?: string;
-}
-
-interface EndSessionDto {
-  sessionId: string;
-}
+import { SendMessageDto, EndSessionDto } from './dto/chat-message.dto';
 
 /**
  * Public REST controller for the web chat widget.
  * No JWT auth required - the widget is embedded in external sites.
- * Rate limiting is handled by the MessageRouter/ChatbotConfig.
+ * Rate-limited to prevent abuse on public endpoints.
  */
 @Controller('chat')
+@UseGuards(ThrottlerGuard)
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
 
   constructor(private readonly messageRouter: MessageRouterService) {}
 
   @Post('message')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   async sendMessage(@Body() dto: SendMessageDto) {
-    if (!dto.tenantId || !dto.message) {
-      throw new HttpException(
-        'tenantId and message are required',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     try {
       const response = await this.messageRouter.processMessage({
         channel: 'webchat' as ChatChannel,
@@ -62,23 +50,8 @@ export class ChatController {
   }
 
   @Post('end-session')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async endSession(@Body() dto: EndSessionDto) {
-    if (!dto.sessionId) {
-      throw new HttpException(
-        'sessionId is required',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    try {
-      // The session service handles cleanup
-      return { success: true, message: 'Session ended' };
-    } catch (error) {
-      this.logger.error(`End session error: ${error.message}`);
-      throw new HttpException(
-        'Failed to end session',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return { success: true, message: 'Session ended' };
   }
 }

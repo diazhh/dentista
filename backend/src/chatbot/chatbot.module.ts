@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ChatbotService } from './chatbot.service';
 import { ChatbotConfigService } from './chatbot-config.service';
 import { ChatbotConfigController } from './chatbot-config.controller';
+import { ChatController } from './chat.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AIAgentEngine } from './ai-agent.engine';
 import { MessageRouterService } from './message-router.service';
@@ -12,7 +13,7 @@ import { ChatGateway } from './chat.gateway';
 
 @Module({
   imports: [PrismaModule, ConfigModule],
-  controllers: [ChatbotConfigController],
+  controllers: [ChatbotConfigController, ChatController],
   providers: [
     ChatbotService,
     ChatbotConfigService,
