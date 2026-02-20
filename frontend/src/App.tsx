@@ -69,6 +69,7 @@ import PatientRegisterPage from './pages/patient/PatientRegisterPage';
 
 // Lazy loaded pages
 const InventoryPage = lazy(() => import('./pages/InventoryPage'));
+const InsurancePage = lazy(() => import('./pages/InsurancePage'));
 
 // Clinic Admin Pages (lazy loaded)
 const ClinicDashboard = lazy(() => import('./pages/clinic-admin/ClinicDashboard'));
@@ -483,6 +484,20 @@ function AppContent() {
               <TenantLayout>
                 <Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}>
                   <InventoryPage />
+                </Suspense>
+              </TenantLayout>
+            </TenantRoute>
+          }
+        />
+
+        {/* Insurance */}
+        <Route
+          path="/insurance"
+          element={
+            <TenantRoute>
+              <TenantLayout>
+                <Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}>
+                  <InsurancePage />
                 </Suspense>
               </TenantLayout>
             </TenantRoute>

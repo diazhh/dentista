@@ -15,6 +15,7 @@ import {
   Building2,
   UserPlus,
   Package,
+  Shield,
 } from 'lucide-react';
 
 interface TenantLayoutProps {
@@ -88,6 +89,12 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
       icon: Package,
       path: '/inventory',
       description: 'Insumos y medicamentos',
+    },
+    {
+      name: 'Seguros',
+      icon: Shield,
+      path: '/insurance',
+      description: 'Aseguradoras y polizas',
     },
     {
       name: 'Reportes',
