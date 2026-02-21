@@ -6,9 +6,10 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
-import { GoogleStrategy } from './strategies/google.strategy';
-import { AppleStrategy } from './strategies/apple.strategy';
-import { MicrosoftStrategy } from './strategies/microsoft.strategy';
+// OAuth strategies disabled on VPS (no credentials configured)
+// import { GoogleStrategy } from './strategies/google.strategy';
+// import { AppleStrategy } from './strategies/apple.strategy';
+// import { MicrosoftStrategy } from './strategies/microsoft.strategy';
 import { UsersModule } from '../users/users.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EmailModule } from '../email/email.module';
@@ -32,9 +33,9 @@ import { EmailModule } from '../email/email.module';
     AuthService,
     JwtStrategy,
     LocalStrategy,
-    GoogleStrategy,
-    AppleStrategy,
-    MicrosoftStrategy,
+    // GoogleStrategy,    // disabled: no OAuth credentials on VPS
+    // AppleStrategy,     // disabled: no OAuth credentials on VPS
+    // MicrosoftStrategy, // disabled: no OAuth credentials on VPS
   ],
   exports: [AuthService],
 })
