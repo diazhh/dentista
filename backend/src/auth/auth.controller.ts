@@ -140,6 +140,6 @@ export class AuthController {
   async switchTenant(@Request() req, @Body('tenantId') tenantId: string): Promise<LoginResponseDto> {
     const userAgent = req.headers['user-agent'];
     const ipAddress = req.ip;
-    return this.authService.switchTenant(req.user.id, tenantId, userAgent, ipAddress);
+    return this.authService.switchTenant(req.user.userId, tenantId, userAgent, ipAddress);
   }
 }
