@@ -165,28 +165,53 @@ export class ChatSessionService implements OnModuleDestroy {
   }
 
   private async saveSession(session: ChatSession): Promise<void> {
-    const json = JSON.stringify(session);
-    await this.redis.set(
-      `${SESSION_PREFIX}${session.id}`,
-      json,
-      'EX',
-      SESSION_TTL_SECONDS,
-    );
+    const key = `${SESSION_PREFIX}${session.id}`;
+    const hash: Record<string, string> = {
+      id: session.id,
+      tenantId: session.tenantId,
+      channel: session.channel,
+      senderId: session.senderId,
+      isHumanHandoff: String(session.isHumanHandoff),
+      conversationHistory: JSON.stringify(session.conversationHistory),
+      createdAt: session.createdAt.toISOString(),
+      lastActivityAt: session.lastActivityAt.toISOString(),
+    };
+
+    if (session.patientId) hash.patientId = session.patientId;
+    if (session.patientName) hash.patientName = session.patientName;
+    if (session.lastIntent) hash.lastIntent = session.lastIntent;
+    if (session.awaitingInput) hash.awaitingInput = session.awaitingInput;
+    if (session.handoffStaffId) hash.handoffStaffId = session.handoffStaffId;
+    if (session.metadata) hash.metadata = JSON.stringify(session.metadata);
+
+    const pipeline = this.redis.pipeline();
+    pipeline.del(key);
+    pipeline.hset(key, hash);
+    pipeline.expire(key, SESSION_TTL_SECONDS);
+    await pipeline.exec();
   }
 
   private async loadSession(sessionId: string): Promise<ChatSession | undefined> {
-    const json = await this.redis.get(`${SESSION_PREFIX}${sessionId}`);
-    if (!json) return undefined;
+    const data = await this.redis.hgetall(`${SESSION_PREFIX}${sessionId}`);
+    if (!data || !data.id) return undefined;
 
-    const data = JSON.parse(json);
-    data.createdAt = new Date(data.createdAt);
-    data.lastActivityAt = new Date(data.lastActivityAt);
-    if (data.conversationHistory) {
-      data.conversationHistory = data.conversationHistory.map((m: any) => ({
-        ...m,
-        timestamp: new Date(m.timestamp),
-      }));
-    }
-    return data as ChatSession;
+    return {
+      id: data.id,
+      tenantId: data.tenantId,
+      channel: data.channel as ChatChannel,
+      senderId: data.senderId,
+      patientId: data.patientId || undefined,
+      patientName: data.patientName || undefined,
+      lastIntent: data.lastIntent || undefined,
+      awaitingInput: data.awaitingInput || undefined,
+      isHumanHandoff: data.isHumanHandoff === 'true',
+      handoffStaffId: data.handoffStaffId || undefined,
+      conversationHistory: JSON.parse(data.conversationHistory || '[]').map(
+        (m: any) => ({ ...m, timestamp: new Date(m.timestamp) }),
+      ),
+      createdAt: new Date(data.createdAt),
+      lastActivityAt: new Date(data.lastActivityAt),
+      metadata: data.metadata ? JSON.parse(data.metadata) : undefined,
+    };
   }
 }
