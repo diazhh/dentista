@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { FileText, DollarSign, Calendar, AlertCircle } from 'lucide-react';
+import { FileText, DollarSign, Calendar, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
 
 interface Invoice {
@@ -29,42 +29,78 @@ interface Props {
   patientId: string;
 }
 
+const PAGE_SIZE = 10;
+
 export default function PatientInvoicesTab({ patientId }: Props) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [summary, setSummary] = useState<InvoiceSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     fetchInvoices();
+  }, [patientId, page]);
+
+  // Fetch summary once (all invoices stats)
+  useEffect(() => {
+    fetchSummary();
   }, [patientId]);
 
-  const fetchInvoices = async () => {
+  const fetchSummary = async () => {
     try {
-      const response = await api.get('/invoices', {
+      const response = await api.get('/invoices/stats', {
         params: { patientId },
       });
       const data = response.data;
-      setInvoices(data);
-
-      // Calculate summary
-      const totalInvoiced = data.reduce((sum: number, inv: Invoice) => sum + inv.total, 0);
-      const totalPaid = data.reduce((sum: number, inv: Invoice) => sum + (inv.total - inv.balance), 0);
-      const pendingBalance = data.reduce((sum: number, inv: Invoice) => sum + inv.balance, 0);
-      const overdueInvoices = data.filter((inv: Invoice) =>
-        inv.status === 'OVERDUE' || (inv.status === 'SENT' && new Date(inv.dueDate) < new Date())
-      ).length;
-
       setSummary({
-        totalInvoiced,
-        totalPaid,
-        pendingBalance,
-        overdueInvoices,
+        totalInvoiced: data.totalInvoiced || 0,
+        totalPaid: data.totalPaid || 0,
+        pendingBalance: data.totalPending || 0,
+        overdueInvoices: data.overdueCount || 0,
       });
+    } catch {
+      // Stats endpoint may not support patientId filter, calculate from first page
+    }
+  };
+
+  const fetchInvoices = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/invoices', {
+        params: { patientId, page, pageSize: PAGE_SIZE },
+      });
+      const result = response.data;
+      if (result.data) {
+        setInvoices(result.data);
+        setTotalPages(result.totalPages);
+        setTotal(result.total);
+        // If no summary yet, calculate from this data
+        if (!summary) {
+          calculateSummaryFromData(result.data);
+        }
+      } else {
+        setInvoices(result);
+        setTotalPages(1);
+        setTotal(result.length);
+        calculateSummaryFromData(result);
+      }
     } catch (error) {
       console.error('Error fetching invoices:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateSummaryFromData = (data: Invoice[]) => {
+    const totalInvoiced = data.reduce((sum: number, inv: Invoice) => sum + inv.total, 0);
+    const totalPaid = data.reduce((sum: number, inv: Invoice) => sum + (inv.total - inv.balance), 0);
+    const pendingBalance = data.reduce((sum: number, inv: Invoice) => sum + inv.balance, 0);
+    const overdueInvoices = data.filter((inv: Invoice) =>
+      inv.status === 'OVERDUE' || (inv.status === 'SENT' && new Date(inv.dueDate) < new Date())
+    ).length;
+    setSummary({ totalInvoiced, totalPaid, pendingBalance, overdueInvoices });
   };
 
   const getStatusColor = (status: string) => {
@@ -108,7 +144,7 @@ export default function PatientInvoicesTab({ patientId }: Props) {
     return invoice.status === 'SENT' && new Date(invoice.dueDate) < new Date();
   };
 
-  if (loading) {
+  if (loading && invoices.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -120,7 +156,12 @@ export default function PatientInvoicesTab({ patientId }: Props) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Facturas</h2>
-        <Button>Nueva Factura</Button>
+        <div className="flex items-center gap-2">
+          {total > 0 && (
+            <span className="text-sm text-muted-foreground">{total} facturas</span>
+          )}
+          <Button>Nueva Factura</Button>
+        </div>
       </div>
 
       {/* Financial Summary */}
@@ -182,76 +223,102 @@ export default function PatientInvoicesTab({ patientId }: Props) {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {invoices.map((invoice) => (
-            <Card key={invoice.id} className={isOverdue(invoice) ? 'border-red-300' : ''}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg">
-                        Factura #{invoice.invoiceNumber}
-                      </CardTitle>
-                      <Badge className={getStatusColor(invoice.status)}>
-                        {getStatusLabel(invoice.status)}
-                      </Badge>
-                      {isOverdue(invoice) && (
-                        <Badge className="bg-red-100 text-red-800">
-                          <AlertCircle className="h-3 w-3 mr-1" />
-                          Vencida
+        <>
+          <div className="grid gap-4">
+            {invoices.map((invoice) => (
+              <Card key={invoice.id} className={isOverdue(invoice) ? 'border-red-300' : ''}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg">
+                          Factura #{invoice.invoiceNumber}
+                        </CardTitle>
+                        <Badge className={getStatusColor(invoice.status)}>
+                          {getStatusLabel(invoice.status)}
                         </Badge>
+                        {isOverdue(invoice) && (
+                          <Badge className="bg-red-100 text-red-800">
+                            <AlertCircle className="h-3 w-3 mr-1" />
+                            Vencida
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                        <div className="flex items-center">
+                          <Calendar className="mr-1 h-4 w-4" />
+                          Emitida: {formatDate(invoice.issueDate)}
+                        </div>
+                        <div className="flex items-center">
+                          <Calendar className="mr-1 h-4 w-4" />
+                          Vence: {formatDate(invoice.dueDate)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold">${invoice.total.toFixed(2)}</p>
+                      {invoice.balance > 0 && (
+                        <p className="text-sm text-orange-600">
+                          Pendiente: ${invoice.balance.toFixed(2)}
+                        </p>
                       )}
                     </div>
-                    <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <Calendar className="mr-1 h-4 w-4" />
-                        Emitida: {formatDate(invoice.issueDate)}
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar className="mr-1 h-4 w-4" />
-                        Vence: {formatDate(invoice.dueDate)}
-                      </div>
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-500">Subtotal</p>
+                      <p className="font-medium">${invoice.subtotal.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Impuestos</p>
+                      <p className="font-medium">${invoice.tax.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Items</p>
+                      <p className="font-medium">{invoice.items?.length || 0} procedimientos</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold">${invoice.total.toFixed(2)}</p>
+
+                  <div className="flex gap-2 mt-4">
+                    <Button variant="outline" className="flex-1">
+                      Ver Detalles
+                    </Button>
                     {invoice.balance > 0 && (
-                      <p className="text-sm text-orange-600">
-                        Pendiente: ${invoice.balance.toFixed(2)}
-                      </p>
+                      <Button className="flex-1">Registrar Pago</Button>
                     )}
                   </div>
-                </div>
-              </CardHeader>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500">Subtotal</p>
-                    <p className="font-medium">${invoice.subtotal.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Impuestos</p>
-                    <p className="font-medium">${invoice.tax.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Items</p>
-                    <p className="font-medium">{invoice.items?.length || 0} procedimientos</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" className="flex-1">
-                    Ver Detalles
-                  </Button>
-                  {invoice.balance > 0 && (
-                    <Button className="flex-1">Registrar Pago</Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page <= 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Página {page} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -12,16 +12,32 @@ export class EmailConfigService {
     private auditLogService: AuditLogService,
   ) {}
 
+  private deriveKey(): Buffer {
+    return crypto.scryptSync(this.encryptionKey, 'medicloud-salt', 32);
+  }
+
   private encrypt(text: string): string {
-    const cipher = crypto.createCipher('aes-256-cbc', this.encryptionKey);
+    const key = this.deriveKey();
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    return encrypted;
+    return iv.toString('hex') + ':' + encrypted;
   }
 
   private decrypt(text: string): string {
-    const decipher = crypto.createDecipher('aes-256-cbc', this.encryptionKey);
-    let decrypted = decipher.update(text, 'hex', 'utf8');
+    const key = this.deriveKey();
+    const [ivHex, encrypted] = text.split(':');
+    if (!ivHex || !encrypted) {
+      // Fallback for legacy data encrypted without IV
+      const legacyDecipher = crypto.createDecipher('aes-256-cbc', this.encryptionKey);
+      let decrypted = legacyDecipher.update(text, 'hex', 'utf8');
+      decrypted += legacyDecipher.final('utf8');
+      return decrypted;
+    }
+    const iv = Buffer.from(ivHex, 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
   }

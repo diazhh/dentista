@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { FileText, Download, Eye, Calendar, Tag } from 'lucide-react';
+import { FileText, Download, Eye, Calendar, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
 
 interface Document {
@@ -20,21 +20,42 @@ interface Props {
   patientId: string;
 }
 
+const PAGE_SIZE = 10;
+
 export default function PatientDocumentsTab({ patientId }: Props) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedType]);
 
   useEffect(() => {
     fetchDocuments();
-  }, [patientId]);
+  }, [patientId, page, selectedType]);
 
   const fetchDocuments = async () => {
     try {
-      const response = await api.get('/documents', {
-        params: { patientId },
-      });
-      setDocuments(response.data);
+      setLoading(true);
+      const params: Record<string, any> = { patientId, page, pageSize: PAGE_SIZE };
+      if (selectedType !== 'all') {
+        params.type = selectedType;
+      }
+      const response = await api.get('/documents', { params });
+      const result = response.data;
+      if (result.data) {
+        setDocuments(result.data);
+        setTotalPages(result.totalPages);
+        setTotal(result.total);
+      } else {
+        setDocuments(result);
+        setTotalPages(1);
+        setTotal(result.length);
+      }
     } catch (error) {
       console.error('Error fetching documents:', error);
     } finally {
@@ -106,18 +127,7 @@ export default function PatientDocumentsTab({ patientId }: Props) {
     { value: 'OTHER', label: 'Otros' },
   ];
 
-  const filteredDocuments = selectedType === 'all' 
-    ? documents 
-    : documents.filter(doc => doc.documentType === selectedType);
-
-  const documentsByType = documentTypes.reduce((acc, type) => {
-    if (type.value !== 'all') {
-      acc[type.value] = documents.filter(doc => doc.documentType === type.value).length;
-    }
-    return acc;
-  }, {} as Record<string, number>);
-
-  if (loading) {
+  if (loading && documents.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -129,112 +139,133 @@ export default function PatientDocumentsTab({ patientId }: Props) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Documentos</h2>
-        <Button>Subir Documento</Button>
+        <div className="flex items-center gap-2">
+          {total > 0 && (
+            <span className="text-sm text-muted-foreground">{total} documentos</span>
+          )}
+          <Button>Subir Documento</Button>
+        </div>
       </div>
 
-      {/* Document Categories Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
+      {/* Document Type Filter */}
+      <div className="flex flex-wrap gap-2">
         {documentTypes.map((type) => (
           <button
             key={type.value}
             onClick={() => setSelectedType(type.value)}
-            className={`p-3 rounded-lg border-2 transition-all ${
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
               selectedType === type.value
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <div className="text-center">
-              <p className="text-xs font-medium text-gray-600">{type.label}</p>
-              {type.value !== 'all' && (
-                <p className="text-lg font-bold text-gray-900">
-                  {documentsByType[type.value] || 0}
-                </p>
-              )}
-              {type.value === 'all' && (
-                <p className="text-lg font-bold text-gray-900">{documents.length}</p>
-              )}
-            </div>
+            {type.label}
           </button>
         ))}
       </div>
 
       {/* Documents List */}
-      {filteredDocuments.length === 0 ? (
+      {documents.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center text-gray-500">
-            {selectedType === 'all' 
+            {selectedType === 'all'
               ? 'No hay documentos registrados'
               : `No hay documentos de tipo ${getTypeLabel(selectedType)}`
             }
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {filteredDocuments.map((doc) => (
-            <Card key={doc.id}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex items-start gap-3 flex-1">
-                    <div className="p-2 bg-gray-100 rounded">
-                      <FileText className="h-6 w-6 text-gray-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg">{doc.fileName}</CardTitle>
-                        <Badge className={getTypeColor(doc.documentType)}>
-                          {getTypeLabel(doc.documentType)}
-                        </Badge>
+        <>
+          <div className="grid gap-4">
+            {documents.map((doc) => (
+              <Card key={doc.id}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="p-2 bg-gray-100 rounded">
+                        <FileText className="h-6 w-6 text-gray-600" />
                       </div>
-                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <Calendar className="mr-1 h-4 w-4" />
-                          {formatDate(doc.uploadedAt)}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-lg">{doc.fileName}</CardTitle>
+                          <Badge className={getTypeColor(doc.documentType)}>
+                            {getTypeLabel(doc.documentType)}
+                          </Badge>
                         </div>
-                        <div className="flex items-center">
-                          <FileText className="mr-1 h-4 w-4" />
-                          {doc.fileType.toUpperCase()}
-                        </div>
-                        <div className="flex items-center">
-                          <Download className="mr-1 h-4 w-4" />
-                          {formatFileSize(doc.fileSize)}
-                        </div>
-                      </div>
-                      {doc.tags && doc.tags.length > 0 && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <Tag className="h-4 w-4 text-gray-400" />
-                          <div className="flex gap-1 flex-wrap">
-                            {doc.tags.map((tag, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-                              >
-                                {tag}
-                              </span>
-                            ))}
+                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <Calendar className="mr-1 h-4 w-4" />
+                            {formatDate(doc.uploadedAt)}
+                          </div>
+                          <div className="flex items-center">
+                            <FileText className="mr-1 h-4 w-4" />
+                            {doc.fileType?.toUpperCase()}
+                          </div>
+                          <div className="flex items-center">
+                            <Download className="mr-1 h-4 w-4" />
+                            {formatFileSize(doc.fileSize)}
                           </div>
                         </div>
-                      )}
+                        {doc.tags && doc.tags.length > 0 && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <Tag className="h-4 w-4 text-gray-400" />
+                            <div className="flex gap-1 flex-wrap">
+                              {doc.tags.map((tag, index) => (
+                                <span
+                                  key={index}
+                                  className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              <CardContent>
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">
-                    <Eye className="mr-2 h-4 w-4" />
-                    Ver
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    <Download className="mr-2 h-4 w-4" />
-                    Descargar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <CardContent>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1">
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver
+                    </Button>
+                    <Button variant="outline" className="flex-1">
+                      <Download className="mr-2 h-4 w-4" />
+                      Descargar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page <= 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Página {page} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

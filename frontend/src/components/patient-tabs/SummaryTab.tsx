@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -52,6 +53,8 @@ interface Props {
 }
 
 export default function PatientSummaryTab({ patientId }: Props) {
+  const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -270,19 +273,19 @@ export default function PatientSummaryTab({ patientId }: Props) {
               <CardTitle>Acciones Rápidas</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-3">
-              <Button className="w-full">
+              <Button className="w-full" onClick={() => navigate(`/appointments/new?patientId=${patientId}`)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nueva Cita
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => setSearchParams({ tab: 'invoices' }, { replace: true })}>
                 <DollarSign className="mr-2 h-4 w-4" />
                 Registrar Pago
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => setSearchParams({ tab: 'documents' }, { replace: true })}>
                 <FileText className="mr-2 h-4 w-4" />
                 Subir Documento
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => setSearchParams({ tab: 'odontograms' }, { replace: true })}>
                 <Activity className="mr-2 h-4 w-4" />
                 Nuevo Odontograma
               </Button>

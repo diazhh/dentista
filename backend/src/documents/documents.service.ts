@@ -67,6 +67,8 @@ export class DocumentsService {
     tenantId: string,
     patientId?: string,
     type?: string,
+    page?: number,
+    pageSize?: number,
   ) {
     const where: any = { tenantId };
 
@@ -78,17 +80,33 @@ export class DocumentsService {
       where.type = type;
     }
 
-    return this.prisma.document.findMany({
-      where,
-      include: {
-        patient: {
-          select: {
-            firstName: true,
-            lastName: true,
-            documentId: true,
-          },
+    const includeFields = {
+      patient: {
+        select: {
+          firstName: true,
+          lastName: true,
+          documentId: true,
         },
       },
+    };
+
+    if (page && pageSize) {
+      const [data, total] = await Promise.all([
+        this.prisma.document.findMany({
+          where,
+          include: includeFields,
+          orderBy: { createdAt: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        this.prisma.document.count({ where }),
+      ]);
+      return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+    }
+
+    return this.prisma.document.findMany({
+      where,
+      include: includeFields,
       orderBy: { createdAt: 'desc' },
     });
   }

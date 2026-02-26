@@ -61,6 +61,7 @@ import { InsuranceModule } from './insurance/insurance.module';
       redis: {
         host: process.env.REDIS_HOST || 'localhost',
         port: parseInt(process.env.REDIS_PORT) || 6381,
+        password: process.env.REDIS_PASSWORD || undefined,
       },
     }),
     PrismaModule,

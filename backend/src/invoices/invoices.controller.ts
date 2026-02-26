@@ -43,8 +43,12 @@ export class InvoicesController {
     @Request() req,
     @Query('patientId') patientId?: string,
     @Query('status') status?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
   ) {
-    return this.invoicesService.findAll(req.user.userId, req.user.tenantId, patientId, status);
+    const p = page ? parseInt(page, 10) : undefined;
+    const ps = pageSize ? parseInt(pageSize, 10) : undefined;
+    return this.invoicesService.findAll(req.user.userId, req.user.tenantId, patientId, status, p, ps);
   }
 
   @Get(':id')

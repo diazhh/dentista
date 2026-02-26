@@ -130,7 +130,7 @@ export class AppointmentsService {
     return appointment;
   }
 
-  async findAll(providerId: string, tenantId: string, startDate?: string, endDate?: string) {
+  async findAll(providerId: string, tenantId: string, startDate?: string, endDate?: string, page?: number, pageSize?: number) {
     const where: any = {
       providerId: providerId,
       tenantId,
@@ -146,50 +146,63 @@ export class AppointmentsService {
       }
     }
 
-    // Optimized query with specific selects instead of full includes
+    const selectFields = {
+      id: true,
+      appointmentDate: true,
+      duration: true,
+      status: true,
+      procedureType: true,
+      notes: true,
+      reminderSent: true,
+      confirmedVia: true,
+      createdAt: true,
+      patient: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          user: {
+            select: {
+              email: true,
+              phone: true,
+            },
+          },
+        },
+      },
+      room: {
+        select: {
+          id: true,
+          name: true,
+          floor: true,
+          clinic: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    };
+
+    if (page && pageSize) {
+      const [data, total] = await Promise.all([
+        this.prisma.appointment.findMany({
+          where,
+          select: selectFields,
+          orderBy: { appointmentDate: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        this.prisma.appointment.count({ where }),
+      ]);
+      return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+    }
+
     return this.prisma.appointment.findMany({
       where,
-      select: {
-        id: true,
-        appointmentDate: true,
-        duration: true,
-        status: true,
-        procedureType: true,
-        notes: true,
-        reminderSent: true,
-        confirmedVia: true,
-        createdAt: true,
-        patient: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            phone: true,
-            user: {
-              select: {
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
-        room: {
-          select: {
-            id: true,
-            name: true,
-            floor: true,
-            clinic: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        appointmentDate: 'asc',
-      },
+      select: selectFields,
+      orderBy: { appointmentDate: 'asc' },
     });
   }
 

@@ -56,14 +56,20 @@ export class DocumentsController {
     @Request() req,
     @Query('patientId') patientId?: string,
     @Query('type') type?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
   ) {
     const providerId = req.user.userId;
     const tenantId = req.user.tenantId || providerId;
+    const p = page ? parseInt(page, 10) : undefined;
+    const ps = pageSize ? parseInt(pageSize, 10) : undefined;
     return this.documentsService.findAll(
       providerId,
       tenantId,
       patientId,
       type,
+      p,
+      ps,
     );
   }
 

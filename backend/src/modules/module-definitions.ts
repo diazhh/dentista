@@ -49,7 +49,7 @@ export const MODULE_DEFINITIONS: Record<string, ModuleDefinition> = {
       },
     ],
     models: ['Odontogram', 'OdontogramTooth', 'TreatmentPlan', 'TreatmentPlanItem'],
-    apiPrefix: '/api/modules/dental',
+    apiPrefix: '/api',
     defaultConfig: { toothNumberingSystem: 'FDI' },
   },
   'general-medicine': {

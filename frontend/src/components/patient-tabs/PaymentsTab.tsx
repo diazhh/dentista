@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { DollarSign, CreditCard, Calendar, TrendingUp } from 'lucide-react';
+import { DollarSign, CreditCard, Calendar, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
 
 interface Payment {
@@ -28,10 +28,13 @@ interface Props {
   patientId: string;
 }
 
+const PAGE_SIZE = 10;
+
 export default function PatientPaymentsTab({ patientId }: Props) {
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [allPayments, setAllPayments] = useState<Payment[]>([]);
   const [stats, setStats] = useState<PaymentStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetchPayments();
@@ -39,18 +42,17 @@ export default function PatientPaymentsTab({ patientId }: Props) {
 
   const fetchPayments = async () => {
     try {
-      // Fetch invoices with payments
       const response = await api.get('/invoices', {
         params: { patientId },
       });
       const invoices = response.data;
+      const dataList = Array.isArray(invoices) ? invoices : invoices.data || [];
 
-      // Extract all payments from invoices
-      const allPayments: Payment[] = [];
-      for (const invoice of invoices) {
+      const payments: Payment[] = [];
+      for (const invoice of dataList) {
         if (invoice.payments && invoice.payments.length > 0) {
           invoice.payments.forEach((payment: any) => {
-            allPayments.push({
+            payments.push({
               ...payment,
               invoice: {
                 id: invoice.id,
@@ -61,33 +63,23 @@ export default function PatientPaymentsTab({ patientId }: Props) {
         }
       }
 
-      // Sort by date descending
-      allPayments.sort((a, b) =>
+      payments.sort((a, b) =>
         new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
       );
 
-      setPayments(allPayments);
+      setAllPayments(payments);
 
-      // Calculate stats
-      if (allPayments.length > 0) {
-        const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
-        const averagePayment = totalPaid / allPayments.length;
-
-        // Find most used payment method
+      if (payments.length > 0) {
+        const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+        const averagePayment = totalPaid / payments.length;
         const methodCounts: Record<string, number> = {};
-        allPayments.forEach(p => {
+        payments.forEach(p => {
           methodCounts[p.paymentMethod] = (methodCounts[p.paymentMethod] || 0) + 1;
         });
         const mostUsedMethod = Object.keys(methodCounts).reduce((a, b) =>
           methodCounts[a] > methodCounts[b] ? a : b
         );
-
-        setStats({
-          totalPaid,
-          averagePayment,
-          mostUsedMethod,
-          paymentCount: allPayments.length,
-        });
+        setStats({ totalPaid, averagePayment, mostUsedMethod, paymentCount: payments.length });
       }
     } catch (error) {
       console.error('Error fetching payments:', error);
@@ -95,6 +87,12 @@ export default function PatientPaymentsTab({ patientId }: Props) {
       setLoading(false);
     }
   };
+
+  const totalPages = Math.ceil(allPayments.length / PAGE_SIZE);
+  const paginatedPayments = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return allPayments.slice(start, start + PAGE_SIZE);
+  }, [allPayments, page]);
 
   const getMethodColor = (method: string) => {
     switch (method) {
@@ -147,7 +145,12 @@ export default function PatientPaymentsTab({ patientId }: Props) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Historial de Pagos</h2>
-        <Button>Registrar Pago</Button>
+        <div className="flex items-center gap-2">
+          {allPayments.length > 0 && (
+            <span className="text-sm text-muted-foreground">{allPayments.length} pagos</span>
+          )}
+          <Button>Registrar Pago</Button>
+        </div>
       </div>
 
       {/* Payment Statistics */}
@@ -198,58 +201,84 @@ export default function PatientPaymentsTab({ patientId }: Props) {
       )}
 
       {/* Payments List */}
-      {payments.length === 0 ? (
+      {allPayments.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center text-gray-500">
             No hay pagos registrados
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {payments.map((payment) => (
-            <Card key={payment.id}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg">
-                        Pago de ${payment.amount.toFixed(2)}
-                      </CardTitle>
-                      <Badge className={getMethodColor(payment.paymentMethod)}>
-                        {getMethodLabel(payment.paymentMethod)}
-                      </Badge>
+        <>
+          <div className="grid gap-4">
+            {paginatedPayments.map((payment) => (
+              <Card key={payment.id}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg">
+                          Pago de ${payment.amount.toFixed(2)}
+                        </CardTitle>
+                        <Badge className={getMethodColor(payment.paymentMethod)}>
+                          {getMethodLabel(payment.paymentMethod)}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                        <div className="flex items-center">
+                          <Calendar className="mr-1 h-4 w-4" />
+                          {formatDate(payment.paymentDate)}
+                        </div>
+                        <div className="flex items-center">
+                          <DollarSign className="mr-1 h-4 w-4" />
+                          Factura #{payment.invoice.invoiceNumber}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <Calendar className="mr-1 h-4 w-4" />
-                        {formatDate(payment.paymentDate)}
-                      </div>
-                      <div className="flex items-center">
-                        <DollarSign className="mr-1 h-4 w-4" />
-                        Factura #{payment.invoice.invoiceNumber}
-                      </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-green-600">
+                        ${payment.amount.toFixed(2)}
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-green-600">
-                      ${payment.amount.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              {payment.notes && (
-                <CardContent>
-                  <div className="bg-gray-50 p-3 rounded">
-                    <p className="text-sm text-gray-600">
-                      <span className="font-semibold">Notas:</span> {payment.notes}
-                    </p>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          ))}
-        </div>
+                {payment.notes && (
+                  <CardContent>
+                    <div className="bg-gray-50 p-3 rounded">
+                      <p className="text-sm text-gray-600">
+                        <span className="font-semibold">Notas:</span> {payment.notes}
+                      </p>
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page <= 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Página {page} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

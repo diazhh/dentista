@@ -89,7 +89,7 @@ export class InvoicesService {
     });
   }
 
-  async findAll(providerId: string, tenantId: string, patientId?: string, status?: string) {
+  async findAll(providerId: string, tenantId: string, patientId?: string, status?: string, page?: number, pageSize?: number) {
     const where: any = {
       providerId,
       tenantId,
@@ -103,23 +103,37 @@ export class InvoicesService {
       where.status = status;
     }
 
+    const includeFields = {
+      items: true,
+      patient: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          documentId: true,
+        },
+      },
+      payments: true,
+    };
+
+    if (page && pageSize) {
+      const [data, total] = await Promise.all([
+        this.prisma.invoice.findMany({
+          where,
+          include: includeFields,
+          orderBy: { issueDate: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        this.prisma.invoice.count({ where }),
+      ]);
+      return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+    }
+
     return this.prisma.invoice.findMany({
       where,
-      include: {
-        items: true,
-        patient: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            documentId: true,
-          },
-        },
-        payments: true,
-      },
-      orderBy: {
-        issueDate: 'desc',
-      },
+      include: includeFields,
+      orderBy: { issueDate: 'desc' },
     });
   }
 

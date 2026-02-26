@@ -25,10 +25,20 @@ export class AppointmentsController {
   @ApiOperation({ summary: 'Get all appointments for the provider' })
   @ApiQuery({ name: 'startDate', required: false, description: 'Filter by start date (ISO 8601)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'Filter by end date (ISO 8601)' })
-  findAll(@Request() req, @Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (1-based)' })
+  @ApiQuery({ name: 'pageSize', required: false, description: 'Items per page (default: no pagination)' })
+  findAll(
+    @Request() req,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
     const providerId = req.user.userId;
     const tenantId = req.user.tenantId || providerId;
-    return this.appointmentsService.findAll(providerId, tenantId, startDate, endDate);
+    const p = page ? parseInt(page, 10) : undefined;
+    const ps = pageSize ? parseInt(pageSize, 10) : undefined;
+    return this.appointmentsService.findAll(providerId, tenantId, startDate, endDate, p, ps);
   }
 
   @Get('today')
