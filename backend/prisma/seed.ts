@@ -1356,9 +1356,9 @@ async function main() {
       providerId: psicologoUser.id,
       tenantId: tenantMedicentro.id,
       assessmentType: 'PHQ-9',
-      responses: { q1: 2, q2: 2, q3: 1, q4: 2, q5: 1, q6: 1, q7: 2, q8: 1, q9: 2 },
-      score: 14,
-      interpretation: 'Depresión moderada. El paciente presenta síntomas depresivos que afectan su funcionamiento diario. Se recomienda continuar psicoterapia y evaluar necesidad de intervención farmacológica.',
+      responses: { q1: 2, q2: 2, q3: 1, q4: 2, q5: 1, q6: 1, q7: 1, q8: 1, q9: 1 },
+      score: 12,
+      interpretation: 'Depresión moderada. El paciente presenta síntomas depresivos que afectan parcialmente su funcionamiento diario. Se recomienda continuar psicoterapia y monitorear evolución.',
       severity: 'Moderate',
     },
   });
@@ -1369,10 +1369,10 @@ async function main() {
       providerId: psicologoUser.id,
       tenantId: tenantMedicentro.id,
       assessmentType: 'GAD-7',
-      responses: { q1: 2, q2: 2, q3: 2, q4: 1, q5: 2, q6: 1, q7: 2 },
-      score: 12,
-      interpretation: 'Ansiedad moderada. Síntomas de preocupación excesiva, dificultad para relajarse y tensión muscular. Compatible con trastorno de ansiedad generalizada.',
-      severity: 'Moderate',
+      responses: { q1: 2, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1 },
+      score: 8,
+      interpretation: 'Ansiedad leve-moderada. Síntomas de preocupación frecuente y dificultad para relajarse. Compatible con trastorno de ansiedad generalizada en mejoría con tratamiento.',
+      severity: 'Mild-Moderate',
     },
   });
 
@@ -1575,7 +1575,39 @@ async function main() {
     },
   });
 
-  console.log('  ✅ 1 cardiac assessment');
+  await prisma.cardiacAssessment.create({
+    data: {
+      patientId: patPedro.id,
+      providerId: cardioUser.id,
+      tenantId: tenantMedicentro.id,
+      assessmentType: 'FOLLOW_UP',
+      bloodPressureSystolic: 134,
+      bloodPressureDiastolic: 82,
+      heartRate: 74,
+      rhythm: 'REGULAR',
+      ecgFindings: 'Ritmo sinusal normal. Frecuencia 74 lpm. Eje normal. HVI leve persistente por criterios de voltaje. Sin cambios isquémicos agudos.',
+      echoFindings: {
+        lvef: '60%',
+        wallMotion: 'Normal',
+        valves: 'Sin cambios respecto a estudio previo',
+        diastolicFunction: 'Patrón de relajación alterada (Grado I) estable',
+        conclusions: 'Función sistólica preservada. HVI leve estable. Sin deterioro funcional.',
+      },
+      lipidPanel: { totalCholesterol: 210, ldl: 130, hdl: 45, triglycerides: 175, nonHdl: 165 },
+      riskFactors: ['Hipertensión arterial', 'Diabetes mellitus tipo 2', 'Dislipidemia', 'Sedentarismo'],
+      riskScore: 12.8,
+      medications: [
+        { name: 'Losartán', dose: '100mg/día', indication: 'HTA' },
+        { name: 'Atorvastatina', dose: '40mg/día', indication: 'Dislipidemia' },
+        { name: 'Aspirina', dose: '100mg/día', indication: 'Prevención primaria' },
+      ],
+      diagnosis: 'Cardiopatía hipertensiva con HVI leve estable. PA en mejoría con ajuste terapéutico. Perfil lipídico mejorando.',
+      plan: 'Mantener tratamiento actual. Continuar programa de ejercicio. Control en 3 meses con perfil lipídico y HbA1c. Evaluar necesidad de agregar betabloqueante si PA no alcanza meta.',
+      notes: 'Paciente ha mejorado adherencia al tratamiento. Inició caminatas 30 min/día. Coordinación con nutrición está dando resultados.',
+    },
+  });
+
+  console.log('  ✅ 2 cardiac assessments');
 
   // ============================================================
   // SECTION 19: MODULE DATA — Pediatrics
@@ -1789,6 +1821,26 @@ async function main() {
 
   await prisma.bodyMeasurement.create({
     data: {
+      patientId: patAndres.id,
+      providerId: nutriUser.id,
+      tenantId: tenantMedicentro.id,
+      measurementDate: daysFromNow(-1),
+      weight: 89.5,
+      height: 175.0,
+      bmi: 29.2,
+      bodyFatPercentage: 26.5,
+      muscleMass: 34.0,
+      waistCircumference: 95.0,
+      hipCircumference: 102.0,
+      chestCircumference: 101.0,
+      armCircumference: 32.5,
+      thighCircumference: 57.0,
+      notes: 'Control a las 2 semanas. Pérdida de 2.5 kg. Reducción de 3 cm en cintura. Aumento leve de masa muscular. Buena adherencia al plan.',
+    },
+  });
+
+  await prisma.bodyMeasurement.create({
+    data: {
       patientId: patPedro.id,
       providerId: nutriUser.id,
       tenantId: tenantMedicentro.id,
@@ -1807,7 +1859,7 @@ async function main() {
     },
   });
 
-  console.log('  ✅ 2 nutrition plans + 2 body measurements');
+  console.log('  ✅ 2 nutrition plans + 3 body measurements');
 
   // ============================================================
   // SECTION 21: MODULE DATA — Gynecology
@@ -1865,7 +1917,57 @@ async function main() {
     },
   });
 
-  console.log('  ✅ 1 gynecological exam');
+  await prisma.gynecologicalExam.create({
+    data: {
+      patientId: patMaria.id,
+      providerId: ginecoUser.id,
+      tenantId: tenantMedicentro.id,
+      examType: 'PRENATAL',
+      lastMenstrualPeriod: daysFromNow(-34 * 7), // 34 weeks ago
+      menstrualCycleLength: 28,
+      menstrualRegularity: 'Regular',
+      contraceptiveMethod: 'Ninguno',
+      pregnancyHistory: { gravida: 2, para: 1, abortions: 0, livingChildren: 1, previousDeliveries: [{ year: 2022, type: 'Vaginal', weight: 3200, complications: 'Ninguna' }] },
+      currentPregnancy: {
+        gestationalWeeks: 34,
+        edd: daysFromNow(6 * 7).toISOString(),
+        weight: 69.5,
+        bloodPressure: '122/78',
+        fetalHeartRate: 140,
+        fetalPosition: 'Cefálica encajada',
+        uterineHeight: 33,
+        edema: 'Leve en tobillos, sin cambio',
+        fetalMovements: 'Activos, >10/hora',
+      },
+      examFindings: {
+        cervix: 'Cerrado, reblandecido, centrado',
+        uterus: 'Acorde a edad gestacional',
+        adnexa: 'No palpables',
+        vaginalDischarge: 'Fisiológico, sin mal olor',
+      },
+      ultrasoundFindings: {
+        biometría: 'Concordante con 34 semanas',
+        pesoFetal: '2200g (percentil 55)',
+        placenta: 'Fúndica posterior, grado II-III',
+        liquidoAmniotico: 'Normal (ILA 12 cm)',
+        cordón: '3 vasos, sin circulares',
+        presentación: 'Cefálica encajada',
+      },
+      labResults: {
+        hemoglobin: 11.5,
+        hematocrit: 35,
+        glucose: 78,
+        urinalysis: 'Normal, sin proteinuria ni glucosuria',
+        streptococcusB: 'Pendiente',
+      },
+      diagnosis: 'Embarazo de 34 semanas con evolución favorable. Feto en presentación cefálica encajada con crecimiento adecuado.',
+      plan: 'Solicitar cultivo Streptococcus grupo B. Monitoreo fetal semanal a partir de ahora. Ecografía de crecimiento a las 36 semanas. Preparación para parto vaginal.',
+      nextAppointmentDate: daysFromNow(7),
+      notes: 'Embarazo progresa sin complicaciones. Se discutió plan de parto. Paciente desea parto vaginal sin analgesia epidural si es posible.',
+    },
+  });
+
+  console.log('  ✅ 2 gynecological exams');
 
   // ============================================================
   // SECTION 22: MEDICAL EXAMS
@@ -1980,7 +2082,7 @@ async function main() {
       tenantId: tenantMedicentro.id,
       issueDate: weeksAgo(1),
       dueDate: daysFromNow(14),
-      status: 'SENT',
+      status: 'PENDING',
       subtotal: 12000,
       tax: 2160,
       discount: 0,
@@ -2017,6 +2119,32 @@ async function main() {
       items: {
         create: [
           { description: 'Sesión terapia cognitivo-conductual', quantity: 3, unitPrice: 3000, total: 9000 },
+        ],
+      },
+    },
+  });
+
+  const invoice4 = await prisma.invoice.create({
+    data: {
+      invoiceNumber: 'INV-2026-0004',
+      patientId: patRoberto.id,
+      providerId: fisioUser.id,
+      tenantId: tenantRehab.id,
+      issueDate: weeksAgo(6),
+      dueDate: weeksAgo(2),
+      status: 'OVERDUE',
+      subtotal: 7500,
+      tax: 1350,
+      discount: 0,
+      total: 8850,
+      amountPaid: 0,
+      balance: 8850,
+      notes: 'Evaluación funcional y sesiones de fisioterapia.',
+      terms: 'Pago a 30 días. Recargo por mora del 2% mensual.',
+      items: {
+        create: [
+          { description: 'Evaluación funcional inicial', quantity: 1, unitPrice: 3500, total: 3500 },
+          { description: 'Sesión fisioterapia rehabilitación', quantity: 2, unitPrice: 2000, total: 4000 },
         ],
       },
     },
@@ -2065,7 +2193,7 @@ async function main() {
     },
   });
 
-  console.log('  ✅ 3 invoices + 3 payments');
+  console.log('  ✅ 4 invoices + 3 payments');
 
   // ============================================================
   // SECTION 22C: RECURRING APPOINTMENTS
@@ -2176,7 +2304,23 @@ async function main() {
     },
   });
 
-  console.log('  ✅ 3 waitlist entries');
+  await prisma.waitlist.create({
+    data: {
+      patientId: patAndres.id,
+      providerId: dermaUser.id,
+      tenantId: tenantMedicentro.id,
+      preferredDates: [daysFromNow(5), daysFromNow(10), daysFromNow(12)],
+      preferredTimes: ['10:00', '11:00', '14:00'],
+      procedureType: 'Control dermatológico seguimiento',
+      duration: 30,
+      priority: 3,
+      status: 'WAITING',
+      notes: 'Seguimiento de lesión cutánea en codo. Sin urgencia.',
+      expiresAt: daysFromNow(30),
+    },
+  });
+
+  console.log('  ✅ 4 waitlist entries');
 
   // ============================================================
   // SECTION 22E: NOTIFICATIONS
@@ -2418,17 +2562,17 @@ async function main() {
   console.log('  Skin Lesions:       2');
   console.log('  Eye Exams:          1');
   console.log('  Lens Prescriptions: 1');
-  console.log('  Cardiac Assessments:1');
+  console.log('  Cardiac Assessments:2  (initial + follow-up)');
   console.log('  Growth Records:     3');
   console.log('  Vaccination Records:4');
   console.log('  Nutrition Plans:    2');
-  console.log('  Body Measurements:  2');
-  console.log('  Gynecological Exams:1');
+  console.log('  Body Measurements:  3  (2 Andrés + 1 Pedro)');
+  console.log('  Gynecological Exams:2  (32 + 34 weeks)');
   console.log('  ─── Billing & Scheduling ───');
-  console.log('  Invoices:           3  (1 paid, 1 sent, 1 draft)');
+  console.log('  Invoices:           4  (paid, pending, draft, overdue)');
   console.log('  Payments:           3  (credit card, bank transfer, cash)');
   console.log('  Recurring Appts:    3  (weekly, monthly, biweekly)');
-  console.log('  Waitlist Entries:   3');
+  console.log('  Waitlist Entries:   4');
   console.log('  Notifications:      4');
   console.log('  Audit Logs:         6');
   console.log('  ─── Other ───');
