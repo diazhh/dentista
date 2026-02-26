@@ -13,4 +13,15 @@ export default defineConfig({
       'Expires': '0',
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['lucide-react', 'recharts', 'date-fns'],
+          'api-client': ['axios', '@tanstack/react-query'],
+        },
+      },
+    },
+  },
 })

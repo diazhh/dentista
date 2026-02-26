@@ -303,6 +303,19 @@ model User {
   managedClinics      Clinic[]             @relation("ClinicAdmin") // NUEVO
   providerModules     ProviderModule[] // NUEVO
 
+  // Phase 6 specialty modules (as provider)
+  providedExercisePlans         ExercisePlan[]
+  providedFunctionalAssessments FunctionalAssessment[]
+  providedSkinLesions           SkinLesion[]
+  providedEyeExams              EyeExam[]
+  providedLensPrescriptions     LensPrescription[]
+  providedCardiacAssessments    CardiacAssessment[]
+  providedGrowthRecords         GrowthRecord[]
+  providedVaccinationRecords    VaccinationRecord[]
+  providedNutritionPlans        NutritionPlan[]
+  providedBodyMeasurements      BodyMeasurement[]
+  providedGynecologicalExams    GynecologicalExam[]
+
   @@unique([oauthProvider, oauthId])
   @@map("users")
 }
@@ -1668,8 +1681,9 @@ model ExercisePlan {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient  Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User    @relation(fields: [providerId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([providerId])
@@ -1694,8 +1708,9 @@ model FunctionalAssessment {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient  Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User    @relation(fields: [providerId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([providerId])
@@ -1731,8 +1746,9 @@ model SkinLesion {
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient  Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User    @relation(fields: [providerId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([providerId])
@@ -1764,6 +1780,7 @@ model EyeExam {
   updatedAt                DateTime @updatedAt @map("updated_at")
 
   patient           Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider          User               @relation(fields: [providerId], references: [id])
   tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   lensPrescriptions LensPrescription[]
 
@@ -1796,9 +1813,10 @@ model LensPrescription {
   notes            String?   @db.Text
   createdAt        DateTime  @default(now()) @map("created_at")
 
-  patient Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  eyeExam EyeExam? @relation(fields: [eyeExamId], references: [id])
+  patient  Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User     @relation(fields: [providerId], references: [id])
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  eyeExam  EyeExam? @relation(fields: [eyeExamId], references: [id])
 
   @@index([patientId])
   @@index([providerId])
@@ -1831,8 +1849,9 @@ model CardiacAssessment {
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient  Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User    @relation(fields: [providerId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([providerId])
@@ -1860,8 +1879,9 @@ model GrowthRecord {
   notes             String?  @db.Text
   createdAt         DateTime @default(now()) @map("created_at")
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient  Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User    @relation(fields: [providerId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([providerId])
@@ -1887,8 +1907,9 @@ model VaccinationRecord {
   notes            String?   @db.Text
   createdAt        DateTime  @default(now()) @map("created_at")
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient  Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User    @relation(fields: [providerId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([providerId])
@@ -1917,8 +1938,9 @@ model NutritionPlan {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient  Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User    @relation(fields: [providerId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([providerId])
@@ -1945,8 +1967,9 @@ model BodyMeasurement {
   notes              String?  @db.Text
   createdAt          DateTime @default(now()) @map("created_at")
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient  Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User    @relation(fields: [providerId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([providerId])
@@ -1979,8 +2002,9 @@ model GynecologicalExam {
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime  @updatedAt @map("updated_at")
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient  Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  provider User    @relation(fields: [providerId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([providerId])
