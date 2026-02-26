@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Calendar, Clock, MapPin } from 'lucide-react';
+import api from '../../services/api';
 
 interface Appointment {
   id: string;
@@ -27,20 +28,10 @@ export default function PatientAppointmentsTab({ patientId }: Props) {
 
   const fetchAppointments = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `http://localhost:3000/api/appointments?patientId=${patientId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setAppointments(data);
-      }
+      const response = await api.get('/appointments', {
+        params: { patientId },
+      });
+      setAppointments(response.data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {

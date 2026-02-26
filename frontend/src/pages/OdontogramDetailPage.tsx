@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, FileText, Trash2, Filter, X, Eye, EyeOff } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import OdontogramChart from '../components/OdontogramChart';
@@ -70,10 +70,7 @@ export default function OdontogramDetailPage() {
   const fetchOdontogram = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3000/api/odontograms/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/odontograms/${id}`);
       setOdontogram(response.data);
     } catch (error) {
       console.error('Error fetching odontogram:', error);
@@ -88,10 +85,7 @@ export default function OdontogramDetailPage() {
     if (!confirm('¿Está seguro de que desea eliminar este odontograma?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/odontograms/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/odontograms/${id}`);
       navigate('/odontograms');
     } catch (error) {
       console.error('Error deleting odontogram:', error);
@@ -107,23 +101,14 @@ export default function OdontogramDetailPage() {
     if (!editingTooth || !odontogram) return;
 
     try {
-      const token = localStorage.getItem('token');
       const existingTooth = odontogram.teeth.find(t => t.toothNumber === editingTooth);
 
       if (existingTooth) {
         // Actualizar diente existente
-        await axios.patch(
-          `http://localhost:3000/api/odontograms/${id}/teeth/${existingTooth.id}`,
-          data,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await api.patch(`/odontograms/${id}/teeth/${existingTooth.id}`, data);
       } else {
         // Crear nuevo diente
-        await axios.post(
-          `http://localhost:3000/api/odontograms/${id}/teeth`,
-          { toothNumber: editingTooth, ...data },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await api.post(`/odontograms/${id}/teeth`, { toothNumber: editingTooth, ...data });
       }
 
       await fetchOdontogram();

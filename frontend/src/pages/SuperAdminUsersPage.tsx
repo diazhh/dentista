@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import { Users, Search, Eye, Edit, Trash2, UserPlus, Filter, X, UserCog } from 'lucide-react';
 
 interface User {
@@ -48,14 +48,11 @@ export default function SuperAdminUsersPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
       const params = new URLSearchParams();
       if (roleFilter) params.append('role', roleFilter);
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await axios.get(`http://localhost:3000/api/admin/users?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/admin/users?${params}`);
       setUsers(response.data.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -66,10 +63,7 @@ export default function SuperAdminUsersPage() {
 
   const fetchStatistics = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:3000/api/admin/users/statistics', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/admin/users/statistics');
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching statistics:', error);
@@ -93,10 +87,7 @@ export default function SuperAdminUsersPage() {
 
   const handleCreateUser = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post('http://localhost:3000/api/admin/users', createForm, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post('/admin/users', createForm);
       setShowCreateModal(false);
       setCreateForm({
         name: '',
@@ -116,10 +107,7 @@ export default function SuperAdminUsersPage() {
   const handleSaveEdit = async () => {
     if (!editingUser) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.put(`http://localhost:3000/api/admin/users/${editingUser.id}`, editForm, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/admin/users/${editingUser.id}`, editForm);
       setShowEditModal(false);
       setEditingUser(null);
       fetchUsers();
@@ -133,16 +121,11 @@ export default function SuperAdminUsersPage() {
   const handleImpersonate = async (userId: string) => {
     if (!confirm('¿Estas seguro de impersonar este usuario?')) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.post(
-        `http://localhost:3000/api/admin/users/${userId}/impersonate`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.post(`/admin/users/${userId}/impersonate`);
 
       // Store the impersonation token
       localStorage.setItem('impersonationToken', response.data.token);
-      localStorage.setItem('originalToken', token!);
+      localStorage.setItem('originalToken', localStorage.getItem('accessToken')!);
 
       alert(`Impersonando a ${response.data.user.name}. Recarga la pagina para usar la sesion.`);
     } catch (error: any) {
@@ -155,10 +138,7 @@ export default function SuperAdminUsersPage() {
     if (!confirm('¿Estas seguro de eliminar este usuario?')) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.delete(`http://localhost:3000/api/admin/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/admin/users/${userId}`);
       fetchUsers();
       alert('Usuario eliminado exitosamente');
     } catch (error) {

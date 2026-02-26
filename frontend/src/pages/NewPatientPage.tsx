@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Save, X, User, Phone, Mail, Calendar, IdCard } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 
 export default function NewPatientPage() {
   const navigate = useNavigate();
@@ -25,27 +25,19 @@ export default function NewPatientPage() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-
-      await axios.post(
-        'http://localhost:3000/api/patients',
-        {
-          email: formData.email,
-          documentId: formData.documentId,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phone: formData.phone,
-          dateOfBirth: formData.dateOfBirth,
-          gender: formData.gender,
-          allergies: formData.allergies ? formData.allergies.split(',').map(a => a.trim()) : [],
-          medications: formData.medications ? formData.medications.split(',').map(m => m.trim()) : [],
-          emergencyContactName: formData.emergencyContactName || undefined,
-          emergencyContactPhone: formData.emergencyContactPhone || undefined,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post('/patients', {
+        email: formData.email,
+        documentId: formData.documentId,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+        allergies: formData.allergies ? formData.allergies.split(',').map(a => a.trim()) : [],
+        medications: formData.medications ? formData.medications.split(',').map(m => m.trim()) : [],
+        emergencyContactName: formData.emergencyContactName || undefined,
+        emergencyContactPhone: formData.emergencyContactPhone || undefined,
+      });
 
       navigate('/patients');
     } catch (error: any) {

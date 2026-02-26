@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Smile, Search, Plus, Eye, Calendar } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -30,10 +30,7 @@ export default function OdontogramsListPage() {
   const fetchOdontograms = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/odontograms', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/odontograms');
       setOdontograms(response.data);
     } catch (error) {
       console.error('Error fetching odontograms:', error);

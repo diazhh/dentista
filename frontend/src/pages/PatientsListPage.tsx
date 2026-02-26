@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Search, Plus, Download, Upload, Eye, Trash2 } from 'lucide-react';
-import axios from 'axios';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import api from '../services/api';
 
 interface Patient {
   id: string;
@@ -32,10 +32,7 @@ export default function PatientsListPage() {
   const fetchPatients = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/patients', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/patients');
       setPatients(response.data);
     } catch (error) {
       console.error('Error fetching patients:', error);
@@ -52,9 +49,8 @@ export default function PatientsListPage() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       const params = new URLSearchParams();
-      
+
       if (searchTerm.match(/^\d+$/)) {
         params.append('documentId', searchTerm);
       } else if (searchTerm.includes('@')) {
@@ -68,12 +64,7 @@ export default function PatientsListPage() {
         if (names.length > 1) params.append('lastName', names.slice(1).join(' '));
       }
 
-      const response = await axios.get(
-        `http://localhost:3000/api/patients/search/query?${params.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await api.get(`/patients/search/query?${params.toString()}`);
       setPatients(response.data);
     } catch (error) {
       console.error('Error searching patients:', error);
@@ -84,9 +75,7 @@ export default function PatientsListPage() {
 
   const handleExport = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/patients/export/csv', {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await api.get('/patients/export/csv', {
         responseType: 'blob',
       });
 
@@ -110,20 +99,14 @@ export default function PatientsListPage() {
     }
 
     try {
-      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('file', importFile);
 
-      const response = await axios.post(
-        'http://localhost:3000/api/patients/import/csv',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const response = await api.post('/patients/import/csv', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       alert(
         `Importación completada:\n✅ ${response.data.success} pacientes importados\n${
@@ -144,10 +127,7 @@ export default function PatientsListPage() {
     if (!confirm('¿Está seguro de que desea desactivar este paciente?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/patients/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/patients/${id}`);
       fetchPatients();
     } catch (error) {
       console.error('Error deleting patient:', error);

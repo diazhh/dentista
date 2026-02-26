@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Building2, Users, DollarSign, TrendingUp, Activity, AlertCircle } from 'lucide-react';
 
 interface DashboardStats {
@@ -26,14 +26,9 @@ export default function SuperAdminDashboard() {
 
   const fetchDashboardStats = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
       const [metricsRes, revenueRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/admin/metrics/system', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get('http://localhost:3000/api/admin/metrics/revenue', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        api.get('/admin/metrics/system'),
+        api.get('/admin/metrics/revenue'),
       ]);
 
       setStats({

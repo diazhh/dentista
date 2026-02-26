@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FileText, ArrowLeft, Trash2, User, Calendar, DollarSign, Plus, CreditCard } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -69,10 +69,7 @@ export default function InvoiceDetailPage() {
   const fetchInvoice = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3000/api/invoices/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/invoices/${id}`);
       setInvoice(response.data);
       setPaymentData({ ...paymentData, amount: response.data.balance });
     } catch (error) {
@@ -85,20 +82,13 @@ export default function InvoiceDetailPage() {
   const handleCreatePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        'http://localhost:3000/api/payments',
-        {
-          invoiceId: id,
-          ...paymentData,
-          transactionId: paymentData.transactionId || undefined,
-          reference: paymentData.reference || undefined,
-          notes: paymentData.notes || undefined,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post('/payments', {
+        invoiceId: id,
+        ...paymentData,
+        transactionId: paymentData.transactionId || undefined,
+        reference: paymentData.reference || undefined,
+        notes: paymentData.notes || undefined,
+      });
       setShowPaymentModal(false);
       fetchInvoice();
       setPaymentData({
@@ -117,14 +107,7 @@ export default function InvoiceDetailPage() {
 
   const handleUpdateStatus = async (newStatus: string) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        `http://localhost:3000/api/invoices/${id}/status`,
-        { status: newStatus },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.patch(`/invoices/${id}/status`, { status: newStatus });
       fetchInvoice();
     } catch (error) {
       console.error('Error updating status:', error);
@@ -135,10 +118,7 @@ export default function InvoiceDetailPage() {
   const handleDelete = async () => {
     if (!confirm('¿Esta seguro de que desea eliminar esta factura?')) return;
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/invoices/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/invoices/${id}`);
       navigate('/invoices');
     } catch (error) {
       console.error('Error deleting invoice:', error);

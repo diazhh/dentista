@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Save, X, Plus, Trash2, User, Calendar } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 
 interface Patient {
   id: string;
@@ -60,10 +60,7 @@ export default function NewInvoicePage() {
 
   const fetchPatients = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/patients', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/patients');
       setPatients(response.data);
     } catch (error) {
       console.error('Error fetching patients:', error);
@@ -72,9 +69,8 @@ export default function NewInvoicePage() {
 
   const fetchTreatmentPlans = async (patientId: string) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3000/api/treatment-plans?patientId=${patientId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await api.get('/treatment-plans', {
+        params: { patientId },
       });
       setTreatmentPlans(response.data);
     } catch (error) {
@@ -119,21 +115,13 @@ export default function NewInvoicePage() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-
-      await axios.post(
-        'http://localhost:3000/api/invoices',
-        {
-          ...formData,
-          treatmentPlanId: formData.treatmentPlanId || undefined,
-          notes: formData.notes || undefined,
-          terms: formData.terms || undefined,
-          items: items,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post('/invoices', {
+        ...formData,
+        treatmentPlanId: formData.treatmentPlanId || undefined,
+        notes: formData.notes || undefined,
+        terms: formData.terms || undefined,
+        items: items,
+      });
 
       navigate('/invoices');
     } catch (error: any) {

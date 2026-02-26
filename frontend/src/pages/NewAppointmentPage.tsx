@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Calendar, Clock, User, FileText, Save, X } from 'lucide-react';
-import axios from 'axios';
-import { format } from 'date-fns';
+import api from '../services/api';
 
 interface Patient {
   id: string;
@@ -33,10 +32,7 @@ export default function NewAppointmentPage() {
 
   const fetchPatients = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/patients', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/patients');
       setPatients(response.data);
     } catch (error) {
       console.error('Error fetching patients:', error);
@@ -48,23 +44,16 @@ export default function NewAppointmentPage() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
       const startTime = new Date(formData.startTime);
       const endTime = new Date(startTime.getTime() + formData.duration * 60000);
 
-      await axios.post(
-        'http://localhost:3000/api/appointments',
-        {
-          patientId: formData.patientId,
-          startTime: startTime.toISOString(),
-          endTime: endTime.toISOString(),
-          type: formData.type,
-          notes: formData.notes,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post('/appointments', {
+        patientId: formData.patientId,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        type: formData.type,
+        notes: formData.notes,
+      });
 
       navigate('/calendar');
     } catch (error: any) {

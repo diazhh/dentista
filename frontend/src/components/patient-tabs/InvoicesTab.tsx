@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { FileText, DollarSign, Calendar, AlertCircle } from 'lucide-react';
+import api from '../../services/api';
 
 interface Invoice {
   id: string;
@@ -39,35 +40,26 @@ export default function PatientInvoicesTab({ patientId }: Props) {
 
   const fetchInvoices = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `http://localhost:3000/api/invoices?patientId=${patientId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.get('/invoices', {
+        params: { patientId },
+      });
+      const data = response.data;
+      setInvoices(data);
 
-      if (response.ok) {
-        const data = await response.json();
-        setInvoices(data);
-        
-        // Calculate summary
-        const totalInvoiced = data.reduce((sum: number, inv: Invoice) => sum + inv.total, 0);
-        const totalPaid = data.reduce((sum: number, inv: Invoice) => sum + (inv.total - inv.balance), 0);
-        const pendingBalance = data.reduce((sum: number, inv: Invoice) => sum + inv.balance, 0);
-        const overdueInvoices = data.filter((inv: Invoice) => 
-          inv.status === 'OVERDUE' || (inv.status === 'SENT' && new Date(inv.dueDate) < new Date())
-        ).length;
-        
-        setSummary({
-          totalInvoiced,
-          totalPaid,
-          pendingBalance,
-          overdueInvoices,
-        });
-      }
+      // Calculate summary
+      const totalInvoiced = data.reduce((sum: number, inv: Invoice) => sum + inv.total, 0);
+      const totalPaid = data.reduce((sum: number, inv: Invoice) => sum + (inv.total - inv.balance), 0);
+      const pendingBalance = data.reduce((sum: number, inv: Invoice) => sum + inv.balance, 0);
+      const overdueInvoices = data.filter((inv: Invoice) =>
+        inv.status === 'OVERDUE' || (inv.status === 'SENT' && new Date(inv.dueDate) < new Date())
+      ).length;
+
+      setSummary({
+        totalInvoiced,
+        totalPaid,
+        pendingBalance,
+        overdueInvoices,
+      });
     } catch (error) {
       console.error('Error fetching invoices:', error);
     } finally {

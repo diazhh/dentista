@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import {
   CreditCard,
   Plus,
@@ -75,9 +75,7 @@ export default function SuperAdminPlansPage() {
   const fetchPlans = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:3000/api/admin/plans', {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await api.get('/admin/plans', {
         params: { includeInactive: 'true' },
       });
       setPlans(response.data);
@@ -90,10 +88,7 @@ export default function SuperAdminPlansPage() {
 
   const fetchStatistics = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:3000/api/admin/plans/statistics', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/admin/plans/statistics');
       setStatistics(response.data);
     } catch (error) {
       console.error('Error fetching statistics:', error);
@@ -102,10 +97,7 @@ export default function SuperAdminPlansPage() {
 
   const handleCreatePlan = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post('http://localhost:3000/api/admin/plans', formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post('/admin/plans', formData);
       setShowCreateModal(false);
       resetForm();
       fetchPlans();
@@ -120,10 +112,7 @@ export default function SuperAdminPlansPage() {
     if (!editingPlan) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.put(`http://localhost:3000/api/admin/plans/${editingPlan.id}`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/admin/plans/${editingPlan.id}`, formData);
       setEditingPlan(null);
       resetForm();
       fetchPlans();
@@ -137,10 +126,7 @@ export default function SuperAdminPlansPage() {
     if (!confirm('¿Estas seguro de eliminar este plan?')) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.delete(`http://localhost:3000/api/admin/plans/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/admin/plans/${id}`);
       fetchPlans();
       fetchStatistics();
     } catch (error: any) {
@@ -151,11 +137,8 @@ export default function SuperAdminPlansPage() {
 
   const handleToggleActive = async (plan: SubscriptionPlan) => {
     try {
-      const token = localStorage.getItem('accessToken');
       const endpoint = plan.isActive ? 'deactivate' : 'activate';
-      await axios.post(`http://localhost:3000/api/admin/plans/${plan.id}/${endpoint}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(`/admin/plans/${plan.id}/${endpoint}`);
       fetchPlans();
       fetchStatistics();
     } catch (error) {

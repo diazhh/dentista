@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Calendar, DollarSign, FileText, Activity, AlertTriangle, Info, Plus } from 'lucide-react';
+import api from '../../services/api';
 
 interface DashboardMetrics {
   nextAppointment?: {
@@ -60,20 +61,8 @@ export default function PatientSummaryTab({ patientId }: Props) {
 
   const fetchSummary = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `http://localhost:3000/api/patients/${patientId}/dashboard/summary`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setSummary(data);
-      }
+      const response = await api.get(`/patients/${patientId}/dashboard/summary`);
+      setSummary(response.data);
     } catch (error) {
       console.error('Error fetching dashboard summary:', error);
     } finally {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FileText, ArrowLeft, Trash2, CheckCircle, User, Calendar, DollarSign } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -53,10 +53,7 @@ export default function TreatmentPlanDetailPage() {
   const fetchPlan = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3000/api/treatment-plans/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/treatment-plans/${id}`);
       setPlan(response.data);
     } catch (error) {
       console.error('Error fetching treatment plan:', error);
@@ -67,14 +64,7 @@ export default function TreatmentPlanDetailPage() {
 
   const handleUpdateItemStatus = async (itemId: string, newStatus: string) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        `http://localhost:3000/api/treatment-plans/items/${itemId}`,
-        { status: newStatus },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.patch(`/treatment-plans/items/${itemId}`, { status: newStatus });
       fetchPlan();
     } catch (error) {
       console.error('Error updating item status:', error);
@@ -84,14 +74,7 @@ export default function TreatmentPlanDetailPage() {
 
   const handleUpdatePlanStatus = async (newStatus: string) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        `http://localhost:3000/api/treatment-plans/${id}`,
-        { status: newStatus },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.patch(`/treatment-plans/${id}`, { status: newStatus });
       fetchPlan();
     } catch (error) {
       console.error('Error updating plan status:', error);
@@ -103,10 +86,7 @@ export default function TreatmentPlanDetailPage() {
     if (!confirm('¿Está seguro de que desea eliminar este plan de tratamiento?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/treatment-plans/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/treatment-plans/${id}`);
       navigate('/treatment-plans');
     } catch (error) {
       console.error('Error deleting plan:', error);

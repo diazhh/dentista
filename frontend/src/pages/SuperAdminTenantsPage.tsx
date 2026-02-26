@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import { Building2, Search, CheckCircle, XCircle } from 'lucide-react';
 
 interface Tenant {
@@ -29,10 +29,7 @@ export default function SuperAdminTenantsPage() {
   const fetchTenants = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:3000/api/admin/tenants', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/admin/tenants');
       setTenants(response.data.data || response.data);
     } catch (error) {
       console.error('Error fetching tenants:', error);

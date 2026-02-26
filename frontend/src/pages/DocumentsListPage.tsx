@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Search, Plus, Eye, Filter, Download, Trash2, Upload, X } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -56,14 +56,11 @@ export default function DocumentsListPage() {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const params = new URLSearchParams();
+      const params: Record<string, string> = {};
       if (typeFilter !== 'all') {
-        params.append('type', typeFilter);
+        params.type = typeFilter;
       }
-      const response = await axios.get(`http://localhost:3000/api/documents?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/documents', { params });
       setDocuments(response.data);
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -74,10 +71,7 @@ export default function DocumentsListPage() {
 
   const fetchPatients = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/patients', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/patients');
       setPatients(response.data);
     } catch (error) {
       console.error('Error fetching patients:', error);
@@ -93,7 +87,6 @@ export default function DocumentsListPage() {
 
     setUploading(true);
     try {
-      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('file', uploadData.file);
       formData.append('patientId', uploadData.patientId);
@@ -107,9 +100,8 @@ export default function DocumentsListPage() {
         formData.append('tags', JSON.stringify(tagsArray));
       }
 
-      await axios.post('http://localhost:3000/api/documents/upload', formData, {
+      await api.post('/documents/upload', formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -134,9 +126,7 @@ export default function DocumentsListPage() {
 
   const handleDownload = async (id: string, fileName: string) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3000/api/documents/${id}/download`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await api.get(`/documents/${id}/download`, {
         responseType: 'blob',
       });
 
@@ -157,10 +147,7 @@ export default function DocumentsListPage() {
     if (!confirm('Esta seguro de que desea eliminar este documento?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/documents/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/documents/${id}`);
       fetchDocuments();
     } catch (error) {
       console.error('Error deleting document:', error);

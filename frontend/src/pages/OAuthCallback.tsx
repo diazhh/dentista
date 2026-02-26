@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import api from '../services/api';
+import { storage } from '../utils/storage';
 
 export default function OAuthCallback() {
   const [searchParams] = useSearchParams();
@@ -10,18 +12,13 @@ export default function OAuthCallback() {
     const refreshToken = searchParams.get('refreshToken');
 
     if (token && refreshToken) {
-      localStorage.setItem('accessToken', token);
-      localStorage.setItem('refreshToken', refreshToken);
-      
+      storage.setItem('accessToken', token);
+      storage.setItem('refreshToken', refreshToken);
+
       // Fetch user info and redirect
-      fetch('http://localhost:3000/api/users/profile', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((user) => {
-          localStorage.setItem('user', JSON.stringify(user));
+      api.get('/users/me')
+        .then((response) => {
+          storage.setItem('user', JSON.stringify(response.data));
           navigate('/admin');
         })
         .catch(() => {

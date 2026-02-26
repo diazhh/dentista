@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import {
   Building2,
   Users,
@@ -83,10 +83,7 @@ export default function TenantDetailPage() {
   const fetchTenant = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`http://localhost:3000/api/admin/tenants/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/admin/tenants/${id}`);
       setTenant(response.data);
       setEditForm({
         name: response.data.name,
@@ -102,10 +99,7 @@ export default function TenantDetailPage() {
 
   const handleUpdate = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.put(`http://localhost:3000/api/admin/tenants/${id}`, editForm, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/admin/tenants/${id}`, editForm);
       setEditMode(false);
       fetchTenant();
       alert('Tenant actualizado exitosamente');
@@ -118,10 +112,7 @@ export default function TenantDetailPage() {
   const handleDelete = async () => {
     if (!confirm('Estas seguro de eliminar este tenant? Esta accion no se puede deshacer.')) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.delete(`http://localhost:3000/api/admin/tenants/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/admin/tenants/${id}`);
       alert('Tenant eliminado exitosamente');
       navigate('/superadmin/tenants');
     } catch (error: any) {
@@ -133,10 +124,7 @@ export default function TenantDetailPage() {
   const handleSuspend = async () => {
     if (!confirm('Estas seguro de suspender este tenant?')) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post(`http://localhost:3000/api/admin/tenants/${id}/suspend`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(`/admin/tenants/${id}/suspend`);
       fetchTenant();
       alert('Tenant suspendido exitosamente');
     } catch (error: any) {
@@ -148,10 +136,7 @@ export default function TenantDetailPage() {
   const handleReactivate = async () => {
     if (!confirm('Estas seguro de reactivar este tenant?')) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post(`http://localhost:3000/api/admin/tenants/${id}/reactivate`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(`/admin/tenants/${id}/reactivate`);
       fetchTenant();
       alert('Tenant reactivado exitosamente');
     } catch (error: any) {
@@ -165,10 +150,7 @@ export default function TenantDetailPage() {
     if (!id) return;
     try {
       setUsersLoading(true);
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`http://localhost:3000/api/admin/tenants/${id}/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/admin/tenants/${id}/users`);
       setTenantUsers(response.data.data || []);
     } catch (error) {
       console.error('Error fetching tenant users:', error);
@@ -189,12 +171,7 @@ export default function TenantDetailPage() {
       return;
     }
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post(
-        `http://localhost:3000/api/admin/tenants/${id}/users`,
-        addUserForm,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post(`/admin/tenants/${id}/users`, addUserForm);
       setShowAddUserModal(false);
       setAddUserForm({ email: '', name: '', password: '', role: 'DENTIST' });
       fetchTenantUsers();
@@ -208,12 +185,7 @@ export default function TenantDetailPage() {
 
   const handleUpdateUserRole = async (userId: string, newRole: string) => {
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.put(
-        `http://localhost:3000/api/admin/tenants/${id}/users/${userId}/role`,
-        { role: newRole },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.put(`/admin/tenants/${id}/users/${userId}/role`, { role: newRole });
       setEditingUserId(null);
       fetchTenantUsers();
       alert('Rol actualizado exitosamente');
@@ -226,11 +198,7 @@ export default function TenantDetailPage() {
   const handleRemoveUser = async (userId: string, userName: string) => {
     if (!confirm(`Estas seguro de remover a ${userName} de este tenant?`)) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.delete(
-        `http://localhost:3000/api/admin/tenants/${id}/users/${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.delete(`/admin/tenants/${id}/users/${userId}`);
       fetchTenantUsers();
       fetchTenant();
       alert('Usuario removido exitosamente');

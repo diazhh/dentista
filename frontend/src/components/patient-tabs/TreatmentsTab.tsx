@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Calendar, DollarSign, CheckCircle, Clock } from 'lucide-react';
+import api from '../../services/api';
 
 interface TreatmentPlanItem {
   id: string;
@@ -41,29 +42,20 @@ export default function PatientTreatmentsTab({ patientId }: Props) {
 
   const fetchTreatmentPlans = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `http://localhost:3000/api/treatment-plans?patientId=${patientId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        const plansWithProgress = data.map((plan: any) => {
-          const completedItems = plan.items?.filter((item: any) => item.status === 'COMPLETED').length || 0;
-          const totalItems = plan.items?.length || 0;
-          return {
-            ...plan,
-            completedItems,
-            totalItems,
-          };
-        });
-        setTreatmentPlans(plansWithProgress);
-      }
+      const response = await api.get('/treatment-plans', {
+        params: { patientId },
+      });
+      const data = response.data;
+      const plansWithProgress = data.map((plan: any) => {
+        const completedItems = plan.items?.filter((item: any) => item.status === 'COMPLETED').length || 0;
+        const totalItems = plan.items?.length || 0;
+        return {
+          ...plan,
+          completedItems,
+          totalItems,
+        };
+      });
+      setTreatmentPlans(plansWithProgress);
     } catch (error) {
       console.error('Error fetching treatment plans:', error);
     } finally {

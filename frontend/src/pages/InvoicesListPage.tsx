@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Search, Plus, Eye, Filter, DollarSign } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -39,14 +39,11 @@ export default function InvoicesListPage() {
   const fetchInvoices = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const params = new URLSearchParams();
+      const params: Record<string, string> = {};
       if (statusFilter !== 'all') {
-        params.append('status', statusFilter);
+        params.status = statusFilter;
       }
-      const response = await axios.get(`http://localhost:3000/api/invoices?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/invoices', { params });
       setInvoices(response.data);
     } catch (error) {
       console.error('Error fetching invoices:', error);

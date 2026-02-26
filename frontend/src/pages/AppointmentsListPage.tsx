@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Search, Filter, Plus, Eye } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -39,10 +39,7 @@ export default function AppointmentsListPage() {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/appointments', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/appointments');
       setAppointments(response.data);
     } catch (error) {
       console.error('Error fetching appointments:', error);

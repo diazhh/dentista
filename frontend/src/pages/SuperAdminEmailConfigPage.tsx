@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import {
   Mail,
   Plus,
@@ -56,10 +56,7 @@ export default function SuperAdminEmailConfigPage() {
   const fetchConfigs = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:3000/api/admin/email/config/all', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/admin/email/config/all');
       setConfigs(response.data);
     } catch (error) {
       console.error('Error fetching configs:', error);
@@ -70,10 +67,7 @@ export default function SuperAdminEmailConfigPage() {
 
   const handleCreate = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post('http://localhost:3000/api/admin/email/config', formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post('/admin/email/config', formData);
       setShowModal(false);
       resetForm();
       fetchConfigs();
@@ -87,10 +81,7 @@ export default function SuperAdminEmailConfigPage() {
     if (!editingConfig) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.put(`http://localhost:3000/api/admin/email/config/${editingConfig.id}`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/admin/email/config/${editingConfig.id}`, formData);
       setEditingConfig(null);
       resetForm();
       fetchConfigs();
@@ -104,10 +95,7 @@ export default function SuperAdminEmailConfigPage() {
     if (!confirm('¿Estás seguro de eliminar esta configuración?')) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.delete(`http://localhost:3000/api/admin/email/config/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/admin/email/config/${id}`);
       fetchConfigs();
     } catch (error: any) {
       console.error('Error deleting config:', error);
@@ -117,10 +105,7 @@ export default function SuperAdminEmailConfigPage() {
 
   const handleActivate = async (id: string) => {
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post(`http://localhost:3000/api/admin/email/config/${id}/activate`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(`/admin/email/config/${id}/activate`);
       fetchConfigs();
     } catch (error) {
       console.error('Error activating config:', error);
@@ -135,12 +120,7 @@ export default function SuperAdminEmailConfigPage() {
 
     try {
       setTestingConfig(id);
-      const token = localStorage.getItem('accessToken');
-      await axios.post(
-        `http://localhost:3000/api/admin/email/config/${id}/test`,
-        { testEmail },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post(`/admin/email/config/${id}/test`, { testEmail });
       alert('Email de prueba enviado exitosamente');
       setTestEmail('');
       fetchConfigs();

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { DollarSign, CreditCard, Calendar, TrendingUp } from 'lucide-react';
+import api from '../../services/api';
 
 interface Payment {
   id: string;
@@ -38,65 +39,55 @@ export default function PatientPaymentsTab({ patientId }: Props) {
 
   const fetchPayments = async () => {
     try {
-      const token = localStorage.getItem('token');
-      
       // Fetch invoices with payments
-      const invoicesResponse = await fetch(
-        `http://localhost:3000/api/invoices?patientId=${patientId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await api.get('/invoices', {
+        params: { patientId },
+      });
+      const invoices = response.data;
+
+      // Extract all payments from invoices
+      const allPayments: Payment[] = [];
+      for (const invoice of invoices) {
+        if (invoice.payments && invoice.payments.length > 0) {
+          invoice.payments.forEach((payment: any) => {
+            allPayments.push({
+              ...payment,
+              invoice: {
+                id: invoice.id,
+                invoiceNumber: invoice.invoiceNumber,
+              },
+            });
+          });
         }
+      }
+
+      // Sort by date descending
+      allPayments.sort((a, b) =>
+        new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
       );
 
-      if (invoicesResponse.ok) {
-        const invoices = await invoicesResponse.json();
-        
-        // Extract all payments from invoices
-        const allPayments: Payment[] = [];
-        for (const invoice of invoices) {
-          if (invoice.payments && invoice.payments.length > 0) {
-            invoice.payments.forEach((payment: any) => {
-              allPayments.push({
-                ...payment,
-                invoice: {
-                  id: invoice.id,
-                  invoiceNumber: invoice.invoiceNumber,
-                },
-              });
-            });
-          }
-        }
-        
-        // Sort by date descending
-        allPayments.sort((a, b) => 
-          new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
+      setPayments(allPayments);
+
+      // Calculate stats
+      if (allPayments.length > 0) {
+        const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
+        const averagePayment = totalPaid / allPayments.length;
+
+        // Find most used payment method
+        const methodCounts: Record<string, number> = {};
+        allPayments.forEach(p => {
+          methodCounts[p.paymentMethod] = (methodCounts[p.paymentMethod] || 0) + 1;
+        });
+        const mostUsedMethod = Object.keys(methodCounts).reduce((a, b) =>
+          methodCounts[a] > methodCounts[b] ? a : b
         );
-        
-        setPayments(allPayments);
-        
-        // Calculate stats
-        if (allPayments.length > 0) {
-          const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
-          const averagePayment = totalPaid / allPayments.length;
-          
-          // Find most used payment method
-          const methodCounts: Record<string, number> = {};
-          allPayments.forEach(p => {
-            methodCounts[p.paymentMethod] = (methodCounts[p.paymentMethod] || 0) + 1;
-          });
-          const mostUsedMethod = Object.keys(methodCounts).reduce((a, b) => 
-            methodCounts[a] > methodCounts[b] ? a : b
-          );
-          
-          setStats({
-            totalPaid,
-            averagePayment,
-            mostUsedMethod,
-            paymentCount: allPayments.length,
-          });
-        }
+
+        setStats({
+          totalPaid,
+          averagePayment,
+          mostUsedMethod,
+          paymentCount: allPayments.length,
+        });
       }
     } catch (error) {
       console.error('Error fetching payments:', error);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { AlertCircle, Search, Filter, Calendar } from 'lucide-react';
 
 interface AuditLog {
@@ -38,14 +38,11 @@ export default function SuperAdminAuditLogsPage() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-      const params = new URLSearchParams();
-      if (filters.action) params.append('action', filters.action);
-      if (filters.entity) params.append('entity', filters.entity);
+      const params: Record<string, string> = {};
+      if (filters.action) params.action = filters.action;
+      if (filters.entity) params.entity = filters.entity;
 
-      const response = await axios.get(`http://localhost:3000/api/admin/audit-logs?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/admin/audit-logs', { params });
       setLogs(response.data.data);
     } catch (error) {
       console.error('Error fetching audit logs:', error);
@@ -56,10 +53,7 @@ export default function SuperAdminAuditLogsPage() {
 
   const fetchStatistics = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:3000/api/admin/audit-logs/statistics', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/admin/audit-logs/statistics');
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching statistics:', error);

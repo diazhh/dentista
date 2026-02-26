@@ -6,7 +6,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Filter, Plus } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 
 interface Appointment {
   id: string;
@@ -40,10 +40,7 @@ export default function CalendarPage() {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/appointments', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/appointments');
       setAppointments(response.data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -62,17 +59,10 @@ export default function CalendarPage() {
 
   const handleEventDrop = async (info: any) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        `http://localhost:3000/api/appointments/${info.event.id}`,
-        {
-          startTime: info.event.start.toISOString(),
-          endTime: info.event.end?.toISOString() || info.event.start.toISOString(),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.patch(`/appointments/${info.event.id}`, {
+        startTime: info.event.start.toISOString(),
+        endTime: info.event.end?.toISOString() || info.event.start.toISOString(),
+      });
       fetchAppointments();
     } catch (error) {
       console.error('Error updating appointment:', error);

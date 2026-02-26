@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import {
   Mail,
   CheckCircle,
@@ -41,16 +41,12 @@ export default function SuperAdminEmailLogsPage() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
       const params: any = { limit: filter.limit };
       if (filter.templateId) {
         params.templateId = filter.templateId;
       }
 
-      const response = await axios.get('http://localhost:3000/api/admin/email/logs', {
-        headers: { Authorization: `Bearer ${token}` },
-        params,
-      });
+      const response = await api.get('/admin/email/logs', { params });
       setLogs(response.data);
     } catch (error) {
       console.error('Error fetching logs:', error);

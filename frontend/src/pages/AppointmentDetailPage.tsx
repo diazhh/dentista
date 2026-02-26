@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Calendar, Clock, User, FileText, Edit, Trash2, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -36,10 +36,7 @@ export default function AppointmentDetailPage() {
   const fetchAppointment = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3000/api/appointments/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/appointments/${id}`);
       setAppointment(response.data);
     } catch (error) {
       console.error('Error fetching appointment:', error);
@@ -52,14 +49,7 @@ export default function AppointmentDetailPage() {
     if (!appointment) return;
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        `http://localhost:3000/api/appointments/${id}`,
-        { status: newStatus },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.patch(`/appointments/${id}`, { status: newStatus });
       fetchAppointment();
     } catch (error) {
       console.error('Error updating status:', error);
@@ -71,10 +61,7 @@ export default function AppointmentDetailPage() {
     if (!confirm('¿Está seguro de que desea cancelar esta cita?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/appointments/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/appointments/${id}`);
       navigate('/calendar');
     } catch (error) {
       console.error('Error deleting appointment:', error);

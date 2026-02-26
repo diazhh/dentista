@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { FileText, Download, Eye, Calendar, Tag } from 'lucide-react';
+import api from '../../services/api';
 
 interface Document {
   id: string;
@@ -30,20 +31,10 @@ export default function PatientDocumentsTab({ patientId }: Props) {
 
   const fetchDocuments = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `http://localhost:3000/api/documents?patientId=${patientId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setDocuments(data);
-      }
+      const response = await api.get('/documents', {
+        params: { patientId },
+      });
+      setDocuments(response.data);
     } catch (error) {
       console.error('Error fetching documents:', error);
     } finally {

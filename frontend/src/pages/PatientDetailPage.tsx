@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Button } from '../components/ui/button';
 import PatientHeader from '../components/patient/PatientHeader';
 import PatientTabsContainer from '../components/patient/PatientTabsContainer';
+import api from '../services/api';
 
 interface Patient {
   id: string;
@@ -39,17 +40,8 @@ export default function PatientDetailPage() {
   const fetchPatient = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/patients/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setPatient(data);
-      }
+      const response = await api.get(`/patients/${id}`);
+      setPatient(response.data);
     } catch (error) {
       console.error('Error fetching patient:', error);
     } finally {

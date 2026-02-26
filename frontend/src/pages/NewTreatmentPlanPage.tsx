@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Save, X, Plus, Trash2, User } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 
 interface Patient {
   id: string;
@@ -59,10 +59,7 @@ export default function NewTreatmentPlanPage() {
 
   const fetchPatients = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/patients', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/patients');
       setPatients(response.data);
     } catch (error) {
       console.error('Error fetching patients:', error);
@@ -101,8 +98,6 @@ export default function NewTreatmentPlanPage() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      
       const cleanedItems = items.map(item => ({
         ...item,
         tooth: item.tooth || undefined,
@@ -112,21 +107,15 @@ export default function NewTreatmentPlanPage() {
         notes: item.notes || undefined,
       }));
 
-      await axios.post(
-        'http://localhost:3000/api/treatment-plans',
-        {
-          ...formData,
-          description: formData.description || undefined,
-          diagnosis: formData.diagnosis || undefined,
-          startDate: formData.startDate || undefined,
-          endDate: formData.endDate || undefined,
-          notes: formData.notes || undefined,
-          items: cleanedItems,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post('/treatment-plans', {
+        ...formData,
+        description: formData.description || undefined,
+        diagnosis: formData.diagnosis || undefined,
+        startDate: formData.startDate || undefined,
+        endDate: formData.endDate || undefined,
+        notes: formData.notes || undefined,
+        items: cleanedItems,
+      });
 
       navigate('/treatment-plans');
     } catch (error: any) {

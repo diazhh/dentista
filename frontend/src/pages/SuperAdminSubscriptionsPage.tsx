@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { DollarSign, TrendingUp, Package, Edit, CheckCircle } from 'lucide-react';
 
 interface Tenant {
@@ -31,10 +31,7 @@ export default function SuperAdminSubscriptionsPage() {
   const fetchTenants = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:3000/api/admin/tenants', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/admin/tenants');
       setTenants(response.data.data || response.data);
     } catch (error) {
       console.error('Error fetching tenants:', error);
@@ -55,12 +52,7 @@ export default function SuperAdminSubscriptionsPage() {
 
   const handleSave = async (tenantId: string) => {
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.put(
-        `http://localhost:3000/api/admin/tenants/${tenantId}/subscription`,
-        editForm,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.put(`/admin/tenants/${tenantId}/subscription`, editForm);
       setEditingTenant(null);
       fetchTenants();
       alert('Suscripcion actualizada exitosamente');

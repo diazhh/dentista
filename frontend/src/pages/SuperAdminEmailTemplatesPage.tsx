@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import {
   Mail,
   Plus,
@@ -68,9 +68,7 @@ export default function SuperAdminEmailTemplatesPage() {
   const fetchTemplates = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:3000/api/admin/email/templates', {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await api.get('/admin/email/templates', {
         params: { includeInactive: 'true' },
       });
       setTemplates(response.data);
@@ -83,10 +81,7 @@ export default function SuperAdminEmailTemplatesPage() {
 
   const fetchStatistics = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:3000/api/admin/email/templates/statistics', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/admin/email/templates/statistics');
       setStatistics(response.data);
     } catch (error) {
       console.error('Error fetching statistics:', error);
@@ -95,10 +90,7 @@ export default function SuperAdminEmailTemplatesPage() {
 
   const handleCreate = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post('http://localhost:3000/api/admin/email/templates', formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post('/admin/email/templates', formData);
       setShowModal(false);
       resetForm();
       fetchTemplates();
@@ -113,10 +105,7 @@ export default function SuperAdminEmailTemplatesPage() {
     if (!editingTemplate) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.put(`http://localhost:3000/api/admin/email/templates/${editingTemplate.id}`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/admin/email/templates/${editingTemplate.id}`, formData);
       setEditingTemplate(null);
       resetForm();
       fetchTemplates();
@@ -130,10 +119,7 @@ export default function SuperAdminEmailTemplatesPage() {
     if (!confirm('¿Estas seguro de eliminar esta plantilla?')) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.delete(`http://localhost:3000/api/admin/email/templates/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/admin/email/templates/${id}`);
       fetchTemplates();
       fetchStatistics();
     } catch (error: any) {
@@ -144,11 +130,8 @@ export default function SuperAdminEmailTemplatesPage() {
 
   const handleToggleActive = async (template: EmailTemplate) => {
     try {
-      const token = localStorage.getItem('accessToken');
       const endpoint = template.isActive ? 'deactivate' : 'activate';
-      await axios.post(`http://localhost:3000/api/admin/email/templates/${template.id}/${endpoint}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(`/admin/email/templates/${template.id}/${endpoint}`);
       fetchTemplates();
       fetchStatistics();
     } catch (error) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import OdontogramChart from '../components/OdontogramChart';
 
 interface Patient {
@@ -58,10 +58,7 @@ export default function NewOdontogramPage() {
 
   const fetchPatients = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/patients', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/patients');
       setPatients(response.data);
     } catch (error) {
       console.error('Error fetching patients:', error);
@@ -120,24 +117,17 @@ export default function NewOdontogramPage() {
 
     setSaving(true);
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        'http://localhost:3000/api/odontograms',
-        {
-          patientId: selectedPatient,
-          notes,
-          teeth: teeth.map(t => ({
-            toothNumber: t.toothNumber,
-            condition: t.condition,
-            surfaces: t.surfaces,
-            notes: t.notes,
-            color: t.color,
-          })),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post('/odontograms', {
+        patientId: selectedPatient,
+        notes,
+        teeth: teeth.map(t => ({
+          toothNumber: t.toothNumber,
+          condition: t.condition,
+          surfaces: t.surfaces,
+          notes: t.notes,
+          color: t.color,
+        })),
+      });
 
       navigate('/odontograms');
     } catch (error: any) {

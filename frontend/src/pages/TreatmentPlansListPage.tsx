@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Search, Plus, Eye, Filter } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -40,10 +40,7 @@ export default function TreatmentPlansListPage() {
   const fetchPlans = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/treatment-plans', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/treatment-plans');
       setPlans(response.data);
     } catch (error) {
       console.error('Error fetching treatment plans:', error);
