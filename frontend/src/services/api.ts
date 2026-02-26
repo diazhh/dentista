@@ -907,4 +907,16 @@ export const insuranceAPI = {
   },
 };
 
+// User Profile API
+export const userProfileAPI = {
+  updateProfile: async (data: { name?: string; email?: string; phone?: string }) => {
+    const response = await api.patch('/users/me', data);
+    return response.data;
+  },
+  changePassword: async (data: { currentPassword: string; newPassword: string }) => {
+    const response = await api.patch('/users/me/password', data);
+    return response.data;
+  },
+};
+
 export default api;

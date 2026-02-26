@@ -28,8 +28,9 @@
 - **Descripción:** El `ChatController` usaba interfaces TypeScript inline en lugar de DTOs con class-validator.
 - **Corrección:** Creado `backend/src/chatbot/dto/chat-message.dto.ts` con `SendMessageDto` y `EndSessionDto` usando `@IsString()`, `@IsNotEmpty()`, `@MaxLength(2000)`. Controller reescrito para usar los DTOs y eliminar dead try-catch en `endSession`.
 
-### P1-003: Chat Controller sin rate limiting
+### ~~P1-003: Chat Controller sin rate limiting~~ CORREGIDO
 - **Descripción:** El endpoint `/api/chat/send` es público (sin JWT) y no tiene rate limiting, vulnerable a abuso/spam.
+- **Corrección:** ThrottlerModule global configurado con limit: 20 req/min. ChatController usa @UseGuards(ThrottlerGuard) con @Throttle limit: 10 req/min en /message y 10 req/min en /end-session.
 - **Archivos afectados:**
   - `backend/src/chatbot/chat.controller.ts` — Agregar `@Throttle()` decorator
   - `backend/src/app.module.ts` — Importar `ThrottlerModule` si no existe
@@ -41,8 +42,9 @@
   3. Agregar `@Throttle(20, 60)` al ChatController
   4. Considerar throttle más agresivo para `/send` (10 req/min)
 
-### P1-004: TenantSettingsPage — profile update no implementado
+### ~~P1-004: TenantSettingsPage — profile update no implementado~~ CORREGIDO
 - **Descripción:** La página de configuración del tenant tiene un TODO para implementar la llamada API de actualización de perfil.
+- **Corrección:** Creado `userProfileAPI` en api.ts con `updateProfile()` y `changePassword()`. TenantSettingsPage actualizado para usar las funciones API tipadas con feedback de éxito/error.
 - **Archivos afectados:**
   - `frontend/src/pages/TenantSettingsPage.tsx:18`
   - `frontend/src/services/api.ts` — Verificar si existe `tenantAPI.updateSettings()`
@@ -184,11 +186,11 @@
 - [x] ~~Dead code: example-casl.controller.ts~~ DONE
 - [x] ~~Silent catches sin logging~~ DONE
 - [x] ~~Dead try-catch chat.controller.ts~~ DONE
-- [ ] P1-003: Rate limiting (requiere instalar `@nestjs/throttler`)
+- [x] ~~P1-003: Rate limiting~~ DONE
 
 ### Sprint 2 (Próxima semana — 3-5 días)
-- [ ] P1-003: Rate limiting
-- [ ] P1-004: TenantSettingsPage implementation
+- [x] ~~P1-003: Rate limiting~~ DONE
+- [x] ~~P1-004: TenantSettingsPage implementation~~ DONE
 - [ ] P2-001: Seeds para 7 especialidades faltantes
 - [ ] P2-002: Seeds para Invoice/Payment
 - [ ] P2-005: Prisma relations para modelos Phase 6
@@ -226,4 +228,4 @@
 | TODOs pendientes | 1 |
 | Bugs encontrados | 2 (corregidos) |
 | Issues de código corregidos | 9 (DTOs, logging, branding, dead code) |
-| Items pendientes | 3 (rate limiting, seeds, TenantSettings) |
+| Items pendientes | 1 (seeds) |

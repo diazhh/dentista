@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Settings, User, Mail, Phone, Lock, Save, CheckCircle, AlertCircle } from 'lucide-react';
-import api from '../services/api';
+import { userProfileAPI } from '../services/api';
 
 export default function TenantSettingsPage() {
   const { user } = useAuth();
@@ -28,7 +28,7 @@ export default function TenantSettingsPage() {
     setSaving(true);
     setMessage(null);
     try {
-      await api.patch('/users/me', formData);
+      await userProfileAPI.updateProfile(formData);
       setMessage({ type: 'success', text: 'Perfil actualizado exitosamente' });
     } catch (error: any) {
       const msg = error.response?.data?.message;
@@ -51,7 +51,7 @@ export default function TenantSettingsPage() {
     setChangingPassword(true);
     setMessage(null);
     try {
-      await api.patch('/users/me/password', {
+      await userProfileAPI.changePassword({
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
