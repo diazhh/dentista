@@ -55,7 +55,7 @@ import { InsuranceModule } from './insurance/insurance.module';
     ThrottlerModule.forRoot([{
       name: 'default',
       ttl: 60_000,
-      limit: 100,
+      limit: 20,
     }]),
     BullModule.forRoot({
       redis: {

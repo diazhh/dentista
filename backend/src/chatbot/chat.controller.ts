@@ -24,7 +24,7 @@ export class ChatController {
   constructor(private readonly messageRouter: MessageRouterService) {}
 
   @Post('message')
-  @Throttle({ default: { ttl: 60_000, limit: 20 } })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async sendMessage(@Body() dto: SendMessageDto) {
     try {
       const response = await this.messageRouter.processMessage({
