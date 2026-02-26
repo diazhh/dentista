@@ -109,6 +109,12 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(@whiskeysockets/baileys)/)"
+    ],
+    "moduleNameMapper": {
+      "^@whiskeysockets/baileys$": "<rootDir>/../test/helpers/__mocks__/baileys.ts"
+    },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
