@@ -46,6 +46,13 @@ import { NutritionModule } from './modules/nutrition/nutrition.module';
 import { GynecologyModule } from './modules/gynecology/gynecology.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { InsuranceModule } from './insurance/insurance.module';
+// Dental-specific modules
+import { PeriodontalModule } from './modules/dental/periodontal/periodontal.module';
+import { ImagingModule } from './modules/dental/imaging/imaging.module';
+import { LabCasesModule } from './modules/dental/lab-cases/lab-cases.module';
+import { RecallModule } from './modules/dental/recall/recall.module';
+import { FeeScheduleModule } from './modules/dental/fee-schedule/fee-schedule.module';
+import { ConsentModule } from './modules/dental/consent/consent.module';
 
 @Module({
   imports: [
@@ -108,6 +115,13 @@ import { InsuranceModule } from './insurance/insurance.module';
     GynecologyModule,
     InventoryModule,
     InsuranceModule,
+    // Dental-specific modules
+    PeriodontalModule,
+    ImagingModule,
+    LabCasesModule,
+    RecallModule,
+    FeeScheduleModule,
+    ConsentModule,
   ],
 })
 export class AppModule { }

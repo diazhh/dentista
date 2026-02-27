@@ -138,6 +138,14 @@ export class AppointmentsController {
     return this.appointmentsService.removeProcedure(id, procedureId, providerId, tenantId);
   }
 
+  @Get(':id/walkout-statement')
+  @ApiOperation({ summary: 'Get walkout statement / visit summary for printing' })
+  getWalkoutStatement(@Param('id') id: string, @Request() req) {
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.appointmentsService.getWalkoutStatement(id, providerId, tenantId);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Delete appointment' })
   remove(@Param('id') id: string, @Request() req) {

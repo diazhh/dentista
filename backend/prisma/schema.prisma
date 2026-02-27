@@ -382,6 +382,14 @@ model Tenant {
   insuranceProviders InsuranceProvider[]
   patientInsurances  PatientInsurance[]
 
+  // Dental-specific modules
+  periodontalExams   PeriodontalExam[]
+  dentalImages       DentalImage[]
+  labCases           LabCase[]
+  dentalRecalls      DentalRecall[]
+  feeSchedules       FeeSchedule[]
+  procedureConsents  ProcedureConsent[]
+
   @@index([ownerId])
   @@map("tenants")
 }
@@ -475,6 +483,13 @@ model Patient {
 
   // Insurance
   patientInsurances PatientInsurance[]
+
+  // Dental-specific modules
+  periodontalExams  PeriodontalExam[]
+  dentalImages      DentalImage[]
+  labCases          LabCase[]
+  dentalRecalls     DentalRecall[]
+  procedureConsents ProcedureConsent[]
 
   @@unique([documentType, documentId])
   @@map("patients")
@@ -1144,11 +1159,18 @@ model InvoiceItem {
   unitPrice   Float  @map("unit_price")
   total       Float
 
+  // Dental: link to procedure
+  procedureId   String? @map("procedure_id")
+  cdtCode       String? @map("cdt_code")
+  toothNumber   Int?    @map("tooth_number")
+  surfaces      String[]
+
   createdAt DateTime @default(now()) @map("created_at")
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@index([invoiceId])
+  @@index([procedureId])
   @@map("invoice_items")
 }
 
@@ -2210,4 +2232,288 @@ model PatientInsurance {
   @@index([tenantId])
   @@index([verificationStatus])
   @@map("patient_insurances")
+}
+
+// ==========================================
+// Periodontal Chart
+// ==========================================
+
+model PeriodontalExam {
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  providerId String @map("provider_id")
+  tenantId   String @map("tenant_id")
+
+  examDate DateTime @default(now()) @map("exam_date")
+  examType String   @default("COMPREHENSIVE") @map("exam_type") // COMPREHENSIVE, LIMITED, MAINTENANCE
+
+  notes             String? @db.Text
+  diagnosis         String? // HEALTHY, GINGIVITIS, MILD_PERIODONTITIS, MODERATE_PERIODONTITIS, SEVERE_PERIODONTITIS
+  overallPlaque     Float?  @map("overall_plaque") // percentage 0-100
+  overallBleeding   Float?  @map("overall_bleeding") // percentage 0-100
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient  Patient              @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant   Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  readings PeriodontalReading[]
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@index([examDate])
+  @@map("periodontal_exams")
+}
+
+model PeriodontalReading {
+  id     String @id @default(uuid())
+  examId String @map("exam_id")
+
+  toothNumber Int @map("tooth_number") // FDI notation
+
+  // Buccal readings (mesio-buccal, mid-buccal, disto-buccal)
+  pocketDepthBuccal    Int[] @map("pocket_depth_buccal") // [MB, B, DB] in mm
+  gingivalMarginBuccal Int[] @map("gingival_margin_buccal") // [MB, B, DB] negative = recession
+  bleedingBuccal       Boolean[] @map("bleeding_buccal") // [MB, B, DB]
+
+  // Lingual readings (mesio-lingual, mid-lingual, disto-lingual)
+  pocketDepthLingual    Int[] @map("pocket_depth_lingual") // [ML, L, DL]
+  gingivalMarginLingual Int[] @map("gingival_margin_lingual") // [ML, L, DL]
+  bleedingLingual       Boolean[] @map("bleeding_lingual") // [ML, L, DL]
+
+  // Per-tooth indicators
+  plaque      Boolean @default(false)
+  calculus    Boolean @default(false)
+  suppuration Boolean @default(false)
+  furcation   Int?    // 0-3 grade, null if not multi-rooted
+  mobility    Int?    // 0-3 grade
+
+  notes String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  exam PeriodontalExam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, toothNumber])
+  @@index([examId])
+  @@map("periodontal_readings")
+}
+
+// ==========================================
+// Dental Imaging / Radiographs
+// ==========================================
+
+model DentalImage {
+  id            String @id @default(uuid())
+  patientId     String @map("patient_id")
+  providerId    String @map("provider_id")
+  tenantId      String @map("tenant_id")
+  appointmentId String? @map("appointment_id")
+
+  imageType  String  @map("image_type") // PERIAPICAL, BITEWING, PANORAMIC, CEPHALOMETRIC, CBCT, INTRAORAL_PHOTO, EXTRAORAL_PHOTO
+  toothNumber Int?   @map("tooth_number") // FDI, null for panoramic/full-mouth
+  region      String? // UPPER_RIGHT, UPPER_LEFT, LOWER_RIGHT, LOWER_LEFT, FULL_MOUTH, ANTERIOR, POSTERIOR
+
+  fileName    String  @map("file_name")
+  filePath    String  @map("file_path")
+  fileSize    Int?    @map("file_size") // bytes
+  mimeType    String  @default("image/jpeg") @map("mime_type")
+
+  description String?
+  findings    String? @db.Text
+  takenDate   DateTime @default(now()) @map("taken_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@index([appointmentId])
+  @@index([imageType])
+  @@index([takenDate])
+  @@map("dental_images")
+}
+
+// ==========================================
+// Lab Case Management
+// ==========================================
+
+model LabCase {
+  id            String  @id @default(uuid())
+  patientId     String  @map("patient_id")
+  providerId    String  @map("provider_id")
+  tenantId      String  @map("tenant_id")
+  appointmentId String? @map("appointment_id")
+
+  labName      String  @map("lab_name")
+  labPhone     String? @map("lab_phone")
+  caseNumber   String? @map("case_number")
+
+  workType     String  @map("work_type") // CROWN, BRIDGE, DENTURE, PARTIAL, IMPLANT_ABUTMENT, NIGHTGUARD, RETAINER, VENEER, INLAY_ONLAY, OTHER
+  toothNumbers Int[]   @map("tooth_numbers") // FDI notation
+  shade        String? // A1, A2, B1, etc.
+  material     String? // PORCELAIN, ZIRCONIA, PFM, GOLD, EMAX, ACRYLIC, etc.
+
+  specifications String? @db.Text // detailed lab instructions
+  notes          String? @db.Text
+
+  status    String   @default("SENT") // SENT, IN_PROGRESS, RECEIVED, TRIED_IN, SEATED, RETURNED, CANCELLED
+  sentDate  DateTime @default(now()) @map("sent_date")
+  dueDate   DateTime? @map("due_date")
+  receivedDate DateTime? @map("received_date")
+  seatedDate   DateTime? @map("seated_date")
+
+  labFee       Float?  @map("lab_fee")
+  patientFee   Float?  @map("patient_fee")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("lab_cases")
+}
+
+// ==========================================
+// Dental Recall System
+// ==========================================
+
+model DentalRecall {
+  id         String @id @default(uuid())
+  patientId  String @map("patient_id")
+  providerId String @map("provider_id")
+  tenantId   String @map("tenant_id")
+
+  recallType   String   @map("recall_type") // PROPHY, PERIO_MAINTENANCE, EXAM, XRAY_BW, XRAY_PANO, FLUORIDE, SEALANT_CHECK
+  intervalMonths Int    @map("interval_months") // e.g., 6 for biannual prophy
+  dueDate      DateTime @map("due_date")
+
+  status       String   @default("ACTIVE") // ACTIVE, SCHEDULED, COMPLETED, OVERDUE, CANCELLED
+  lastCompletedDate DateTime? @map("last_completed_date")
+  lastAppointmentId String?   @map("last_appointment_id")
+
+  // Outreach tracking
+  remindersSent    Int      @default(0) @map("reminders_sent")
+  lastReminderDate DateTime? @map("last_reminder_date")
+  reminderChannel  String?   @map("reminder_channel") // SMS, EMAIL, WHATSAPP, PHONE
+
+  notes String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@index([dueDate])
+  @@index([status])
+  @@index([recallType])
+  @@map("dental_recalls")
+}
+
+// ==========================================
+// Fee Schedule / Tarifario
+// ==========================================
+
+model FeeSchedule {
+  id       String @id @default(uuid())
+  tenantId String @map("tenant_id")
+
+  name        String // "Tarifa Privada", "ARS Humano", "ARS Senasa"
+  description String?
+  isDefault   Boolean @default(false) @map("is_default")
+  isActive    Boolean @default(true) @map("is_active")
+
+  effectiveDate  DateTime  @default(now()) @map("effective_date")
+  expirationDate DateTime? @map("expiration_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items  FeeScheduleItem[]
+
+  @@index([tenantId])
+  @@index([isActive])
+  @@map("fee_schedules")
+}
+
+model FeeScheduleItem {
+  id            String @id @default(uuid())
+  feeScheduleId String @map("fee_schedule_id")
+
+  cdtCode       String @map("cdt_code") // D0120, D2391, etc.
+  procedureName String @map("procedure_name")
+  category      String // DIAGNOSTIC, PREVENTIVE, RESTORATIVE, ENDODONTICS, PERIODONTICS, PROSTHODONTICS, SURGERY, ORTHODONTICS, ADJUNCTIVE
+  description   String?
+
+  fee           Float
+  insuranceFee  Float? @map("insurance_fee") // what insurance typically pays
+  patientCopay  Float? @map("patient_copay")
+
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  feeSchedule FeeSchedule @relation(fields: [feeScheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([feeScheduleId, cdtCode])
+  @@index([feeScheduleId])
+  @@index([cdtCode])
+  @@index([category])
+  @@map("fee_schedule_items")
+}
+
+// ==========================================
+// Procedure-Specific Consent Forms
+// ==========================================
+
+model ProcedureConsent {
+  id            String @id @default(uuid())
+  patientId     String @map("patient_id")
+  providerId    String @map("provider_id")
+  tenantId      String @map("tenant_id")
+  appointmentId String? @map("appointment_id")
+
+  procedureType String @map("procedure_type") // EXTRACTION, ROOT_CANAL, IMPLANT, SURGERY, SEDATION, etc.
+  toothNumbers  Int[]  @map("tooth_numbers")
+
+  consentText  String @db.Text @map("consent_text")
+  risks        String[] // list of disclosed risks
+  alternatives String[] // list of alternatives discussed
+
+  patientSignature  String? @map("patient_signature") // base64 or path
+  signedAt          DateTime? @map("signed_at")
+  witnessName       String?  @map("witness_name")
+  witnessSignature  String?  @map("witness_signature")
+
+  status String @default("PENDING") // PENDING, SIGNED, DECLINED, REVOKED
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([tenantId])
+  @@index([appointmentId])
+  @@index([status])
+  @@map("procedure_consents")
 }

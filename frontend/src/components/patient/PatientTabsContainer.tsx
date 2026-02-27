@@ -26,6 +26,11 @@ import {
   Apple,
   Scale,
   Baby,
+  GitBranch,
+  Image,
+  Package,
+  Bell,
+  FileCheck,
 } from 'lucide-react';
 
 // Icon map for dynamic rendering based on iconName string
@@ -53,6 +58,11 @@ const iconMap: Record<string, React.ReactNode> = {
   'apple': <Apple className="h-4 w-4" />,
   'scale': <Scale className="h-4 w-4" />,
   'baby': <Baby className="h-4 w-4" />,
+  'git-branch': <GitBranch className="h-4 w-4" />,
+  'image': <Image className="h-4 w-4" />,
+  'package': <Package className="h-4 w-4" />,
+  'bell': <Bell className="h-4 w-4" />,
+  'file-check': <FileCheck className="h-4 w-4" />,
 };
 
 interface PatientTabsContainerProps {

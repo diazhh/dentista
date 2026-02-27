@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, ChevronLeft, ChevronRight, ExternalLink, CheckCircle2, FileText } from 'lucide-react';
 import api from '../../services/api';
 
 interface Appointment {
@@ -12,6 +13,8 @@ interface Appointment {
   status: string;
   procedureType: string;
   notes?: string;
+  clinicalNoteComplete?: boolean;
+  procedures?: { id: string }[];
 }
 
 interface Props {
@@ -20,7 +23,20 @@ interface Props {
 
 const PAGE_SIZE = 10;
 
+const PROCEDURE_LABELS: Record<string, string> = {
+  CHECKUP: 'Revision', CLEANING: 'Limpieza', FILLING: 'Obturacion', ROOT_CANAL: 'Endodoncia',
+  EXTRACTION: 'Extraccion', CROWN: 'Corona', BRIDGE: 'Puente', IMPLANT: 'Implante',
+  WHITENING: 'Blanqueamiento', SCALING: 'Raspado', SEALANT: 'Sellante', XRAY: 'Radiografia',
+  ORTHODONTICS: 'Ortodoncia', VENEER: 'Carilla', INLAY_ONLAY: 'Inlay/Onlay', OTHER: 'Otro',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  SCHEDULED: 'Programada', CONFIRMED: 'Confirmada', IN_PROGRESS: 'En Progreso',
+  COMPLETED: 'Completada', CANCELLED: 'Cancelada', NO_SHOW: 'No Asistio',
+};
+
 export default function PatientAppointmentsTab({ patientId }: Props) {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -114,11 +130,27 @@ export default function PatientAppointmentsTab({ patientId }: Props) {
         <>
           <div className="grid gap-4">
             {appointments.map((appointment) => (
-              <Card key={appointment.id}>
+              <Card
+                key={appointment.id}
+                className="cursor-pointer hover:shadow-md hover:border-blue-200 transition-all"
+                onClick={() => navigate(`/appointments/${appointment.id}`)}
+              >
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">{appointment.procedureType}</CardTitle>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {PROCEDURE_LABELS[appointment.procedureType] || appointment.procedureType}
+                        {appointment.clinicalNoteComplete && (
+                          <span title="Nota SOAP completa">
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                          </span>
+                        )}
+                        {(appointment.procedures?.length ?? 0) > 0 && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-normal">
+                            {appointment.procedures!.length} proc.
+                          </span>
+                        )}
+                      </CardTitle>
                       <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
                         <div className="flex items-center">
                           <Calendar className="mr-1 h-4 w-4" />
@@ -130,14 +162,17 @@ export default function PatientAppointmentsTab({ patientId }: Props) {
                         </div>
                       </div>
                     </div>
-                    <Badge className={getStatusColor(appointment.status)}>
-                      {appointment.status}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getStatusColor(appointment.status)}>
+                        {STATUS_LABELS[appointment.status] || appointment.status}
+                      </Badge>
+                      <ExternalLink className="h-4 w-4 text-gray-400" />
+                    </div>
                   </div>
                 </CardHeader>
                 {appointment.notes && (
                   <CardContent>
-                    <p className="text-sm text-gray-600">{appointment.notes}</p>
+                    <p className="text-sm text-gray-600 line-clamp-2">{appointment.notes}</p>
                   </CardContent>
                 )}
               </Card>

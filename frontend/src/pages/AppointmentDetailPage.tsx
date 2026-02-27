@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
   Calendar, Clock, User, FileText, Edit, Trash2, CheckCircle, XCircle, ArrowLeft,
-  Plus, Save, Stethoscope, Pill, AlertTriangle, ClipboardList, Activity, Smile
+  Plus, Save, Stethoscope, Pill, AlertTriangle, ClipboardList, Activity, Smile, Printer
 } from 'lucide-react';
 import api from '../services/api';
 import { format, addMinutes } from 'date-fns';
@@ -87,6 +87,9 @@ export default function AppointmentDetailPage() {
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState('info');
   const [showProcedureForm, setShowProcedureForm] = useState(false);
+  const [showWalkout, setShowWalkout] = useState(false);
+  const [walkoutData, setWalkoutData] = useState<any>(null);
+  const [loadingWalkout, setLoadingWalkout] = useState(false);
 
   // SOAP form state
   const [soap, setSoap] = useState({
@@ -224,6 +227,81 @@ export default function AppointmentDetailPage() {
     }
   };
 
+  const handlePrintWalkout = async () => {
+    try {
+      setLoadingWalkout(true);
+      const response = await api.get(`/appointments/${id}/walkout-statement`);
+      setWalkoutData(response.data);
+      setShowWalkout(true);
+    } catch (error) {
+      console.error('Error fetching walkout statement:', error);
+      alert('Error al generar el resumen de visita');
+    } finally {
+      setLoadingWalkout(false);
+    }
+  };
+
+  const printWalkout = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow || !walkoutData) return;
+    const w = walkoutData;
+    const procRows = (w.procedures || []).map((p: any) =>
+      `<tr>
+        <td style="padding:6px 8px;border-bottom:1px solid #eee">${getProcedureLabel(p.procedureType)}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid #eee">${p.toothNumber || '-'}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid #eee">${p.cdtCode || '-'}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right">RD$ ${(p.cost || 0).toFixed(2)}</td>
+      </tr>`
+    ).join('');
+    const totalCost = (w.procedures || []).reduce((s: number, p: any) => s + (p.cost || 0), 0);
+
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Resumen de Visita</title>
+      <style>body{font-family:Arial,sans-serif;max-width:700px;margin:20px auto;color:#333;font-size:14px}
+      h1{font-size:20px;margin-bottom:4px} h2{font-size:16px;color:#555;margin:20px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
+      table{width:100%;border-collapse:collapse} th{text-align:left;padding:6px 8px;background:#f5f5f5;border-bottom:2px solid #ddd}
+      .header{display:flex;justify-content:space-between;align-items:start;border-bottom:2px solid #333;padding-bottom:12px;margin-bottom:16px}
+      .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px} .info-item{display:flex;gap:4px}
+      .info-label{color:#666;min-width:120px} .footer{margin-top:30px;border-top:1px solid #ddd;padding-top:10px;font-size:12px;color:#888;text-align:center}
+      @media print{body{margin:0;padding:15px}}</style></head><body>
+      <div class="header"><div><h1>${w.clinic?.name || 'Clinica Dental'}</h1>
+      <p style="color:#666;margin:0">${w.clinic?.address || ''}</p>
+      <p style="color:#666;margin:0">${w.clinic?.phone || ''}</p></div>
+      <div style="text-align:right"><p style="font-weight:bold;margin:0">RESUMEN DE VISITA</p>
+      <p style="color:#666;margin:0">${w.visitDate ? format(new Date(w.visitDate), 'PPP', { locale: es }) : ''}</p></div></div>
+
+      <h2>Paciente</h2>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">Nombre:</span><strong>${w.patient?.name || ''}</strong></div>
+        <div class="info-item"><span class="info-label">Cedula:</span>${w.patient?.documentId || ''}</div>
+        <div class="info-item"><span class="info-label">Telefono:</span>${w.patient?.phone || ''}</div>
+        <div class="info-item"><span class="info-label">Proveedor:</span>${w.provider?.name || ''}</div>
+      </div>
+
+      <h2>Procedimientos Realizados</h2>
+      ${(w.procedures || []).length > 0 ? `<table><thead><tr><th>Procedimiento</th><th>Diente</th><th>Codigo</th><th style="text-align:right">Costo</th></tr></thead>
+      <tbody>${procRows}<tr style="font-weight:bold"><td colspan="3" style="padding:8px;border-top:2px solid #333">TOTAL</td>
+      <td style="padding:8px;border-top:2px solid #333;text-align:right">RD$ ${totalCost.toFixed(2)}</td></tr></tbody></table>`
+      : '<p style="color:#888">No se realizaron procedimientos</p>'}
+
+      ${w.soapSummary ? `<h2>Resumen Clinico</h2>
+      ${w.soapSummary.assessment ? `<p><strong>Diagnostico:</strong> ${w.soapSummary.assessment}</p>` : ''}
+      ${w.soapSummary.plan ? `<p><strong>Plan:</strong> ${w.soapSummary.plan}</p>` : ''}
+      ${w.soapSummary.postProcedureInstructions ? `<h2>Instrucciones Post-procedimiento</h2><p>${w.soapSummary.postProcedureInstructions}</p>` : ''}
+      ${w.soapSummary.followUpNotes ? `<h2>Seguimiento</h2><p>${w.soapSummary.followUpNotes}</p>` : ''}` : ''}
+
+      ${w.invoice ? `<h2>Factura</h2><div class="info-grid">
+      <div class="info-item"><span class="info-label">Subtotal:</span>RD$ ${(w.invoice.subtotal || 0).toFixed(2)}</div>
+      <div class="info-item"><span class="info-label">Impuesto:</span>RD$ ${(w.invoice.tax || 0).toFixed(2)}</div>
+      <div class="info-item"><span class="info-label">Total:</span><strong>RD$ ${(w.invoice.total || 0).toFixed(2)}</strong></div>
+      <div class="info-item"><span class="info-label">Pagado:</span>RD$ ${(w.invoice.paid || 0).toFixed(2)}</div>
+      <div class="info-item"><span class="info-label">Balance:</span><strong>RD$ ${(w.invoice.balance || 0).toFixed(2)}</strong></div></div>` : ''}
+
+      <div class="footer"><p>Gracias por su visita. Si tiene alguna pregunta, no dude en contactarnos.</p>
+      <p>Generado el ${format(new Date(), 'PPP p', { locale: es })}</p></div></body></html>`);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   const handleDelete = async () => {
     if (!confirm('¿Está seguro de que desea eliminar esta cita?')) return;
     try {
@@ -319,6 +397,15 @@ export default function AppointmentDetailPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrintWalkout}
+                disabled={loadingWalkout}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 disabled:opacity-50"
+                title="Resumen de visita"
+              >
+                <Printer className="w-4 h-4" />
+                <span className="hidden sm:inline">Resumen</span>
+              </button>
               {getStatusBadge(appointment.status)}
               {appointment.clinicalNoteComplete && (
                 <span className="px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
@@ -830,6 +917,106 @@ export default function AppointmentDetailPage() {
             </div>
           )}
         </div>
+
+        {/* Walkout Statement Modal */}
+        {showWalkout && walkoutData && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold">Resumen de Visita</h2>
+                <div className="flex gap-2">
+                  <button onClick={printWalkout} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                    <Printer className="w-4 h-4" /> Imprimir
+                  </button>
+                  <button onClick={() => setShowWalkout(false)} className="px-3 py-2 text-gray-600 border rounded-lg hover:bg-gray-50 text-sm">
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-sm">
+                {/* Clinic & Date */}
+                <div className="flex justify-between border-b pb-3">
+                  <div>
+                    <p className="font-bold text-lg">{walkoutData.clinic?.name || 'Clinica'}</p>
+                    <p className="text-gray-500">{walkoutData.clinic?.address}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">RESUMEN DE VISITA</p>
+                    <p className="text-gray-500">{walkoutData.visitDate ? format(new Date(walkoutData.visitDate), 'PPP', { locale: es }) : ''}</p>
+                  </div>
+                </div>
+
+                {/* Patient */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div><span className="text-gray-500">Paciente:</span> <strong>{walkoutData.patient?.name}</strong></div>
+                  <div><span className="text-gray-500">Cedula:</span> {walkoutData.patient?.documentId}</div>
+                  <div><span className="text-gray-500">Proveedor:</span> {walkoutData.provider?.name}</div>
+                  <div><span className="text-gray-500">Telefono:</span> {walkoutData.patient?.phone}</div>
+                </div>
+
+                {/* Procedures */}
+                {(walkoutData.procedures || []).length > 0 && (
+                  <div>
+                    <h3 className="font-semibold border-b pb-1 mb-2">Procedimientos</h3>
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50">
+                          <th className="text-left p-2">Procedimiento</th>
+                          <th className="text-left p-2">Diente</th>
+                          <th className="text-left p-2">Codigo</th>
+                          <th className="text-right p-2">Costo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {walkoutData.procedures.map((p: any, i: number) => (
+                          <tr key={i} className="border-b">
+                            <td className="p-2">{getProcedureLabel(p.procedureType)}</td>
+                            <td className="p-2">{p.toothNumber || '-'}</td>
+                            <td className="p-2">{p.cdtCode || '-'}</td>
+                            <td className="p-2 text-right">RD$ {(p.cost || 0).toFixed(2)}</td>
+                          </tr>
+                        ))}
+                        <tr className="font-bold">
+                          <td colSpan={3} className="p-2 border-t-2">TOTAL</td>
+                          <td className="p-2 border-t-2 text-right">
+                            RD$ {walkoutData.procedures.reduce((s: number, p: any) => s + (p.cost || 0), 0).toFixed(2)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* SOAP Summary */}
+                {walkoutData.soapSummary?.assessment && (
+                  <div><span className="font-semibold">Diagnostico:</span> {walkoutData.soapSummary.assessment}</div>
+                )}
+                {walkoutData.soapSummary?.postProcedureInstructions && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <p className="font-semibold text-amber-800 mb-1">Instrucciones Post-procedimiento</p>
+                    <p className="text-amber-900 whitespace-pre-wrap">{walkoutData.soapSummary.postProcedureInstructions}</p>
+                  </div>
+                )}
+                {walkoutData.soapSummary?.followUpNotes && (
+                  <div><span className="font-semibold">Seguimiento:</span> {walkoutData.soapSummary.followUpNotes}</div>
+                )}
+
+                {/* Invoice */}
+                {walkoutData.invoice && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <h3 className="font-semibold mb-2">Factura</h3>
+                    <div className="grid grid-cols-2 gap-1">
+                      <span className="text-gray-500">Total:</span><span className="font-medium">RD$ {(walkoutData.invoice.total || 0).toFixed(2)}</span>
+                      <span className="text-gray-500">Pagado:</span><span>RD$ {(walkoutData.invoice.paid || 0).toFixed(2)}</span>
+                      <span className="text-gray-500">Balance:</span><span className="font-bold">RD$ {(walkoutData.invoice.balance || 0).toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -294,7 +294,7 @@ export class AppointmentsService {
   // === Procedures CRUD ===
 
   async addProcedure(appointmentId: string, dto: CreateAppointmentProcedureDto, providerId: string, tenantId: string) {
-    await this.findOne(appointmentId, providerId, tenantId);
+    const appointment = await this.findOne(appointmentId, providerId, tenantId);
 
     const procedure = await this.prisma.appointmentProcedure.create({
       data: {
@@ -313,6 +313,11 @@ export class AppointmentsService {
     // Auto-update odontogram if tooth number is specified
     if (dto.toothNumber) {
       await this.autoUpdateOdontogram(appointmentId, dto, tenantId);
+    }
+
+    // Auto-create invoice item for the procedure
+    if (procedure.cost > 0) {
+      await this.autoCreateInvoiceItem(appointment, procedure, providerId, tenantId);
     }
 
     return procedure;
@@ -406,6 +411,157 @@ export class AppointmentsService {
     } catch (error) {
       this.logger.warn('Failed to auto-update odontogram:', error);
     }
+  }
+
+  // Auto-create invoice item when procedure is added
+  private async autoCreateInvoiceItem(appointment: any, procedure: any, providerId: string, tenantId: string) {
+    try {
+      // Find or create a draft invoice for this appointment's patient for today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      let invoice = await this.prisma.invoice.findFirst({
+        where: {
+          patientId: appointment.patientId,
+          providerId,
+          tenantId,
+          status: 'DRAFT',
+          issueDate: { gte: today, lt: tomorrow },
+        },
+      });
+
+      if (!invoice) {
+        const count = await this.prisma.invoice.count({ where: { tenantId } });
+        invoice = await this.prisma.invoice.create({
+          data: {
+            invoiceNumber: `INV-${String(count + 1).padStart(6, '0')}`,
+            patientId: appointment.patientId,
+            providerId,
+            tenantId,
+            issueDate: new Date(),
+            dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            status: 'DRAFT',
+            subtotal: 0,
+            tax: 0,
+            discount: 0,
+            total: 0,
+            amountPaid: 0,
+            balance: 0,
+          },
+        });
+      }
+
+      // Build description with tooth info
+      const toothInfo = procedure.toothNumber ? ` - Diente #${procedure.toothNumber}` : '';
+      const surfaceInfo = procedure.surfaces?.length ? ` (${procedure.surfaces.join(',')})` : '';
+
+      await this.prisma.invoiceItem.create({
+        data: {
+          invoiceId: invoice.id,
+          description: `${procedure.procedureType}${toothInfo}${surfaceInfo}`,
+          quantity: 1,
+          unitPrice: procedure.cost,
+          total: procedure.cost,
+          procedureId: procedure.id,
+          cdtCode: procedure.cdtCode,
+          toothNumber: procedure.toothNumber,
+          surfaces: procedure.surfaces || [],
+        },
+      });
+
+      // Recalculate invoice totals
+      const items = await this.prisma.invoiceItem.findMany({
+        where: { invoiceId: invoice.id },
+      });
+      const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+      await this.prisma.invoice.update({
+        where: { id: invoice.id },
+        data: {
+          subtotal,
+          total: subtotal - (invoice.discount || 0) + (invoice.tax || 0),
+          balance: subtotal - (invoice.discount || 0) + (invoice.tax || 0) - (invoice.amountPaid || 0),
+        },
+      });
+    } catch (error) {
+      this.logger.warn('Failed to auto-create invoice item:', error);
+    }
+  }
+
+  // Generate walkout statement (visit summary) for printing
+  async getWalkoutStatement(appointmentId: string, providerId: string, tenantId: string) {
+    const appointment = await this.prisma.appointment.findFirst({
+      where: { id: appointmentId, providerId, tenantId },
+      include: {
+        patient: {
+          select: { id: true, firstName: true, lastName: true, phone: true, documentId: true, dateOfBirth: true },
+        },
+        room: { include: { clinic: true } },
+        procedures: { orderBy: { createdAt: 'asc' } },
+      },
+    });
+
+    if (!appointment) throw new NotFoundException('Appointment not found');
+
+    // Find related invoice
+    const today = new Date(appointment.appointmentDate);
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const invoice = await this.prisma.invoice.findFirst({
+      where: {
+        patientId: appointment.patientId,
+        providerId,
+        tenantId,
+        issueDate: { gte: today, lt: tomorrow },
+      },
+      include: { items: true, payments: true },
+    });
+
+    // Find provider info
+    const provider = await this.prisma.user.findUnique({
+      where: { id: providerId },
+      select: { name: true, specialties: true, licenseNumber: true },
+    });
+
+    // Find tenant info
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { name: true },
+    });
+
+    return {
+      clinicName: tenant?.name || '',
+      providerName: provider?.name || '',
+      providerSpecialty: provider?.specialties?.[0] || '',
+      providerLicense: provider?.licenseNumber || '',
+      patient: appointment.patient,
+      appointmentDate: appointment.appointmentDate,
+      room: appointment.room,
+      procedures: appointment.procedures,
+      totalProcedures: appointment.procedures.reduce((sum, p) => sum + p.cost, 0),
+      soapSummary: {
+        chiefComplaint: appointment.chiefComplaint,
+        assessment: appointment.assessment,
+        plan: appointment.plan,
+        postProcedureInstructions: appointment.postProcedureInstructions,
+        followUpNotes: appointment.followUpNotes,
+      },
+      invoice: invoice ? {
+        invoiceNumber: invoice.invoiceNumber,
+        subtotal: invoice.subtotal,
+        tax: invoice.tax,
+        discount: invoice.discount,
+        total: invoice.total,
+        amountPaid: invoice.amountPaid,
+        balance: invoice.balance,
+        items: invoice.items,
+        payments: invoice.payments,
+      } : null,
+      generatedAt: new Date(),
+    };
   }
 
   async findToday(providerId: string, tenantId: string) {
