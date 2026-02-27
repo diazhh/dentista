@@ -796,7 +796,8 @@ model Appointment {
   tenant     Tenant                @relation(fields: [tenantId], references: [id])
   room       ConsultationRoom?     @relation(fields: [roomId], references: [id]) // RENOMBRADO
   recurring  RecurringAppointment? @relation(fields: [recurringId], references: [id])
-  procedures AppointmentProcedure[]
+  procedures   AppointmentProcedure[]
+  toothHistory ToothHistory[]
 
   @@index([patientId])
   @@index([providerId])
@@ -1255,10 +1256,32 @@ model OdontogramTooth {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   odontogram Odontogram @relation(fields: [odontogramId], references: [id], onDelete: Cascade)
+  history    ToothHistory[]
 
   @@unique([odontogramId, toothNumber])
   @@index([odontogramId])
   @@map("odontogram_teeth")
+}
+
+model ToothHistory {
+  id            String         @id @default(uuid())
+  toothId       String         @map("tooth_id")
+  appointmentId String?        @map("appointment_id")
+
+  previousCondition ToothCondition @map("previous_condition")
+  newCondition      ToothCondition @map("new_condition")
+  surfaces          ToothSurface[]
+  notes             String?
+
+  changedAt DateTime @default(now()) @map("changed_at")
+
+  tooth       OdontogramTooth @relation(fields: [toothId], references: [id], onDelete: Cascade)
+  appointment Appointment?    @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([toothId])
+  @@index([appointmentId])
+  @@index([changedAt])
+  @@map("tooth_history")
 }
 
 // ==========================================

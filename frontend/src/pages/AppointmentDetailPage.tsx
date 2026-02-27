@@ -111,6 +111,7 @@ export default function AppointmentDetailPage() {
     notes: '',
     cost: 0,
     cdtCode: '',
+    updateOdontogram: false,
   });
 
   const fetchAppointment = useCallback(async () => {
@@ -171,14 +172,40 @@ export default function AppointmentDetailPage() {
     }
   };
 
+  // Map procedure types to resulting tooth conditions
+  const PROCEDURE_TO_CONDITION: Record<string, string> = {
+    FILLING: 'FILLED', EXTRACTION: 'MISSING', ROOT_CANAL: 'ROOT_CANAL',
+    CROWN: 'CROWN', BRIDGE: 'BRIDGE', IMPLANT: 'IMPLANT',
+  };
+
   const handleAddProcedure = async () => {
     try {
+      const { updateOdontogram, ...procData } = newProcedure;
       await api.post(`/appointments/${id}/procedures`, {
-        ...newProcedure,
-        toothNumber: newProcedure.toothNumber ? Number(newProcedure.toothNumber) : undefined,
-        cost: Number(newProcedure.cost) || 0,
+        ...procData,
+        toothNumber: procData.toothNumber ? Number(procData.toothNumber) : undefined,
+        cost: Number(procData.cost) || 0,
       });
-      setNewProcedure({ procedureType: 'CHECKUP', toothNumber: '', surfaces: [], material: '', notes: '', cost: 0, cdtCode: '' });
+
+      // Update odontogram if checkbox is checked and tooth + condition mapping exist
+      if (updateOdontogram && procData.toothNumber && appointment?.patientId) {
+        const newCondition = PROCEDURE_TO_CONDITION[procData.procedureType];
+        if (newCondition) {
+          try {
+            await api.post(`/odontograms/patient/${appointment.patientId}/update-from-procedure`, {
+              toothNumber: Number(procData.toothNumber),
+              newCondition,
+              surfaces: procData.surfaces,
+              appointmentId: id,
+              notes: `${getProcedureLabel(procData.procedureType)} - ${procData.notes || ''}`.trim(),
+            });
+          } catch (err) {
+            console.error('Error updating odontogram:', err);
+          }
+        }
+      }
+
+      setNewProcedure({ procedureType: 'CHECKUP', toothNumber: '', surfaces: [], material: '', notes: '', cost: 0, cdtCode: '', updateOdontogram: false });
       setShowProcedureForm(false);
       fetchAppointment();
     } catch (error) {
@@ -632,6 +659,24 @@ export default function AppointmentDetailPage() {
                       placeholder="Detalles adicionales del procedimiento..."
                     />
                   </div>
+                  {/* Update odontogram checkbox */}
+                  {newProcedure.toothNumber && PROCEDURE_TO_CONDITION[newProcedure.procedureType] && (
+                    <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                      <input
+                        type="checkbox"
+                        id="updateOdontogram"
+                        checked={newProcedure.updateOdontogram}
+                        onChange={e => setNewProcedure({...newProcedure, updateOdontogram: e.target.checked})}
+                        className="h-4 w-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
+                      />
+                      <label htmlFor="updateOdontogram" className="text-sm text-emerald-800">
+                        Actualizar estado del diente en el odontograma
+                        <span className="text-xs text-emerald-600 ml-1">
+                          (→ {PROCEDURE_TO_CONDITION[newProcedure.procedureType]})
+                        </span>
+                      </label>
+                    </div>
+                  )}
                   <div className="flex gap-2 justify-end">
                     <button onClick={() => setShowProcedureForm(false)} className="px-4 py-2 text-sm text-gray-700 border rounded-lg hover:bg-gray-50">
                       Cancelar

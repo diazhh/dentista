@@ -71,6 +71,7 @@ async function main() {
   await prisma.invoice.deleteMany({ where: { tenantId: tenant.id } });
   await prisma.prescription.deleteMany({ where: { tenantId: tenant.id } });
   await prisma.clinicalNote.deleteMany({ where: { tenantId: tenant.id } });
+  await prisma.toothHistory.deleteMany({ where: { tooth: { odontogram: { tenantId: tenant.id } } } });
   await prisma.odontogramTooth.deleteMany({ where: { odontogram: { tenantId: tenant.id } } });
   await prisma.odontogram.deleteMany({ where: { tenantId: tenant.id } });
   await prisma.treatmentPlanItem.deleteMany({ where: { treatmentPlan: { tenantId: tenant.id } } });
@@ -414,58 +415,104 @@ async function main() {
   console.log(`  ✅ ${patients.length} pacientes creados`);
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // 7. ODONTOGRAMAS
+  // 7. ODONTOGRAMAS (1 por paciente) + HISTORIAL
   // ══════════════════════════════════════════════════════════════════════════════
-  console.log('🦷 Creando odontogramas...');
+  console.log('🦷 Creando odontogramas (1 por paciente) + historial...');
 
-  // Teeth templates by patient type
-  function generateTeeth(type: 'child' | 'adult' | 'elder'): { toothNumber: number; condition: ToothCondition; surfaces: ToothSurface[]; notes: string }[] {
-    const teeth: any[] = [];
-    const allAdult = [11,12,13,14,15,16,17,18, 21,22,23,24,25,26,27,28, 31,32,33,34,35,36,37,38, 41,42,43,44,45,46,47,48];
+  const allAdult = [11,12,13,14,15,16,17,18, 21,22,23,24,25,26,27,28, 31,32,33,34,35,36,37,38, 41,42,43,44,45,46,47,48];
+
+  // Deterministic teeth per patient type
+  interface ToothDef { toothNumber: number; condition: ToothCondition; surfaces: ToothSurface[]; notes: string }
+
+  // History templates: transitions teeth went through
+  interface HistoryDef { toothNumber: number; previousCondition: ToothCondition; newCondition: ToothCondition; daysAgoVal: number; notes: string }
+
+  function generateTeethAndHistory(type: 'child' | 'adult' | 'elder'): { teeth: ToothDef[]; history: HistoryDef[] } {
+    const teeth: ToothDef[] = [];
+    const history: HistoryDef[] = [];
 
     if (type === 'child') {
-      // Children: permanent incisors + deciduous molars, mostly healthy
       const childTeeth = [11,12,13,14,15,16, 21,22,23,24,25,26, 31,32,33,34,35,36, 41,42,43,44,45,46];
       for (const t of childTeeth) {
         const r = Math.random();
-        if (r < 0.1) teeth.push({ toothNumber: t, condition: ToothCondition.CAVITY, surfaces: [ToothSurface.OCCLUSAL], notes: 'Caries incipiente en superficie oclusal' });
-        else if (r < 0.15) teeth.push({ toothNumber: t, condition: ToothCondition.FILLED, surfaces: [ToothSurface.OCCLUSAL], notes: 'Resina preventiva en fosa' });
-        else teeth.push({ toothNumber: t, condition: ToothCondition.HEALTHY, surfaces: [], notes: '' });
+        if (r < 0.1) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.CAVITY, surfaces: [ToothSurface.OCCLUSAL], notes: 'Caries incipiente' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.CAVITY, daysAgoVal: rand(30, 90), notes: 'Caries detectada en revisión' });
+        } else if (r < 0.18) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.FILLED, surfaces: [ToothSurface.OCCLUSAL], notes: 'Resina preventiva' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.CAVITY, daysAgoVal: rand(120, 240), notes: 'Caries detectada' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.CAVITY, newCondition: ToothCondition.FILLED, daysAgoVal: rand(60, 110), notes: 'Obturación con resina' });
+        } else {
+          teeth.push({ toothNumber: t, condition: ToothCondition.HEALTHY, surfaces: [], notes: '' });
+        }
       }
     } else if (type === 'elder') {
-      // Elders: many missing, crowned, root canals
       for (const t of allAdult) {
         const r = Math.random();
-        if (r < 0.2) teeth.push({ toothNumber: t, condition: ToothCondition.MISSING, surfaces: [], notes: 'Ausente - pérdida por enfermedad periodontal' });
-        else if (r < 0.3) teeth.push({ toothNumber: t, condition: ToothCondition.CROWN, surfaces: [], notes: 'Corona metal-porcelana en buen estado' });
-        else if (r < 0.38) teeth.push({ toothNumber: t, condition: ToothCondition.ROOT_CANAL, surfaces: [], notes: 'Endodoncia previa, requiere seguimiento' });
-        else if (r < 0.45) teeth.push({ toothNumber: t, condition: ToothCondition.FILLED, surfaces: [ToothSurface.MESIAL, ToothSurface.OCCLUSAL], notes: 'Amalgama antigua MO' });
-        else if (r < 0.5) teeth.push({ toothNumber: t, condition: ToothCondition.WORN, surfaces: [], notes: 'Desgaste por bruxismo' });
-        else if (r < 0.55) teeth.push({ toothNumber: t, condition: ToothCondition.FRACTURED, surfaces: [], notes: 'Fractura coronal parcial' });
-        else teeth.push({ toothNumber: t, condition: ToothCondition.HEALTHY, surfaces: [], notes: '' });
+        if (r < 0.18) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.MISSING, surfaces: [], notes: 'Ausente - perdido por enfermedad periodontal' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.CAVITY, daysAgoVal: rand(700, 1000), notes: 'Caries avanzada' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.CAVITY, newCondition: ToothCondition.MISSING, daysAgoVal: rand(500, 690), notes: 'Extracción por destrucción coronaria' });
+        } else if (r < 0.30) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.CROWN, surfaces: [], notes: 'Corona metal-porcelana' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.CAVITY, daysAgoVal: rand(800, 1200), notes: 'Caries extensa' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.CAVITY, newCondition: ToothCondition.ROOT_CANAL, daysAgoVal: rand(600, 790), notes: 'Endodoncia realizada' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.ROOT_CANAL, newCondition: ToothCondition.CROWN, daysAgoVal: rand(400, 590), notes: 'Rehabilitación con corona' });
+        } else if (r < 0.38) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.ROOT_CANAL, surfaces: [], notes: 'Endodoncia previa' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.CAVITY, daysAgoVal: rand(500, 800), notes: 'Lesión cariosa profunda' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.CAVITY, newCondition: ToothCondition.ROOT_CANAL, daysAgoVal: rand(300, 490), notes: 'Tratamiento de conducto' });
+        } else if (r < 0.48) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.FILLED, surfaces: [ToothSurface.MESIAL, ToothSurface.OCCLUSAL], notes: 'Amalgama antigua MO' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.CAVITY, daysAgoVal: rand(600, 900), notes: 'Caries MO' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.CAVITY, newCondition: ToothCondition.FILLED, daysAgoVal: rand(400, 590), notes: 'Restauración amalgama MO' });
+        } else if (r < 0.52) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.WORN, surfaces: [], notes: 'Desgaste por bruxismo' });
+        } else {
+          teeth.push({ toothNumber: t, condition: ToothCondition.HEALTHY, surfaces: [], notes: '' });
+        }
       }
     } else {
       // Adults: realistic mix
       for (const t of allAdult) {
         const r = Math.random();
-        if (r < 0.08) teeth.push({ toothNumber: t, condition: ToothCondition.CAVITY, surfaces: [ToothSurface.OCCLUSAL, ToothSurface.MESIAL][rand(0, 1)] === ToothSurface.OCCLUSAL ? [ToothSurface.OCCLUSAL] : [ToothSurface.MESIAL], notes: 'Lesión cariosa activa' });
-        else if (r < 0.18) teeth.push({ toothNumber: t, condition: ToothCondition.FILLED, surfaces: [ToothSurface.OCCLUSAL], notes: 'Resina compuesta en buen estado' });
-        else if (r < 0.22) teeth.push({ toothNumber: t, condition: ToothCondition.CROWN, surfaces: [], notes: 'Corona de porcelana' });
-        else if (r < 0.25) teeth.push({ toothNumber: t, condition: ToothCondition.ROOT_CANAL, surfaces: [], notes: 'Tratamiento de conducto previo' });
-        else if (t === 18 || t === 28 || t === 38 || t === 48) {
-          if (Math.random() < 0.4) teeth.push({ toothNumber: t, condition: ToothCondition.MISSING, surfaces: [], notes: 'Tercer molar extraído' });
-          else teeth.push({ toothNumber: t, condition: ToothCondition.HEALTHY, surfaces: [], notes: '' });
+        if (r < 0.08) {
+          const surf = Math.random() < 0.5 ? [ToothSurface.OCCLUSAL] : [ToothSurface.MESIAL];
+          teeth.push({ toothNumber: t, condition: ToothCondition.CAVITY, surfaces: surf, notes: 'Lesión cariosa activa' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.CAVITY, daysAgoVal: rand(30, 120), notes: 'Caries detectada en revisión' });
+        } else if (r < 0.18) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.FILLED, surfaces: [ToothSurface.OCCLUSAL], notes: 'Resina compuesta' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.CAVITY, daysAgoVal: rand(200, 400), notes: 'Caries oclusal' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.CAVITY, newCondition: ToothCondition.FILLED, daysAgoVal: rand(100, 190), notes: 'Resina compuesta colocada' });
+        } else if (r < 0.22) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.CROWN, surfaces: [], notes: 'Corona de porcelana' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.FRACTURED, daysAgoVal: rand(300, 500), notes: 'Fractura traumática' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.FRACTURED, newCondition: ToothCondition.CROWN, daysAgoVal: rand(200, 290), notes: 'Corona de porcelana cementada' });
+        } else if (r < 0.25) {
+          teeth.push({ toothNumber: t, condition: ToothCondition.ROOT_CANAL, surfaces: [], notes: 'Tratamiento de conducto' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.ABSCESS, daysAgoVal: rand(200, 350), notes: 'Absceso periapical agudo' });
+          history.push({ toothNumber: t, previousCondition: ToothCondition.ABSCESS, newCondition: ToothCondition.ROOT_CANAL, daysAgoVal: rand(100, 190), notes: 'Endodoncia completada' });
+        } else if (t === 18 || t === 28 || t === 38 || t === 48) {
+          if (Math.random() < 0.4) {
+            teeth.push({ toothNumber: t, condition: ToothCondition.MISSING, surfaces: [], notes: 'Tercer molar extraído' });
+            history.push({ toothNumber: t, previousCondition: ToothCondition.HEALTHY, newCondition: ToothCondition.EXTRACTION_NEEDED, daysAgoVal: rand(300, 500), notes: 'Tercer molar retenido' });
+            history.push({ toothNumber: t, previousCondition: ToothCondition.EXTRACTION_NEEDED, newCondition: ToothCondition.MISSING, daysAgoVal: rand(200, 290), notes: 'Extracción quirúrgica' });
+          } else {
+            teeth.push({ toothNumber: t, condition: ToothCondition.HEALTHY, surfaces: [], notes: '' });
+          }
+        } else {
+          teeth.push({ toothNumber: t, condition: ToothCondition.HEALTHY, surfaces: [], notes: '' });
         }
-        else teeth.push({ toothNumber: t, condition: ToothCondition.HEALTHY, surfaces: [], notes: '' });
       }
     }
-    return teeth;
+    return { teeth, history };
   }
 
+  let totalHistoryEntries = 0;
   for (const pat of patients) {
     const age = new Date().getFullYear() - new Date(pat.def.dob).getFullYear();
     const type = age < 15 ? 'child' : age >= 60 ? 'elder' : 'adult';
-    const teeth = generateTeeth(type);
+    const { teeth, history } = generateTeethAndHistory(type);
 
     const odonto = await prisma.odontogram.create({
       data: {
@@ -473,7 +520,7 @@ async function main() {
         providerId: dentistUser.id,
         tenantId: tenant.id,
         date: daysAgo(rand(30, 180)),
-        notes: `Odontograma inicial - ${pat.def.firstName} ${pat.def.lastName}. Examen completo realizado.`,
+        notes: `Odontograma - ${pat.def.firstName} ${pat.def.lastName}. Estado actual del paciente.`,
         teeth: {
           create: teeth.map(t => ({
             toothNumber: t.toothNumber,
@@ -483,9 +530,27 @@ async function main() {
           })),
         },
       },
+      include: { teeth: true },
     });
+
+    // Create tooth history entries
+    for (const h of history) {
+      const toothRecord = odonto.teeth.find(t => t.toothNumber === h.toothNumber);
+      if (toothRecord) {
+        await prisma.toothHistory.create({
+          data: {
+            toothId: toothRecord.id,
+            previousCondition: h.previousCondition,
+            newCondition: h.newCondition,
+            notes: h.notes,
+            changedAt: daysAgo(h.daysAgoVal),
+          },
+        });
+        totalHistoryEntries++;
+      }
+    }
   }
-  console.log(`  ✅ ${patients.length} odontogramas con dientes creados`);
+  console.log(`  ✅ ${patients.length} odontogramas + ${totalHistoryEntries} entradas de historial`);
 
   // ══════════════════════════════════════════════════════════════════════════════
   // 8. PLANES DE TRATAMIENTO
@@ -1335,7 +1400,7 @@ async function main() {
   console.log(`  🏥 1 clínica con 3 consultorios`);
   console.log(`  💊 ${serviceDefs.length} servicios médicos`);
   console.log(`  🧑 ${patients.length} pacientes`);
-  console.log(`  🦷 ${patients.length} odontogramas`);
+  console.log(`  🦷 ${patients.length} odontogramas + historial de cambios`);
   console.log(`  📋 ${treatmentPlans.length} planes de tratamiento`);
   console.log(`  📅 ${pastAppointments.length} citas pasadas`);
   console.log(`  📅 ${futureAppointments.length} citas futuras`);

@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OdontogramsService } from './odontograms.service';
 import { CreateOdontogramDto, CreateToothDto } from './dto/create-odontogram.dto';
 import { UpdateOdontogramDto } from './dto/update-odontogram.dto';
+import { UpdateFromProcedureDto } from './dto/update-odontogram.dto';
 
 @ApiTags('odontograms')
 @ApiBearerAuth()
@@ -13,7 +14,7 @@ export class OdontogramsController {
   constructor(private readonly odontogramsService: OdontogramsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new odontogram' })
+  @ApiOperation({ summary: 'Create initial odontogram for a patient (1 per patient)' })
   create(@Body() createOdontogramDto: CreateOdontogramDto, @Request() req) {
     const providerId = req.user.userId;
     const tenantId = req.user.tenantId || providerId;
@@ -30,7 +31,7 @@ export class OdontogramsController {
   }
 
   @Get('patient/:patientId/latest')
-  @ApiOperation({ summary: 'Get latest odontogram for a patient' })
+  @ApiOperation({ summary: 'Get the odontogram for a patient (single per patient)' })
   getLatestByPatient(@Param('patientId') patientId: string, @Request() req) {
     const providerId = req.user.userId;
     const tenantId = req.user.tenantId || providerId;
@@ -46,12 +47,8 @@ export class OdontogramsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update odontogram' })
-  update(
-    @Param('id') id: string,
-    @Body() updateOdontogramDto: UpdateOdontogramDto,
-    @Request() req,
-  ) {
+  @ApiOperation({ summary: 'Update odontogram notes' })
+  update(@Param('id') id: string, @Body() updateOdontogramDto: UpdateOdontogramDto, @Request() req) {
     const providerId = req.user.userId;
     const tenantId = req.user.tenantId || providerId;
     return this.odontogramsService.update(id, updateOdontogramDto, providerId, tenantId);
@@ -76,13 +73,8 @@ export class OdontogramsController {
   }
 
   @Patch(':id/teeth/:toothId')
-  @ApiOperation({ summary: 'Update a specific tooth' })
-  updateTooth(
-    @Param('id') id: string,
-    @Param('toothId') toothId: string,
-    @Body() toothDto: Partial<CreateToothDto>,
-    @Request() req,
-  ) {
+  @ApiOperation({ summary: 'Update a specific tooth (with history tracking)' })
+  updateTooth(@Param('id') id: string, @Param('toothId') toothId: string, @Body() toothDto: Partial<CreateToothDto>, @Request() req) {
     const providerId = req.user.userId;
     const tenantId = req.user.tenantId || providerId;
     return this.odontogramsService.updateTooth(id, toothId, toothDto, providerId, tenantId);
@@ -94,5 +86,37 @@ export class OdontogramsController {
     const providerId = req.user.userId;
     const tenantId = req.user.tenantId || providerId;
     return this.odontogramsService.removeTooth(id, toothId, providerId, tenantId);
+  }
+
+  // === History endpoints ===
+
+  @Get(':id/history')
+  @ApiOperation({ summary: 'Get all tooth change history for an odontogram' })
+  getOdontogramHistory(@Param('id') id: string, @Request() req) {
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.getOdontogramHistory(id, providerId, tenantId);
+  }
+
+  @Get(':id/teeth/:toothId/history')
+  @ApiOperation({ summary: 'Get history for a specific tooth' })
+  getToothHistory(@Param('id') id: string, @Param('toothId') toothId: string, @Request() req) {
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.getToothHistory(id, toothId, providerId, tenantId);
+  }
+
+  // === Procedure integration ===
+
+  @Post('patient/:patientId/update-from-procedure')
+  @ApiOperation({ summary: 'Update odontogram tooth from a completed procedure' })
+  updateFromProcedure(
+    @Param('patientId') patientId: string,
+    @Body() dto: UpdateFromProcedureDto,
+    @Request() req,
+  ) {
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.updateFromProcedure(patientId, dto, providerId, tenantId);
   }
 }
