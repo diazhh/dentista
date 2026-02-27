@@ -876,7 +876,7 @@ async function main() {
             heartRate: rand(60, 90),
             temperature: (36 + Math.random()).toFixed(1),
           } : null,
-          appointmentDate: daysAgo(rand(7, 180)),
+          // appointmentId left null — standalone clinical notes
         },
       });
       clinicalNoteCount++;
