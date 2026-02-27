@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, 
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OdontogramsService } from './odontograms.service';
-import { CreateOdontogramDto } from './dto/create-odontogram.dto';
+import { CreateOdontogramDto, CreateToothDto } from './dto/create-odontogram.dto';
 import { UpdateOdontogramDto } from './dto/update-odontogram.dto';
 
 @ApiTags('odontograms')
@@ -63,5 +63,36 @@ export class OdontogramsController {
     const providerId = req.user.userId;
     const tenantId = req.user.tenantId || providerId;
     return this.odontogramsService.remove(id, providerId, tenantId);
+  }
+
+  // === Tooth-level endpoints ===
+
+  @Post(':id/teeth')
+  @ApiOperation({ summary: 'Add or update a tooth in the odontogram' })
+  addTooth(@Param('id') id: string, @Body() toothDto: CreateToothDto, @Request() req) {
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.addTooth(id, toothDto, providerId, tenantId);
+  }
+
+  @Patch(':id/teeth/:toothId')
+  @ApiOperation({ summary: 'Update a specific tooth' })
+  updateTooth(
+    @Param('id') id: string,
+    @Param('toothId') toothId: string,
+    @Body() toothDto: Partial<CreateToothDto>,
+    @Request() req,
+  ) {
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.updateTooth(id, toothId, toothDto, providerId, tenantId);
+  }
+
+  @Delete(':id/teeth/:toothId')
+  @ApiOperation({ summary: 'Remove a tooth from the odontogram' })
+  removeTooth(@Param('id') id: string, @Param('toothId') toothId: string, @Request() req) {
+    const providerId = req.user.userId;
+    const tenantId = req.user.tenantId || providerId;
+    return this.odontogramsService.removeTooth(id, toothId, providerId, tenantId);
   }
 }

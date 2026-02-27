@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateOdontogramDto } from './dto/create-odontogram.dto';
+import { CreateOdontogramDto, CreateToothDto } from './dto/create-odontogram.dto';
 import { UpdateOdontogramDto } from './dto/update-odontogram.dto';
 
 @Injectable()
@@ -189,5 +189,75 @@ export class OdontogramsService {
     });
 
     return odontogram;
+  }
+
+  // === Tooth-level CRUD ===
+
+  async addTooth(odontogramId: string, toothDto: CreateToothDto, providerId: string, tenantId: string) {
+    await this.findOne(odontogramId, providerId, tenantId);
+
+    const existing = await this.prisma.odontogramTooth.findUnique({
+      where: {
+        odontogramId_toothNumber: {
+          odontogramId,
+          toothNumber: toothDto.toothNumber,
+        },
+      },
+    });
+
+    if (existing) {
+      return this.prisma.odontogramTooth.update({
+        where: { id: existing.id },
+        data: {
+          condition: toothDto.condition,
+          surfaces: toothDto.surfaces || [],
+          notes: toothDto.notes,
+          color: toothDto.color,
+        },
+      });
+    }
+
+    return this.prisma.odontogramTooth.create({
+      data: {
+        odontogramId,
+        toothNumber: toothDto.toothNumber,
+        condition: toothDto.condition,
+        surfaces: toothDto.surfaces || [],
+        notes: toothDto.notes,
+        color: toothDto.color,
+      },
+    });
+  }
+
+  async updateTooth(odontogramId: string, toothId: string, toothDto: Partial<CreateToothDto>, providerId: string, tenantId: string) {
+    await this.findOne(odontogramId, providerId, tenantId);
+
+    const tooth = await this.prisma.odontogramTooth.findFirst({
+      where: { id: toothId, odontogramId },
+    });
+
+    if (!tooth) {
+      throw new NotFoundException('Tooth not found');
+    }
+
+    return this.prisma.odontogramTooth.update({
+      where: { id: toothId },
+      data: {
+        condition: toothDto.condition,
+        surfaces: toothDto.surfaces,
+        notes: toothDto.notes,
+        color: toothDto.color,
+      },
+    });
+  }
+
+  async removeTooth(odontogramId: string, toothId: string, providerId: string, tenantId: string) {
+    await this.findOne(odontogramId, providerId, tenantId);
+
+    await this.prisma.odontogramTooth.delete({
+      where: { id: toothId },
+    });
+
+    return { message: 'Tooth removed successfully' };
   }
 }

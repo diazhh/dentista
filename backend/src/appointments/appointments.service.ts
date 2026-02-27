@@ -1,10 +1,39 @@
 import { Injectable, Logger, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { CreateAppointmentDto, UpdateAppointmentSoapDto, CreateAppointmentProcedureDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { AppointmentStatus } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SchedulingService } from '../scheduling/scheduling.service';
+
+const appointmentInclude = {
+  patient: {
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      phone: true,
+      documentId: true,
+      dateOfBirth: true,
+      gender: true,
+      user: {
+        select: {
+          email: true,
+          phone: true,
+          name: true,
+        },
+      },
+    },
+  },
+  room: {
+    include: {
+      clinic: true,
+    },
+  },
+  procedures: {
+    orderBy: { createdAt: 'asc' as const },
+  },
+};
 
 @Injectable()
 export class AppointmentsService {
@@ -68,7 +97,7 @@ export class AppointmentsService {
           providerId: providerId,
           tenantId: tenantId,
           status: {
-            in: [AppointmentStatus.SCHEDULED],
+            in: [AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED],
           },
           OR: [
             {
@@ -99,24 +128,7 @@ export class AppointmentsService {
         tenantId,
         status: createAppointmentDto.status || AppointmentStatus.SCHEDULED,
       },
-      include: {
-        patient: {
-          include: {
-            user: {
-              select: {
-                email: true,
-                phone: true,
-                name: true,
-              },
-            },
-          },
-        },
-        room: {
-          include: {
-            clinic: true,
-          },
-        },
-      },
+      include: appointmentInclude,
     });
 
     // Send confirmation and schedule reminders
@@ -153,6 +165,8 @@ export class AppointmentsService {
       status: true,
       procedureType: true,
       notes: true,
+      chiefComplaint: true,
+      clinicalNoteComplete: true,
       reminderSent: true,
       confirmedVia: true,
       createdAt: true,
@@ -162,6 +176,7 @@ export class AppointmentsService {
           firstName: true,
           lastName: true,
           phone: true,
+          documentId: true,
           user: {
             select: {
               email: true,
@@ -182,6 +197,9 @@ export class AppointmentsService {
             },
           },
         },
+      },
+      _count: {
+        select: { procedures: true },
       },
     };
 
@@ -213,24 +231,7 @@ export class AppointmentsService {
         providerId: providerId,
         tenantId,
       },
-      include: {
-        patient: {
-          include: {
-            user: {
-              select: {
-                email: true,
-                phone: true,
-                name: true,
-              },
-            },
-          },
-        },
-        room: {
-          include: {
-            clinic: true,
-          },
-        },
-      },
+      include: appointmentInclude,
     });
 
     if (!appointment) {
@@ -246,24 +247,29 @@ export class AppointmentsService {
     return this.prisma.appointment.update({
       where: { id },
       data: updateAppointmentDto,
-      include: {
-        patient: {
-          include: {
-            user: {
-              select: {
-                email: true,
-                phone: true,
-                name: true,
-              },
-            },
-          },
-        },
-        room: {
-          include: {
-            clinic: true,
-          },
-        },
+      include: appointmentInclude,
+    });
+  }
+
+  async updateSoap(id: string, soapDto: UpdateAppointmentSoapDto, providerId: string, tenantId: string) {
+    await this.findOne(id, providerId, tenantId);
+
+    return this.prisma.appointment.update({
+      where: { id },
+      data: {
+        chiefComplaint: soapDto.chiefComplaint,
+        painScale: soapDto.painScale,
+        subjectiveFindings: soapDto.subjectiveFindings,
+        objectiveFindings: soapDto.objectiveFindings,
+        assessment: soapDto.assessment,
+        plan: soapDto.plan,
+        postProcedureInstructions: soapDto.postProcedureInstructions,
+        followUpNotes: soapDto.followUpNotes,
+        vitalSigns: soapDto.vitalSigns,
+        clinicalNoteComplete: soapDto.clinicalNoteComplete,
+        notes: soapDto.notes,
       },
+      include: appointmentInclude,
     });
   }
 
@@ -281,20 +287,125 @@ export class AppointmentsService {
     return this.prisma.appointment.update({
       where: { id },
       data: { status },
-      include: {
-        patient: {
-          include: {
-            user: {
-              select: {
-                email: true,
-                phone: true,
-                name: true,
-              },
-            },
-          },
-        },
+      include: appointmentInclude,
+    });
+  }
+
+  // === Procedures CRUD ===
+
+  async addProcedure(appointmentId: string, dto: CreateAppointmentProcedureDto, providerId: string, tenantId: string) {
+    await this.findOne(appointmentId, providerId, tenantId);
+
+    const procedure = await this.prisma.appointmentProcedure.create({
+      data: {
+        appointmentId,
+        tenantId,
+        procedureType: dto.procedureType,
+        toothNumber: dto.toothNumber,
+        surfaces: dto.surfaces || [],
+        material: dto.material,
+        notes: dto.notes,
+        cost: dto.cost || 0,
+        cdtCode: dto.cdtCode,
       },
     });
+
+    // Auto-update odontogram if tooth number is specified
+    if (dto.toothNumber) {
+      await this.autoUpdateOdontogram(appointmentId, dto, tenantId);
+    }
+
+    return procedure;
+  }
+
+  async updateProcedure(appointmentId: string, procedureId: string, dto: Partial<CreateAppointmentProcedureDto>, providerId: string, tenantId: string) {
+    await this.findOne(appointmentId, providerId, tenantId);
+
+    return this.prisma.appointmentProcedure.update({
+      where: { id: procedureId },
+      data: {
+        procedureType: dto.procedureType,
+        toothNumber: dto.toothNumber,
+        surfaces: dto.surfaces,
+        material: dto.material,
+        notes: dto.notes,
+        cost: dto.cost,
+        cdtCode: dto.cdtCode,
+      },
+    });
+  }
+
+  async removeProcedure(appointmentId: string, procedureId: string, providerId: string, tenantId: string) {
+    await this.findOne(appointmentId, providerId, tenantId);
+
+    await this.prisma.appointmentProcedure.delete({
+      where: { id: procedureId },
+    });
+
+    return { message: 'Procedure removed successfully' };
+  }
+
+  async getProcedures(appointmentId: string, providerId: string, tenantId: string) {
+    await this.findOne(appointmentId, providerId, tenantId);
+
+    return this.prisma.appointmentProcedure.findMany({
+      where: { appointmentId },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  // Auto-update odontogram based on procedure
+  private async autoUpdateOdontogram(appointmentId: string, dto: CreateAppointmentProcedureDto, tenantId: string) {
+    try {
+      const appointment = await this.prisma.appointment.findUnique({
+        where: { id: appointmentId },
+        select: { patientId: true, providerId: true },
+      });
+      if (!appointment) return;
+
+      // Find latest odontogram for patient
+      const odontogram = await this.prisma.odontogram.findFirst({
+        where: { patientId: appointment.patientId, tenantId },
+        orderBy: { date: 'desc' },
+        include: { teeth: true },
+      });
+
+      if (!odontogram || !dto.toothNumber) return;
+
+      // Map procedure type to tooth condition
+      const conditionMap: Record<string, string> = {
+        EXTRACTION: 'MISSING',
+        FILLING: 'FILLED',
+        ROOT_CANAL: 'ROOT_CANAL',
+        CROWN: 'CROWN',
+      };
+
+      const newCondition = conditionMap[dto.procedureType];
+      if (!newCondition) return;
+
+      const existingTooth = odontogram.teeth.find(t => t.toothNumber === dto.toothNumber);
+
+      if (existingTooth) {
+        await this.prisma.odontogramTooth.update({
+          where: { id: existingTooth.id },
+          data: {
+            condition: newCondition as any,
+            surfaces: (dto.surfaces || existingTooth.surfaces) as any,
+          },
+        });
+      } else {
+        await this.prisma.odontogramTooth.create({
+          data: {
+            odontogramId: odontogram.id,
+            toothNumber: dto.toothNumber,
+            condition: newCondition as any,
+            surfaces: (dto.surfaces || []) as any,
+          },
+        });
+      }
+    } catch (error) {
+      this.logger.warn('Failed to auto-update odontogram:', error);
+    }
   }
 
   async findToday(providerId: string, tenantId: string) {
@@ -319,6 +430,7 @@ export class AppointmentsService {
         status: true,
         procedureType: true,
         notes: true,
+        clinicalNoteComplete: true,
         patient: {
           select: {
             id: true,
@@ -332,6 +444,9 @@ export class AppointmentsService {
             id: true,
             name: true,
           },
+        },
+        _count: {
+          select: { procedures: true },
         },
       },
       orderBy: {
@@ -353,7 +468,9 @@ export class AppointmentsService {
           gte: now,
           lte: endDate,
         },
-        status: AppointmentStatus.SCHEDULED,
+        status: {
+          in: [AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED],
+        },
       },
       select: {
         id: true,

@@ -7,22 +7,30 @@ import listPlugin from '@fullcalendar/list';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Filter, Plus } from 'lucide-react';
 import api from '../services/api';
+import { addMinutes } from 'date-fns';
 
 interface Appointment {
   id: string;
   patientId: string;
   providerId: string;
-  clinicId: string;
-  startTime: string;
-  endTime: string;
+  appointmentDate: string;
+  duration: number;
   status: string;
-  type: string;
+  procedureType: string;
+  clinicalNoteComplete?: boolean;
   notes?: string;
   patient?: {
     firstName: string;
     lastName: string;
   };
 }
+
+const PROCEDURE_LABELS: Record<string, string> = {
+  CHECKUP: 'Rev', CLEANING: 'Limp', FILLING: 'Emp', ROOT_CANAL: 'Endo',
+  EXTRACTION: 'Ext', ORTHODONTICS: 'Orto', EMERGENCY: 'Emerg', CONSULTATION: 'Cons',
+  FOLLOW_UP: 'Seg', CROWN: 'Cor', BRIDGE: 'Puent', IMPLANT: 'Impl',
+  WHITENING: 'Blanq', SCALING: 'Rasp',
+};
 
 export default function CalendarPage() {
   const navigate = useNavigate();
@@ -59,9 +67,12 @@ export default function CalendarPage() {
 
   const handleEventDrop = async (info: any) => {
     try {
+      const newDate = info.event.start;
+      // Calculate duration from original event end-start, fallback to original duration
+      const originalApt = appointments.find(a => a.id === info.event.id);
       await api.patch(`/appointments/${info.event.id}`, {
-        startTime: info.event.start.toISOString(),
-        endTime: info.event.end?.toISOString() || info.event.start.toISOString(),
+        appointmentDate: newDate.toISOString(),
+        duration: originalApt?.duration || 30,
       });
       fetchAppointments();
     } catch (error) {
@@ -73,19 +84,25 @@ export default function CalendarPage() {
   const events = appointments
     .filter((apt) => {
       if (filters.status !== 'all' && apt.status !== filters.status) return false;
-      if (filters.type !== 'all' && apt.type !== filters.type) return false;
+      if (filters.type !== 'all' && apt.procedureType !== filters.type) return false;
       return true;
     })
-    .map((apt) => ({
-      id: apt.id,
-      title: apt.patient
-        ? `${apt.patient.firstName} ${apt.patient.lastName}`
-        : 'Cita sin paciente',
-      start: apt.startTime,
-      end: apt.endTime,
-      backgroundColor: getStatusColor(apt.status),
-      borderColor: getStatusColor(apt.status),
-    }));
+    .map((apt) => {
+      const start = new Date(apt.appointmentDate);
+      const end = addMinutes(start, apt.duration);
+      const procLabel = PROCEDURE_LABELS[apt.procedureType] || apt.procedureType;
+      const patientName = apt.patient ? `${apt.patient.firstName} ${apt.patient.lastName}` : 'Sin paciente';
+
+      return {
+        id: apt.id,
+        title: `${procLabel} - ${patientName}`,
+        start: start.toISOString(),
+        end: end.toISOString(),
+        backgroundColor: getStatusColor(apt.status),
+        borderColor: apt.clinicalNoteComplete ? '#10b981' : getStatusColor(apt.status),
+        borderWidth: apt.clinicalNoteComplete ? '3px' : undefined,
+      };
+    });
 
   function getStatusColor(status: string): string {
     const colors: Record<string, string> = {
@@ -111,8 +128,7 @@ export default function CalendarPage() {
             onClick={() => navigate('/appointments/new')}
             className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base w-full sm:w-auto"
           >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-            Nueva Cita
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" /> Nueva Cita
           </button>
         </div>
 
@@ -121,14 +137,8 @@ export default function CalendarPage() {
             <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 hidden sm:block" />
             <div className="grid grid-cols-2 gap-3 sm:gap-4 flex-1">
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                  Estado
-                </label>
-                <select
-                  value={filters.status}
-                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                  className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })} className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                   <option value="all">Todos</option>
                   <option value="SCHEDULED">Programada</option>
                   <option value="CONFIRMED">Confirmada</option>
@@ -139,20 +149,15 @@ export default function CalendarPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                  Tipo
-                </label>
-                <select
-                  value={filters.type}
-                  onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                  className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                <select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })} className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                   <option value="all">Todos</option>
                   <option value="CHECKUP">Revisión</option>
                   <option value="CLEANING">Limpieza</option>
                   <option value="FILLING">Empaste</option>
                   <option value="ROOT_CANAL">Endodoncia</option>
                   <option value="EXTRACTION">Extracción</option>
+                  <option value="CROWN">Corona</option>
                   <option value="ORTHODONTICS">Ortodoncia</option>
                   <option value="EMERGENCY">Emergencia</option>
                   <option value="CONSULTATION">Consulta</option>
@@ -178,13 +183,7 @@ export default function CalendarPage() {
                 right: window.innerWidth < 640 ? 'listWeek,dayGridMonth' : 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
               }}
               locale="es"
-              buttonText={{
-                today: 'Hoy',
-                month: 'Mes',
-                week: 'Semana',
-                day: 'Día',
-                list: 'Lista',
-              }}
+              buttonText={{ today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista' }}
               slotMinTime="07:00:00"
               slotMaxTime="20:00:00"
               allDaySlot={false}
@@ -198,11 +197,7 @@ export default function CalendarPage() {
               contentHeight="auto"
               nowIndicator={true}
               weekends={true}
-              businessHours={{
-                daysOfWeek: [1, 2, 3, 4, 5],
-                startTime: '08:00',
-                endTime: '18:00',
-              }}
+              businessHours={{ daysOfWeek: [1, 2, 3, 4, 5], startTime: '08:00', endTime: '18:00' }}
             />
           )}
         </div>
@@ -210,30 +205,19 @@ export default function CalendarPage() {
         <div className="mt-4 sm:mt-6 bg-white rounded-lg shadow-sm p-3 sm:p-4">
           <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Leyenda</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-blue-500 flex-shrink-0"></div>
-              <span className="text-xs sm:text-sm text-gray-600">Programada</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-green-500 flex-shrink-0"></div>
-              <span className="text-xs sm:text-sm text-gray-600">Confirmada</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-amber-500 flex-shrink-0"></div>
-              <span className="text-xs sm:text-sm text-gray-600">En Progreso</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-gray-500 flex-shrink-0"></div>
-              <span className="text-xs sm:text-sm text-gray-600">Completada</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-red-500 flex-shrink-0"></div>
-              <span className="text-xs sm:text-sm text-gray-600">Cancelada</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-red-600 flex-shrink-0"></div>
-              <span className="text-xs sm:text-sm text-gray-600">No Asistió</span>
-            </div>
+            {[
+              { color: 'bg-blue-500', label: 'Programada' },
+              { color: 'bg-green-500', label: 'Confirmada' },
+              { color: 'bg-amber-500', label: 'En Progreso' },
+              { color: 'bg-gray-500', label: 'Completada' },
+              { color: 'bg-red-500', label: 'Cancelada' },
+              { color: 'bg-red-600', label: 'No Asistió' },
+            ].map(item => (
+              <div key={item.label} className="flex items-center gap-2">
+                <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded ${item.color} flex-shrink-0`}></div>
+                <span className="text-xs sm:text-sm text-gray-600">{item.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

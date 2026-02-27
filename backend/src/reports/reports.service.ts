@@ -389,9 +389,9 @@ export class ReportsService {
       _sum: { amount: true },
     });
 
-    // Today's appointments
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+    // Today's appointments - use separate date objects to avoid mutation
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
 
     const todayAppointments = await this.prisma.appointment.count({
       where: {

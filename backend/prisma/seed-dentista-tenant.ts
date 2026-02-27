@@ -644,12 +644,54 @@ async function main() {
   const pastAppointments: any[] = [];
   const rooms = [room1, room2, room3];
 
+  // SOAP note data for completed appointments
+  const soapData = [
+    {
+      chiefComplaint: 'Dolor en muela inferior izquierda al masticar',
+      painScale: 6,
+      subjectiveFindings: 'Paciente reporta dolor intermitente desde hace 2 semanas, aumenta con alimentos fríos y calientes. No toma medicamentos actualmente.',
+      objectiveFindings: 'Examen extraoral sin hallazgos. Intraoral: caries profunda en #36 cara oclusal-mesial. Percusión positiva leve. Vitalidad pulpar presente.',
+      assessment: 'Caries profunda en diente 36 (K02.1). Pulpitis reversible.',
+      plan: 'Obturación con resina compuesta. Control en 2 semanas. Si persiste el dolor, evaluar tratamiento de conducto.',
+      postProcedureInstructions: 'Evitar alimentos duros por 24 horas. Si presenta dolor intenso o inflamación, acudir de urgencia.',
+    },
+    {
+      chiefComplaint: 'Control y limpieza de rutina',
+      painScale: 0,
+      subjectiveFindings: 'Paciente asintomático. Asiste a control semestral. No reporta cambios en su salud general.',
+      objectiveFindings: 'Examen extraoral normal. Intraoral: acumulación moderada de cálculo supragingival en sector anteroinferior. Encías ligeramente eritematosas en zona lingual inferior. Índice de placa 35%.',
+      assessment: 'Gingivitis localizada (K05.10). Higiene oral mejorable.',
+      plan: 'Profilaxis con ultrasonido y pulido. Instrucciones de higiene oral. Control en 6 meses.',
+      postProcedureInstructions: 'Usar cepillo de cerdas suaves. Hilo dental diario. Enjuague con clorhexidina 0.12% por 7 días.',
+    },
+    {
+      chiefComplaint: 'Se rompió un pedazo de diente comiendo',
+      painScale: 3,
+      subjectiveFindings: 'Paciente relata fractura parcial del diente 14 al morder un hueso de aceituna hace 3 días. Dolor leve ocasional. Sin sangrado.',
+      objectiveFindings: 'Fractura de esquina mesio-palatina del diente 14. Esmalte y dentina expuestos. Sin exposición pulpar. Vitalidad conservada.',
+      assessment: 'Fractura coronaria no complicada diente 14 (S02.5). Pronóstico favorable.',
+      plan: 'Reconstrucción con resina compuesta. Evaluar necesidad de corona a futuro si la fractura compromete la estructura.',
+      postProcedureInstructions: 'No morder alimentos duros con ese diente por 1 semana. Control en 10 días.',
+    },
+    {
+      chiefComplaint: 'Extracción de muela del juicio recomendada en cita anterior',
+      painScale: 2,
+      subjectiveFindings: 'Paciente acude para extracción programada del tercer molar 48 parcialmente erupcionado. Ha tomado amoxicilina profiláctica según indicación.',
+      objectiveFindings: 'Rx periapical confirma impactación mesioangular de 48. Raíces con dilaceración distal. Relación cercana al nervio dentario inferior.',
+      assessment: 'Tercer molar 48 parcialmente impactado con indicación de extracción (K01.1).',
+      plan: 'Extracción quirúrgica bajo anestesia local. Osteotomía y odontosección si necesario. Sutura con seda 3-0.',
+      postProcedureInstructions: 'Morder gasa 30 min. Hielo las primeras 24h. Dieta blanda 3 días. Amoxicilina 500mg c/8h x 5 días. Ibuprofeno 400mg c/6h PRN dolor. No escupir ni usar sorbete. No fumar.',
+    },
+  ];
+
   for (const pat of patients) {
     const numPast = rand(3, 5);
     for (let i = 0; i < numPast; i++) {
       const dayOffset = rand(7, 180);
       const hour = rand(8, 15);
       const providerIdx = rand(0, 2);
+      const soapIdx = rand(0, soapData.length - 1);
+      const hasSoap = Math.random() < 0.7; // 70% have SOAP data
       const appt = await prisma.appointment.create({
         data: {
           patientId: pat.id,
@@ -663,12 +705,68 @@ async function main() {
           notes: pastNotes[rand(0, pastNotes.length - 1)],
           reminderSent: true,
           confirmedVia: ['WhatsApp', 'Llamada', 'SMS', 'Email'][rand(0, 3)],
+          // SOAP data for completed appointments
+          ...(hasSoap ? {
+            chiefComplaint: soapData[soapIdx].chiefComplaint,
+            painScale: soapData[soapIdx].painScale,
+            subjectiveFindings: soapData[soapIdx].subjectiveFindings,
+            objectiveFindings: soapData[soapIdx].objectiveFindings,
+            assessment: soapData[soapIdx].assessment,
+            plan: soapData[soapIdx].plan,
+            postProcedureInstructions: soapData[soapIdx].postProcedureInstructions,
+            clinicalNoteComplete: true,
+            vitalSigns: { bloodPressure: `${rand(110, 140)}/${rand(60, 90)}`, pulse: rand(60, 90), temperature: 36 + Math.random() * 1.5 },
+          } : {}),
         },
       });
       pastAppointments.push({ ...appt, patientId: pat.id });
     }
   }
   console.log(`  ✅ ${pastAppointments.length} citas pasadas creadas`);
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // 9b. PROCEDIMIENTOS REALIZADOS (para citas con SOAP)
+  // ══════════════════════════════════════════════════════════════════════════════
+  console.log('🦷 Creando procedimientos para citas completadas...');
+
+  const procedureData = [
+    { procedureType: 'FILLING', materials: ['Composite', 'Ionómero de vidrio'], teeth: [16, 26, 36, 46, 15, 25, 35, 45], cdtCodes: ['D2391', 'D2392', 'D2393'] },
+    { procedureType: 'CLEANING', materials: [], teeth: [], cdtCodes: ['D1110'] },
+    { procedureType: 'EXTRACTION', materials: [], teeth: [18, 28, 38, 48, 14, 24, 34, 44], cdtCodes: ['D7140', 'D7210'] },
+    { procedureType: 'ROOT_CANAL', materials: ['Gutapercha', 'MTA'], teeth: [11, 21, 36, 46, 16, 26], cdtCodes: ['D3310', 'D3330'] },
+    { procedureType: 'CROWN', materials: ['Cerámica', 'Zirconia'], teeth: [16, 26, 36, 46, 11, 21], cdtCodes: ['D2740', 'D2750'] },
+    { procedureType: 'SCALING', materials: [], teeth: [], cdtCodes: ['D4341', 'D4342'] },
+    { procedureType: 'XRAY', materials: [], teeth: [], cdtCodes: ['D0220', 'D0274', 'D0330'] },
+    { procedureType: 'SEALANT', materials: ['Composite fluido'], teeth: [16, 26, 36, 46], cdtCodes: ['D1351'] },
+  ];
+
+  let procCount = 0;
+  for (const appt of pastAppointments) {
+    if (Math.random() < 0.6) { // 60% of past appointments get procedures
+      const numProcs = rand(1, 3);
+      for (let p = 0; p < numProcs; p++) {
+        const procTemplate = procedureData[rand(0, procedureData.length - 1)];
+        const hasTooth = procTemplate.teeth.length > 0;
+        const tooth = hasTooth ? procTemplate.teeth[rand(0, procTemplate.teeth.length - 1)] : undefined;
+        const surfaces = hasTooth ? (['OCCLUSAL', 'MESIAL', 'DISTAL', 'BUCCAL', 'LINGUAL'] as const).filter(() => Math.random() < 0.4) : [];
+        await prisma.appointmentProcedure.create({
+          data: {
+            appointmentId: appt.id,
+            tenantId: tenant.id,
+            procedureType: procTemplate.procedureType,
+            toothNumber: tooth,
+            surfaces: surfaces as string[],
+            material: procTemplate.materials.length > 0 ? procTemplate.materials[rand(0, procTemplate.materials.length - 1)] : null,
+            cost: [500, 800, 1200, 2000, 3500, 5000, 8000, 15000][rand(0, 7)],
+            cdtCode: procTemplate.cdtCodes[rand(0, procTemplate.cdtCodes.length - 1)],
+            notes: ['Procedimiento sin complicaciones.', 'Paciente toleró bien.', 'Se logró resultado esperado.', null][rand(0, 3)],
+          },
+        });
+        procCount++;
+      }
+    }
+  }
+  console.log(`  ✅ ${procCount} procedimientos creados`);
 
   // ══════════════════════════════════════════════════════════════════════════════
   // 10. CITAS FUTURAS (próximas 4 semanas)
@@ -691,7 +789,7 @@ async function main() {
           roomId: rooms[providerIdx].id,
           appointmentDate: setTime(daysFromNow(dayOffset), hour, rand(0, 1) * 30),
           duration: [30, 45, 60][rand(0, 2)],
-          status: Math.random() < 0.6 ? AppointmentStatus.SCHEDULED : AppointmentStatus.SCHEDULED,
+          status: Math.random() < 0.4 ? AppointmentStatus.CONFIRMED : AppointmentStatus.SCHEDULED,
           procedureType: procedureTypes[rand(0, procedureTypes.length - 1)],
           notes: 'Cita programada.',
           reminderSent: false,

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsDateString, IsInt, IsOptional, IsEnum, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsDateString, IsInt, IsOptional, IsEnum, Min, Max, IsBoolean, IsNumber, IsArray } from 'class-validator';
 import { AppointmentStatus } from '@prisma/client';
 
 export class CreateAppointmentDto {
@@ -37,4 +37,81 @@ export class CreateAppointmentDto {
   @IsEnum(AppointmentStatus)
   @IsOptional()
   status?: AppointmentStatus;
+}
+
+export class UpdateAppointmentSoapDto {
+  @IsString()
+  @IsOptional()
+  chiefComplaint?: string;
+
+  @IsInt()
+  @Min(0)
+  @Max(10)
+  @IsOptional()
+  painScale?: number;
+
+  @IsString()
+  @IsOptional()
+  subjectiveFindings?: string;
+
+  @IsString()
+  @IsOptional()
+  objectiveFindings?: string;
+
+  @IsString()
+  @IsOptional()
+  assessment?: string;
+
+  @IsString()
+  @IsOptional()
+  plan?: string;
+
+  @IsString()
+  @IsOptional()
+  postProcedureInstructions?: string;
+
+  @IsString()
+  @IsOptional()
+  followUpNotes?: string;
+
+  @IsOptional()
+  vitalSigns?: Record<string, any>;
+
+  @IsBoolean()
+  @IsOptional()
+  clinicalNoteComplete?: boolean;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+}
+
+export class CreateAppointmentProcedureDto {
+  @IsString()
+  @IsNotEmpty()
+  procedureType: string;
+
+  @IsInt()
+  @IsOptional()
+  toothNumber?: number;
+
+  @IsArray()
+  @IsOptional()
+  surfaces?: string[];
+
+  @IsString()
+  @IsOptional()
+  material?: string;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @IsNumber()
+  @IsOptional()
+  cost?: number;
+
+  @IsString()
+  @IsOptional()
+  cdtCode?: string;
 }
