@@ -161,6 +161,22 @@ async function main() {
   console.log('  ✅ 2 doctores + 2 staff creados');
 
   // ══════════════════════════════════════════════════════════════════════════════
+  // 3B. MÓDULOS ACTIVOS (dental, treatments, odontograms)
+  // ══════════════════════════════════════════════════════════════════════════════
+  console.log('🔧 Activando módulos dentales...');
+  const dentalModuleKeys = ['dental', 'treatments', 'odontograms'];
+  for (const provider of providers) {
+    for (const moduleKey of dentalModuleKeys) {
+      await prisma.providerModule.upsert({
+        where: { providerId_moduleKey: { providerId: provider.id, moduleKey } },
+        update: { isActive: true },
+        create: { providerId: provider.id, moduleKey, isActive: true },
+      });
+    }
+  }
+  console.log('  ✅ Módulos dental/treatments/odontograms activados para 3 proveedores');
+
+  // ══════════════════════════════════════════════════════════════════════════════
   // 4. CLÍNICA
   // ══════════════════════════════════════════════════════════════════════════════
   console.log('🏥 Creando clínica...');
