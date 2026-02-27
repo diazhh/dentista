@@ -225,6 +225,11 @@ export const whatsappAPI = {
     return response.data;
   },
 
+  connect: async () => {
+    const response = await api.post('/whatsapp/connect');
+    return response.data;
+  },
+
   sendMessage: async (to: string, message: string) => {
     const response = await api.post('/whatsapp/send', { to, message });
     return response.data;

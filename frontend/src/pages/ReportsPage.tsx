@@ -152,10 +152,10 @@ function MetricCard({ icon: Icon, label, value, color }: { icon: any; label: str
 function DashboardView({ data }: { data: any }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <MetricCard icon={DollarSign} label="Ingresos del Mes" value={formatCurrency(data.revenue || 0)} color="bg-green-500" />
-      <MetricCard icon={Calendar} label="Citas del Mes" value={data.appointments || 0} color="bg-blue-500" />
-      <MetricCard icon={Users} label="Pacientes Activos" value={data.activePatients || 0} color="bg-purple-500" />
-      <MetricCard icon={TrendingUp} label="Facturas Pendientes" value={data.pendingInvoices || 0} color="bg-yellow-500" />
+      <MetricCard icon={DollarSign} label="Ingresos del Mes" value={formatCurrency(data.revenue?.currentMonth || 0)} color="bg-green-500" />
+      <MetricCard icon={Calendar} label="Citas del Mes" value={data.appointments?.thisMonth || 0} color="bg-blue-500" />
+      <MetricCard icon={Users} label="Pacientes Activos" value={data.patients?.active || 0} color="bg-purple-500" />
+      <MetricCard icon={TrendingUp} label="Facturas Pendientes" value={data.invoices?.pendingCount || 0} color="bg-yellow-500" />
     </div>
   );
 }

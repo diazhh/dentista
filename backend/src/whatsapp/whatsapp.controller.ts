@@ -15,6 +15,17 @@ export class WhatsappController {
         };
     }
 
+    @Post('connect')
+    @UseGuards(JwtAuthGuard)
+    async connect() {
+        const status = this.whatsappService.getStatus();
+        if (status === 'CONNECTED') {
+            return { success: true, message: 'Ya está conectado' };
+        }
+        await this.whatsappService.connectToWhatsapp();
+        return { success: true, message: 'Reconexión iniciada. Espere el código QR.' };
+    }
+
     @Post('send')
     @UseGuards(JwtAuthGuard)
     async sendMessage(@Body() body: { to: string; message: string }) {

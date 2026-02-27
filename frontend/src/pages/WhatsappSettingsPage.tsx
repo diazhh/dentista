@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { MessageSquare, RefreshCw, Send, Check } from 'lucide-react';
+import { MessageSquare, RefreshCw, Send, Check, WifiOff, Wifi } from 'lucide-react';
 import { whatsappAPI } from '../services/api';
 
 export default function WhatsappSettingsPage() {
@@ -10,7 +10,20 @@ export default function WhatsappSettingsPage() {
     const { data: statusData, refetch, isLoading: isLoadingStatus } = useQuery({
         queryKey: ['whatsappStatus'],
         queryFn: whatsappAPI.getStatus,
-        refetchInterval: 5000,
+        refetchInterval: (query) => {
+            const status = query.state.data?.status;
+            // Poll faster when waiting for QR or initializing
+            if (status === 'QR_READY' || status === 'INITIALIZING') return 3000;
+            if (status === 'DISCONNECTED') return 10000;
+            return 5000;
+        },
+    });
+
+    const connectMutation = useMutation({
+        mutationFn: whatsappAPI.connect,
+        onSuccess: () => {
+            refetch();
+        },
     });
 
     const sendMessageMutation = useMutation({
@@ -86,9 +99,34 @@ export default function WhatsappSettingsPage() {
                                     El código se actualiza automáticamente
                                 </p>
                             </div>
+                        ) : statusData?.status === 'DISCONNECTED' ? (
+                            <div className="text-center space-y-4">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto">
+                                    <WifiOff className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 dark:text-red-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg sm:text-xl font-bold text-red-500 dark:text-red-400">Desconectado</h3>
+                                    <p className="text-sm sm:text-base text-gray-500 max-w-xs mx-auto mt-2">
+                                        WhatsApp no está conectado. Presiona el botón para iniciar la conexión y obtener un código QR.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => connectMutation.mutate()}
+                                    disabled={connectMutation.isPending}
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors font-medium text-sm sm:text-base"
+                                >
+                                    {connectMutation.isPending ? (
+                                        <><RefreshCw className="w-4 h-4 animate-spin" /> Conectando...</>
+                                    ) : (
+                                        <><Wifi className="w-4 h-4" /> Conectar WhatsApp</>
+                                    )}
+                                </button>
+                            </div>
                         ) : (
-                            <div className="text-center">
-                                <p className="text-sm sm:text-base text-gray-500">Esperando inicialización...</p>
+                            <div className="text-center space-y-4">
+                                <RefreshCw className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-blue-400 mb-2 mx-auto" />
+                                <p className="text-sm sm:text-base text-gray-500">Inicializando conexión...</p>
+                                <p className="text-xs text-gray-400">El código QR aparecerá en un momento</p>
                             </div>
                         )}
                     </div>

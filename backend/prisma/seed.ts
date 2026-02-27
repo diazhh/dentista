@@ -2082,7 +2082,7 @@ async function main() {
       tenantId: tenantMedicentro.id,
       issueDate: weeksAgo(1),
       dueDate: daysFromNow(14),
-      status: 'PENDING',
+      status: 'DRAFT',
       subtotal: 12000,
       tax: 2160,
       discount: 0,
